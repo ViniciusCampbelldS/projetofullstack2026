@@ -1,0 +1,29 @@
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="replace-epi-title" (click)="closed.emit()">
+	<section class="epi-modal" (click)="$event.stopPropagation()">
+		<header class="modal-header">
+			<div>
+				<p class="eyebrow">Substituição de EPI</p>
+				<h3 id="replace-epi-title">Marcar EPI anterior como substituído</h3>
+				<span>Selecione os EPIs que estão sendo substituídos nesta entrega</span>
+			</div>
+			<button class="modal-close" type="button" aria-label="Fechar" (click)="closed.emit()">
+				<i class="bi bi-x-lg"></i>
+			</button>
+		</header>
+
+		<div class="replace-list">
+			<label *ngFor="let item of previousEpis" class="replace-item">
+				<input class="form-check-input" type="checkbox" />
+				<span class="replace-item-info">
+					<strong>{{ item.name }}</strong>
+					<small>CA {{ item.ca }} - entregue em {{ item.deliveredAt }}</small>
+				</span>
+			</label>
+		</div>
+
+		<footer class="modal-actions">
+			<button class="btn btn-soft" type="button" (click)="closed.emit()">Cancelar</button>
+			<button class="btn btn-brand" type="button" (click)="closed.emit()">Confirmar substituição</button>
+		</footer>
+	</section>
+</div>

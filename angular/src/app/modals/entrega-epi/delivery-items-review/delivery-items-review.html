@@ -1,0 +1,35 @@
+<div class="delivery-confirm-body">
+  <article class="epi-confirm-card" *ngFor="let item of deliveryItems(); let i = index">
+    <h4>{{ item.epi }}</h4>
+
+    <div class="epi-confirm-details">
+      <div class="info-row">
+        <span class="label">Funcionário:</span>
+        <span class="value">{{ employeeName() }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Data da entrega:</span>
+        <span class="value">{{ deliveryDate() }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Quantidade:</span>
+        <span class="value">{{ item.quantity }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">CA:</span>
+        <span class="value">{{ item.ca }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Validade:</span>
+        <span class="value">{{ item.validity }}</span>
+      </div>
+    </div>
+
+    <div class="delivery-review-actions" *ngIf="showRemoveButton()">
+      <button class="icon-button danger" type="button" (click)="removeItem.emit(i)"
+        [disabled]="deliveryItems().length === 1" aria-label="Remover EPI da entrega">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  </article>
+</div>

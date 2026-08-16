@@ -1,0 +1,43 @@
+@use "../../../../styles/shared" as shared;
+
+@include shared.epi-modal-shell;
+
+.replace-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.replace-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 12px;
+	border: 1px solid var(--mar-line-soft);
+	border-radius: var(--mar-radius);
+	background: var(--mar-bg);
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--mar-azul-claro);
+	}
+
+	.form-check-input {
+		margin-top: 3px;
+	}
+
+	.replace-item-info {
+		display: flex;
+		flex-direction: column;
+
+		strong {
+			color: var(--mar-azul-escuro);
+			font-size: 0.9rem;
+		}
+
+		small {
+			color: var(--mar-muted-2);
+			font-size: 0.8rem;
+		}
+	}
+}

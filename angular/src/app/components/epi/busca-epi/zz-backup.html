@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<title>Gerenciar EPIs</title>
+
+		<!-- Bootstrap -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+		<!-- Bootstrap Icons -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+		<link rel="stylesheet" href="CSS/style.css">
+	
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:_ApprovalStatus msdt:dt="string">0</mso:_ApprovalStatus>
+<mso:_ApprovalAssignedTo msdt:dt="string"></mso:_ApprovalAssignedTo>
+<mso:_ApprovalRespondedBy msdt:dt="string"></mso:_ApprovalRespondedBy>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+
+	<body class="bg-light">
+
+		<div class="container-fluid">
+
+			<!-- ================= HEADER ================= -->
+
+			<header class="bg-white shadow-sm rounded mt-3">
+
+				<div class="row align-items-center p-4 justify-content-center">
+
+					<div id="logoDiv" class="col-lg-3 col-md-3 col-sm-5 d-flex align-items-center justify-content-center ">
+
+						<img src="public/img/logo.png" class="me-4 logo"
+							alt="Logo com M estilizado em azul e laranja. Em seguida M, A, R, Metaúrgica escrito em azul. ">
+
+					</div>
+
+					<div id="metalDiv" class="col-lg-4 d-flex align-items-center justify-content-center">
+						<div>
+
+							<h1 class="display-4 fw-bold text-primary mb-0 text-center">
+								A Metalúrgica
+							</h1>
+
+							<h2 class="display-6 text-success fw-semibold text-center">
+								Especialista na sua praia
+							</h2>
+
+						</div>
+
+					</div>
+
+					<div id="TSTDiv" class="col-lg-4 text-center">
+
+						<h2 class="fw-light">
+							Sistema de Gerenciamento
+						</h2>
+
+						<p class="fs-4">
+							Segurança do Trabalho
+						</p>
+
+					</div>
+
+				</div>
+
+			</header>
+
+
+			<!-- ================= MENU ================= -->
+
+			<ul class="nav nav-tabs nav-fill justify-content-center p-3 row">
+
+				<li class="col-lg-2">
+					<a class="btn btn-outline-dark d-flex align-items-center justify-content-center" href="#">
+					<i class="bi bi-house-door"></i>
+					&nbsp;HOME
+					</a>
+				</li>
+
+				<li class="col-lg-2">
+					<a class="btn btn-outline-dark d-flex align-items-center justify-content-center" href="#">
+					<i class="bi bi-person-raised-hand"></i>
+					&nbsp;Portal do funcionário
+					</a>
+				</li>
+
+				<li class="col-lg-2">
+					<a class="btn btn-outline-dark d-flex align-items-center justify-content-center" href="#">
+					<i class="bi bi-shield-shaded"></i>
+					&nbsp;Gerenciar EPIs
+					</a>
+				</li>
+
+				<li class="col-lg-2">
+					<a class="btn btn-outline-dark d-flex align-items-center justify-content-center" href="#">
+					<i class="bi bi-file-text-fill"></i>
+					&nbsp;Gerenciar Treinamentos
+					</a>
+				</li>
+
+				<li class="col-lg-2">
+					<a href="/login-DRAFT.html" class="btn btn-outline-dark d-flex align-items-center justify-content-center">
+						<i class="bi bi-person-fill-x"></i>
+						&nbsp;Logout
+					</a>
+				</li>
+
+			</ul>
+
+
+			<!-- ================= TITLE ================= -->
+
+			<div class="text-center mb-5">
+
+				<h1 class="display-3">
+					Avaliações
+				</h1>
+
+			</div>
+
+
+			<!-- ================= FILTERS ================= -->
+
+			<div class="row g-3">
+
+				<div class="col-lg-3">
+
+					<label class="form-label fw-bold">
+						CA
+					</label>
+
+					<div class="input-group">
+
+						<input type="text" class="form-control" placeholder="Filtrar CA">
+
+						<button class="btn btn-outline-secondary">
+							<i class="bi bi-funnel"></i>
+						</button>
+
+					</div>
+
+				</div>
+
+
+				<div class="col-lg-3">
+
+					<label class="form-label fw-bold">
+						Nome EPI
+					</label>
+
+					<div class="input-group">
+
+						<input type="text" class="form-control" placeholder="Filtrar Nome EPI">
+
+						<button class="btn btn-outline-secondary">
+							<i class="bi bi-funnel"></i>
+						</button>
+
+					</div>
+
+				</div>
+
+
+				<div class="col-lg-3">
+
+					<label class="form-label fw-bold">
+						Funcionários
+					</label>
+
+					<div class="input-group">
+
+						<input type="text" class="form-control" placeholder="Filtrar Funcionários">
+
+						<button class="btn btn-outline-secondary">
+							<i class="bi bi-funnel"></i>
+						</button>
+
+					</div>
+
+				</div>
+
+
+				<div class="col-lg-3">
+
+					<label class="form-label fw-bold">
+						situação
+					</label>
+
+					<div class="input-group">
+
+						<input type="text" class="form-control" placeholder="Filtrar Situação">
+
+						<button class="btn btn-outline-secondary">
+							<i class="bi bi-funnel"></i>
+						</button>
+
+					</div>
+
+				</div>
+
+			</div>
+
+
+			<!-- ================= SECOND ROW ================= -->
+
+			<div class="row mt-4 align-items-center">
+
+				<div class="col-lg-1">
+
+					<button class="btn btn-success rounded-circle">
+						<i class="bi bi-plus-lg"></i>
+					</button>
+
+				</div>
+
+				<div class="col-lg-3">
+
+					<input type="text" class="form-control" placeholder="CA do novo EPI">
+
+				</div>
+
+				<div class="col-lg-3">
+
+					<input type="text" class="form-control" placeholder="Funcionário do novo EPI">
+
+				</div>
+
+				<div class="col-lg-3">
+
+					<button class="btn btn-primary w-200">
+						Adicionar EPI
+					</button>
+
+				</div>
+
+			</div>
+
+
+			<!-- ================= CONTENT ================= -->
+
+			<div class="row mt-3 mb-5">
+
+					<div class="col-12">
+						<div class="card list-card">
+							<div class="card-body">
+								<div class="table-responsive">
+									<table class="table table-hover align-middle mb-0">
+										<thead class="table-light">
+											<tr>
+												<th>CA</th>
+												<th>Nome</th>
+												<th>Funcionários</th>
+												<th>Status</th>
+												<th>Ações</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>18695</td>
+												<td>Capacete em Termoplástico de Bombeiro Visor de 6" Modelo LTX Amarelo Bullard</td>
+												<td>João Pedro da Rocha de Alcântara</td>
+												<td><span class="badge bg-success">Distante do vencimento</span></td>
+												<td>
+													<button class="btn btn-sm btn-primary me-1">Editar</button>
+													<button class="btn btn-sm btn-warning">Estado do EPI</button>
+													<button class="btn btn-sm btn-danger">Descarte/Substituição</button>
+												</td>
+											</tr>
+											<tr>
+												<td>34456</td>
+												<td>Luva Anticorte Cut Oil Volk</td>
+												<td>Fernanda Beatriz de Lima Barreto</td>
+												<td><span class="badge bg-warning text-dark">Próximo do Vencimento</span></td>
+												<td>
+													<button class="btn btn-sm btn-primary me-1">Editar</button>
+													<button class="btn btn-sm btn-warning">Estado do EPI</button>
+													<button class="btn btn-sm btn-danger">Descarte/Substituição</button>
+												</td>
+											</tr>
+											<tr>
+												<td>51403</td>
+												<td>Bota de Segurança Gogowear KW2024 100% Couro Marrom Eletricista</td>
+												<td>Marcos Paulo Ferreira Pereira Filho</td>
+												<td><span class="badge bg-danger">Vencido</span></td>
+												<td>
+													<button class="btn btn-sm btn-primary me-1">Editar</button>
+													<button class="btn btn-sm btn-warning">Estado do EPI</button>
+													<button class="btn btn-sm btn-danger">Descarte/Substituição</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+			</div>
+
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+	</body>
+
+</html>

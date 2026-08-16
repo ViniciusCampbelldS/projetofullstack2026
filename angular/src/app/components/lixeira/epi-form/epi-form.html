@@ -1,0 +1,47 @@
+<section class="content-area">
+  <form [formGroup]="formulario" (ngSubmit)="salvar()" class="panel epi-form-panel">
+    <div class="panel-title">
+      <div>
+        <p class="eyebrow">Cadastro</p>
+        <h3>Novo EPI</h3>
+      </div>
+      <a class="btn btn-light" routerLink="/epi">
+        <i class="bi bi-arrow-left"></i>
+        Voltar
+      </a>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="nome">Nome do EPI</label>
+        <input id="nome" type="text" formControlName="nome" class="form-control" />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label" for="ca">CA</label>
+        <input id="ca" type="text" formControlName="ca" class="form-control" />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label" for="vencimento">Vencimento</label>
+        <input id="vencimento" type="date" formControlName="vencimento" class="form-control" />
+      </div>
+
+      <div class="col-12">
+        <label class="form-label" for="funcionarios">Funcionarios</label>
+        <input id="funcionarios" type="text" formControlName="funcionarios" class="form-control" />
+      </div>
+    </div>
+
+    <div class="alert alert-warning mt-3" *ngIf="saveError" role="alert">
+      {{ saveError }}
+    </div>
+
+    <div class="action-row end mt-3">
+      <button type="submit" class="btn btn-brand">
+        <i class="bi bi-check2-circle"></i>
+        Cadastrar
+      </button>
+    </div>
+  </form>
+</section>

@@ -1,0 +1,45 @@
+<section class="epi-view">
+  <div class="page-shell">
+    <div class="header-area">
+      <div>
+        <h1>Histórico de Alterações de EPI</h1>
+        <p>Consulte alterações manuais, entregas e substituições registradas nos EPIs.</p>
+      </div>
+    </div>
+
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Alterações registradas</h2>
+          <p>Últimas movimentações administrativas relacionadas aos EPIs.</p>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Usuário</th>
+              <th>Registro</th>
+              <th>Alteração</th>
+              <th>Descrição</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of history">
+              <td>{{ item.data }}</td>
+              <td>{{ item.usuario }}</td>
+              <td>{{ item.registro }}</td>
+              <td>
+                <span class="status" [ngClass]="getActionClass(item.alteracao)">{{ item.alteracao }}</span>
+              </td>
+              <td>{{ item.detalhe }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </div>
+</section>

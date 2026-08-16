@@ -1,0 +1,169 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(16, 38, 54, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mar-panel-padding);
+}
+
+.employee-modal {
+  width: min(980px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: var(--mar-radius-lg);
+  border: 1px solid rgba(0, 61, 108, 0.18);
+  background: var(--mar-surface);
+  box-shadow: 0 14px 36px rgba(0, 31, 58, 0.26);
+  padding: var(--mar-panel-padding);
+  min-width: 0;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: var(--mar-panel-padding);
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 61, 108, 0.1);
+}
+
+.modal-header h3 {
+  margin: 6px 0 0;
+  font-size: 21px;
+  color: #0a3e63;
+}
+
+.close-btn {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--mar-line);
+  background: var(--mar-surface);
+  color: var(--mar-azul-escuro);
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #d8e8f1;
+}
+
+.employee-section {
+  padding: var(--mar-panel-padding);
+  border: 1px solid rgba(0, 61, 108, 0.12);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f9fc 100%);
+}
+
+.modal-search-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mar-azul-escuro);
+}
+
+.modal-table-container {
+  margin-top: 18px;
+  border: 1px solid #b8c6d1;
+  border-radius: 10px;
+  overflow: auto;
+  background: var(--mar-surface);
+  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+}
+
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.modal-table thead {
+  background: #0b4e79;
+}
+
+.modal-table thead th {
+  color: var(--mar-surface);
+  border-bottom: 0;
+}
+
+.modal-table td,
+.modal-table th {
+  padding: 12px;
+  border-right: 1px solid #d7e1e9;
+  border-bottom: 1px solid #d7e1e9;
+  text-align: left;
+  font-size: 13px;
+}
+
+.modal-table td:last-child,
+.modal-table th:last-child {
+  border-right: 0;
+}
+
+.modal-table tbody tr:nth-child(even) {
+  background: #fbfdfe;
+}
+
+.modal-table tbody tr:hover {
+  background: #f5faff;
+}
+
+.modal-table input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: #0b5f8f;
+  cursor: pointer;
+}
+
+.empty-row {
+  color: #60788c;
+  text-align: center;
+  padding: var(--mar-panel-padding);
+}
+
+.modal-actions {
+  margin-top: var(--mar-panel-padding);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .modal-search-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-search-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-modal {
+    padding: 16px;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}

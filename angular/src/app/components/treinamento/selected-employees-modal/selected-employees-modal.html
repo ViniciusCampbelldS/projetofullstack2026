@@ -1,0 +1,35 @@
+@if (isOpen) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" [attr.aria-label]="titulo" (click)="fechar()">
+    <section class="selected-modal" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <h3>{{ titulo }}</h3>
+        </div>
+        <button class="close-btn" type="button" aria-label="Fechar" (click)="fechar()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+
+      <div class="selected-section">
+        <div class="selected-list">
+          @for (funcionario of funcionarios; track funcionario.id) {
+            <div class="selected-chip">
+              <span>{{ formatarFuncionario(funcionario) }}</span>
+              @if (allowRemove) {
+                <button class="remove-btn" type="button" [attr.aria-label]="'Remover ' + funcionario.nome" (click)="remover(funcionario.id)">
+                  <i class="bi bi-x"></i>
+                </button>
+              }
+            </div>
+          } @empty {
+            <span class="empty-state">{{ emptyMessage }}</span>
+          }
+        </div>
+
+        <footer class="modal-actions">
+          <button class="btn btn-brand" type="button" (click)="fechar()">Fechar</button>
+        </footer>
+      </div>
+    </section>
+  </div>
+}

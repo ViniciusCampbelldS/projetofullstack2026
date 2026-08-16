@@ -1,0 +1,183 @@
+:host {
+  display: block;
+
+  --azul-escuro: var(--mar-azul-escuro);
+  --azul-medio: var(--mar-azul-medio);
+  --azul-claro: var(--mar-azul-claro);
+  --laranja-escuro: var(--mar-laranja-escuro);
+  --laranja-claro: var(--mar-laranja-claro);
+
+}
+
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: var(--mar-panel-padding);
+
+  background:
+    linear-gradient(120deg,
+      rgba(0, 61, 108, 0.96) rgba(4, 103, 158, 0.9)),
+    var(--azul-escuro);
+}
+
+.login-panel {
+  width: min(100%, 480px);
+  padding: var(--mar-panel-padding);
+  border-radius: var(--mar-radius-md);
+  background: var(--mar-surface);
+
+  box-shadow:
+    0 15px 40px rgba(0, 61, 108, 0.22);
+}
+
+.login-panel img {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: var(--mar-panel-padding);
+}
+
+.login-copy h1 {
+  margin: 0;
+  color: var(--azul-escuro);
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.login-copy .eyebrow {
+  margin: 0 0 5px;
+  color: var(--laranja-escuro);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.login-copy p:last-child {
+  margin: 8px 0 0;
+  color: #555;
+}
+
+.login-form {
+  display: grid;
+  gap: 12px;
+  margin-top: var(--mar-panel-padding);
+}
+
+.login-form label {
+  color: var(--azul-escuro);
+  font-weight: 700;
+}
+
+.login-form input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 61, 108, 0.3);
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.login-form input:focus {
+  border-color: var(--azul-medio);
+
+  box-shadow:
+    0 0 0 3px rgba(25, 150, 208, 0.18)
+}
+
+/* botao pra entrar */
+
+.btn-brand {
+  min-height: 44px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--azul-escuro);
+  color: var(--mar-surface);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.btn-brand:hover {
+  background: var(--azul-medio);
+}
+
+.btn-brand:active {
+  transform: scale(0.98);
+}
+
+/* erro no login */
+
+.login-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--laranja-escuro);
+  border-radius: 6px;
+  background: rgba(246, 141, 23, 0.1);
+  color: var(--azul-escuro);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* esqueceu a senha */
+
+.forgot-password {
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--azul-medio);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.forgot-password:hover {
+  color: var(--azul-claro);
+  text-decoration: underline;
+}
+
+/* contato do ti */
+
+.ti-contact {
+  margin-top: 4px;
+  padding: 14px;
+  border-left: 4px solid var(--laranja-escuro);
+  border-radius: 8px;
+  background: rgba(246, 141, 23, 0.08);
+  text-align: center;
+}
+
+.ti-contact strong {
+  display: block;
+  color: var(--azul-escuro);
+  font-size: 15px;
+}
+
+.ti-contact p {
+  margin: 6px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.ti-contact a {
+  color: var(--laranja-escuro);
+
+  font-size: 16px;
+  font-weight: 800;
+
+  text-decoration: none;
+}
+
+.ti-contact a:hover {
+  color: var(--laranja-claro);
+  text-decoration: underline;
+}

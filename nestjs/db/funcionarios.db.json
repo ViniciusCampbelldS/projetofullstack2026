@@ -1,0 +1,38 @@
+[
+  {
+    "cpf": "12345678910",
+    "nome": "João Pedro da Rocha",
+    "setor": "Operações",
+    "cargo": "Operador",
+    "permicoes": "field",
+    "NRs": ["06", "12"],
+    "status": "At"
+  },
+  {
+    "cpf": "98765432100",
+    "nome": "Fernanda Lima Barreto",
+    "setor": "Qualidade",
+    "cargo": "Supervisora",
+    "permicoes": "tst",
+    "NRs": ["06", "35"],
+    "status": "At"
+  },
+  {
+	"cpf": "45678912344",
+	"nome": "Marcos Paulo Pereira",
+	"setor": "Manutenção",
+	"cargo": "Eletricista",
+	"permicoes": "field",
+	"NRs": ["06", "10", "35"],
+	"status": "Af"
+  },
+  {
+	"cpf": "12345678910",
+	"nome": "João Pedro da Rocha",
+	"setor": "Operações",
+	"cargo": "Operador",
+	"permicoes": "tst",
+	"NRs": ["06", "12"],
+	"status": "In"
+  }
+]

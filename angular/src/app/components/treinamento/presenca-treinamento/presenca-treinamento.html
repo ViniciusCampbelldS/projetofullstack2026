@@ -1,0 +1,185 @@
+<section class="treinamento-view">
+	<div class="page-shell">
+		<div class="header-area">
+			<div>
+				<h1>Presenca em Treinamentos</h1>
+				<p>Selecione a turma agendada, confirme os participantes presentes e mantenha o registro de presenca
+					organizado.</p>
+			</div>
+		</div>
+
+		<div class="content-grid">
+			<div class="panel">
+				<div class="panel-header">
+					<div>
+						<h2>Selecione a sessao do treinamento</h2>
+						<p>Escolha a turma do dia para carregar o treinamento, a data e o horario da sessao.</p>
+					</div>
+				</div>
+
+				@if (mensagem) {
+				<div class="form-message" role="status">
+					<i class="bi bi-info-circle"></i>
+					{{ mensagem }}
+				</div>
+				}
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="turma-treinamento">Treinamento</label>
+						<input id="turma-treinamento" type="text" class="form-control" [ngModel]="treinamento"
+							readonly />
+					</div>
+
+					<div class="field">
+						<label for="turma-data">Data</label>
+						<input id="turma-data" type="date" class="form-control" [ngModel]="data" readonly />
+					</div>
+
+					<div class="field">
+						<label for="turma-horario">Horario</label>
+						<input id="turma-horario" type="time" class="form-control" [ngModel]="horario" readonly />
+					</div>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-header">
+					<div>
+						<h2>Selecione os funcionarios</h2>
+						<p>Filtre a lista e marque quem esteve presente na sessao selecionada.</p>
+					</div>
+					<button class="btn btn-soft" type="button" (click)="abrirModalFuncionarios()">Adicionar
+						funcionarios</button>
+				</div>
+
+				<div class="participants-panel">
+					<div class="participants-header">
+						<strong>Funcionarios selecionados</strong>
+					</div>
+
+					<div class="participant-list">
+						@for (funcionario of funcionariosSelecionados; track funcionario.id) {
+						<button class="participant-chip" type="button" (click)="removerParticipante(funcionario.id)">
+							{{ funcionario.nome }} - {{ funcionario.cpf }} - {{ funcionario.cargo }} - {{
+							funcionario.area }}
+							<i class="bi bi-x"></i>
+						</button>
+						} @empty {
+						<span>Nenhum funcionario selecionado.</span>
+						}
+					</div>
+				</div>
+
+				<div class="upload-area">
+					<div class="upload-icon">
+						<i class="bi bi-file-earmark-arrow-up-fill"></i>
+					</div>
+
+					<div>
+						<strong>Comprovante da presenca</strong>
+						<p>{{ documento || 'Faca upload da lista assinada ou do comprovante de presenca.' }}</p>
+					</div>
+
+					<label class="upload-btn">
+						Selecionar arquivo
+						<input type="file" hidden (change)="onDocumentoSelecionado($event)" />
+					</label>
+				</div>
+
+				@if (documento && documentoPreviewUrl) {
+				<div class="preview-box">
+					<div>
+						<strong>{{ documento }}</strong>
+						<span>Pre-visualizacao disponivel</span>
+					</div>
+
+					<a class="btn btn-light btn-sm" [href]="documentoPreviewUrl" target="_blank"
+						rel="noopener noreferrer">
+						<i class="bi bi-eye"></i>
+						Abrir
+					</a>
+				</div>
+				}
+
+				<div class="form-actions submit-actions">
+					<button class="btn btn-brand" type="button" [disabled]="!podeCriar" (click)="criarTurma()">
+						<i class="bi bi-check-lg"></i>
+						Confirmar presenca
+					</button>
+				</div>
+			</div>
+
+			<div class="panel table-panel">
+				<div class="panel-header">
+					<div>
+						<h2>Turmas agendadas</h2>
+						<p>Filtre por data e horario para localizar a turma e clique em uma linha para seleciona-la.</p>
+					</div>
+				</div>
+
+				<div class="schedule-filters">
+					<div class="field">
+						<label for="filtro-turma-data">Treinamento Data</label>
+						<input id="filtro-turma-data" type="date" class="form-control" [(ngModel)]="filtroTurmaData" />
+					</div>
+
+					<div class="field">
+						<label for="filtro-turma-horario">Horario</label>
+						<input id="filtro-turma-horario" type="time" class="form-control"
+							[(ngModel)]="filtroTurmaHorario" />
+					</div>
+				</div>
+
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Treinamento</th>
+								<th>Data</th>
+								<th>Horario</th>
+								<th>Participantes</th>
+								<th>Documento</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (turma of filteredTurmas; track turma.id) {
+							<tr class="selectable-row" [class.is-selected]="turma.id === turmaSelecionadaId"
+								(click)="selecionarTurma(turma)">
+								<td>{{ turma.id }}</td>
+								<td>{{ turma.treinamento }}</td>
+								<td>{{ turma.data | date: 'dd/MM/yyyy' }}</td>
+								<td>{{ turma.horario }}</td>
+								<td>{{ turma.participantes.join(', ') }}</td>
+								<td>{{ turma.documento }}</td>
+								<td>
+									<span class="status-badge"
+										[class.is-planned]="obterStatusTurma(turma) === 'Planejada'"
+										[class.is-realized]="obterStatusTurma(turma) === 'Realizada'">
+										{{ obterStatusTurma(turma) }}
+									</span>
+								</td>
+							</tr>
+							} @empty {
+							<tr>
+								<td colspan="7" class="empty-row">Nenhuma turma encontrada para os filtros informados.
+								</td>
+							</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<app-employee-selector-modal [isOpen]="isEmployeeModalOpen" [funcionarios]="funcionarios"
+	[selectedFuncionarioIds]="selectedFuncionarioIds" titulo="Selecionar funcionarios"
+	(close)="fecharModalFuncionarios()" (save)="salvarFuncionariosSelecionados($event)" />
+
+<app-selected-employees-modal [isOpen]="isSelectedEmployeesModalOpen" [funcionarios]="funcionariosSelecionados"
+	[allowRemove]="true" titulo="Funcionarios selecionados" (close)="fecharModalFuncionariosSelecionados()"
+	(remove)="removerParticipante($event)" />

@@ -1,0 +1,232 @@
+<header class="topbar">
+  <a
+    class="brand"
+    routerLink="/epi"
+    aria-label="MAR Metalúrgica"
+  >
+    <img
+      src="/logo-mar.svg"
+      alt="MAR Metalúrgica"
+    />
+  </a>
+
+  <nav
+    class="main-nav"
+    aria-label="Navegação principal"
+  >
+
+    <!-- HOME -->
+    <a
+      class="nav-button"
+      routerLink="/epi"
+      routerLinkActive="active"
+    >
+      <i class="bi bi-house-door"></i>
+      Home
+    </a>
+
+    <!-- PORTAL DO FUNCIONÁRIO -->
+    <a
+      class="nav-button"
+      routerLink="/funcionario/relatorio-epi"
+      routerLinkActive="active"
+    >
+      <i class="bi bi-person-badge"></i>
+      Portal do funcionário
+    </a>
+
+    <!-- EPI -->
+    <a
+      class="nav-button"
+      routerLink="/epi"
+      routerLinkActive="active"
+    >
+      <i class="bi bi-shield-check"></i>
+      Gerenciar EPIs
+    </a>
+
+    <!-- TREINAMENTOS -->
+    <a
+      class="nav-button"
+      routerLink="/treinamento"
+      routerLinkActive="active"
+    >
+      <i class="bi bi-journal-check"></i>
+      Treinamentos
+    </a>
+
+    <!-- NOTIFICAÇÕES -->
+    <div class="notification-area">
+
+      <button
+        class="notification-button"
+        type="button"
+        (click)="alternarNotificacoes()"
+        aria-label="Notificações"
+      >
+        <i class="bi bi-bell"></i>
+
+        @if (totalNotificacoes > 0) {
+          <span class="notification-badge">
+            {{ totalNotificacoes }}
+          </span>
+        }
+      </button>
+
+      @if (notificacoesAbertas) {
+        <div class="notification-panel">
+
+          <!-- CABEÇALHO -->
+          <div class="notification-header">
+            <div>
+              <strong>Notificações</strong>
+              <span>Avisos de vencimento</span>
+            </div>
+
+            <button
+              type="button"
+              class="notification-settings"
+              (click)="alternarConfiguracao()"
+              aria-label="Configurar notificações"
+            >
+              <i class="bi bi-gear"></i>
+            </button>
+          </div>
+
+          <!-- CONFIGURAÇÃO -->
+          @if (configuracaoAberta) {
+
+            <div class="notification-config">
+
+              <strong>
+                Configurar aviso prévio
+              </strong>
+
+              <label for="diasAvisoEpi">
+                Avisar sobre EPI com:
+              </label>
+
+              <div class="days-input">
+                <input
+                  id="diasAvisoEpi"
+                  type="number"
+                  min="0"
+                  [(ngModel)]="diasAvisoEpi"
+                />
+
+                <span>
+                  dias de antecedência
+                </span>
+              </div>
+
+              <label for="diasAvisoNr">
+                Avisar sobre NR com:
+              </label>
+
+              <div class="days-input">
+                <input
+                  id="diasAvisoNr"
+                  type="number"
+                  min="0"
+                  [(ngModel)]="diasAvisoNr"
+                />
+
+                <span>
+                  dias de antecedência
+                </span>
+              </div>
+
+              <button
+                class="btn btn-brand save-notification-config"
+                type="button"
+                (click)="salvarConfiguracao()"
+              >
+                <i class="bi bi-check-lg"></i>
+                Salvar configuração
+              </button>
+
+            </div>
+
+          } @else {
+
+            <!-- SEM NOTIFICAÇÕES -->
+            @if (totalNotificacoes === 0) {
+
+              <div class="notification-empty">
+
+                <i class="bi bi-check-circle"></i>
+
+                <strong>
+                  Nenhum vencimento próximo
+                </strong>
+
+                <span>
+                  Os avisos de EPI e NR aparecerão aqui.
+                </span>
+
+              </div>
+
+            }
+
+          }
+
+        </div>
+      }
+
+    </div>
+
+    <!-- USUÁRIO -->
+    <div
+      class="user-menu"
+      aria-label="Usuário logado"
+    >
+
+      <div
+        class="user-avatar"
+        aria-hidden="true"
+      >
+        {{ userInitials }}
+      </div>
+
+      <div class="user-info">
+        <strong>{{ userName }}</strong>
+        <span>{{ userRole }}</span>
+      </div>
+
+      <button
+        class="logout-icon"
+        type="button"
+        (click)="logout()"
+        aria-label="Sair"
+      >
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
+
+    </div>
+
+  </nav>
+</header>
+
+<section class="page-switcher">
+
+  <span>
+    Alternar perfil
+  </span>
+
+  <a
+    routerLink="/epi"
+    routerLinkActive="active"
+  >
+    <i class="bi bi-tools"></i>
+    Página do técnico/ADM
+  </a>
+
+  <a
+    routerLink="/funcionario/relatorio-epi"
+    routerLinkActive="active"
+  >
+    <i class="bi bi-person-check"></i>
+    Página do funcionário
+  </a>
+
+</section>

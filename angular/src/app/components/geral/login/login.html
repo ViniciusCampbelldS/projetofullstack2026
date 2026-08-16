@@ -1,0 +1,75 @@
+﻿<section class="login-page">
+  <div class="login-panel">
+    <img src="/logo-mar.svg" alt="MAR Metalúrgica" />
+
+    <div class="login-copy">
+      <p class="eyebrow">
+        Sistema de Gerenciamento
+      </p>
+
+      <h1>
+        Segurança do Trabalho
+      </h1>
+
+      <p>
+        Entre com seu CPF, senha e perfil de acesso.
+      </p>
+    </div>
+
+    <form class="login-form" (ngSubmit)="entrar()">
+      <label for="cpf">
+        CPF
+      </label>
+
+      <input id="cpf" type="text" [(ngModel)]="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14"
+        inputmode="numeric" autocomplete="username" required />
+
+      <label for="senha">
+        Senha
+      </label>
+
+      <input id="senha" type="password" [(ngModel)]="senha" name="senha" placeholder="Digite sua senha"
+        autocomplete="current-password" required />
+
+      <label for="perfil">
+        Entrar como
+      </label>
+
+      <select id="perfil" [(ngModel)]="perfil" name="perfil" required>
+        @for (item of perfis; track item) {
+          <option [value]="item">{{ item }}</option>
+        }
+      </select>
+
+      @if (erroLogin) {
+        <p class="login-error" aria-live="polite">`r`n          {{ mensagemErroLogin }}`r`n        </p>
+      }
+
+      <button class="btn btn-brand" type="submit" [disabled]="carregando">
+        <i class="bi bi-box-arrow-in-right"></i>
+        {{ carregando ? 'Entrando...' : 'Entrar' }}
+      </button>
+
+      <button class="forgot-password" type="button" (click)="mostrarTelefoneTI()">
+        Esqueci minha senha
+      </button>
+
+      @if (exibirTelefoneTI) {
+        <div class="ti-contact">
+          <strong>
+            Problemas para acessar?
+          </strong>
+
+          <p>
+            Entre em contato com o setor de TI:
+          </p>
+
+          <a href="tel:+552100000000">
+            (21) 0000-0000
+          </a>
+        </div>
+      }
+    </form>
+  </div>
+</section>
+

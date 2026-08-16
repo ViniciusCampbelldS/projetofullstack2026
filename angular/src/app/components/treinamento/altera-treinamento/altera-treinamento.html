@@ -1,0 +1,243 @@
+<section class="treinamento-page">
+  <div class="hero">
+    <div>
+      <h1>Gerenciar Treinamentos</h1>
+      <p>Area para cadastrar, agendar e acompanhar os treinamentos de seguranca dos funcionarios.</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div>
+        <small>Total de treinamentos</small>
+        <strong>24</strong>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🗓️</div>
+      <div>
+        <small>Agendados</small>
+        <strong>08</strong>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⚠️</div>
+      <div>
+        <small>Proximos do vencimento</small>
+        <strong>07</strong>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❗</div>
+      <div>
+        <small>Vencidos</small>
+        <strong>01</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Pesquisar treinamentos</h2>
+        <p>Filtre os treinamentos cadastrados no sistema.</p>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="field">
+        <label>ID</label>
+        <input type="text" class="form-control" placeholder="Digite o ID" />
+      </div>
+
+      <div class="field">
+        <label>Treinamento</label>
+        <input type="text" class="form-control" placeholder="Digite o treinamento" />
+      </div>
+
+      <div class="field">
+        <label>Data</label>
+        <input type="date" class="form-control" />
+      </div>
+
+      <div class="field">
+        <label>Vencimento</label>
+        <input type="date" class="form-control" />
+      </div>
+
+      <div class="field">
+        <label>Codigo da NR</label>
+        <select class="form-select">
+          <option>Todos</option>
+          <option>NR-01</option>
+          <option>NR-02 (Revogada)</option>
+          <option>NR-03</option>
+          <option>NR-04</option>
+          <option>NR-05</option>
+          <option>NR-06</option>
+          <option>NR-07</option>
+          <option>NR-08</option>
+          <option>NR-09</option>
+          <option>NR-10</option>
+          <option>NR-11</option>
+          <option>NR-12</option>
+          <option>NR-13</option>
+          <option>NR-14</option>
+          <option>NR-15</option>
+          <option>NR-16</option>
+          <option>NR-17</option>
+          <option>NR-18</option>
+          <option>NR-19</option>
+          <option>NR-20</option>
+          <option>NR-21</option>
+          <option>NR-22</option>
+          <option>NR-23</option>
+          <option>NR-24</option>
+          <option>NR-25</option>
+          <option>NR-26</option>
+          <option>NR-27 (Revogada)</option>
+          <option>NR-28</option>
+          <option>NR-29</option>
+          <option>NR-30</option>
+          <option>NR-31</option>
+          <option>NR-32</option>
+          <option>NR-33</option>
+          <option>NR-34</option>
+          <option>NR-35</option>
+          <option>NR-36</option>
+          <option>NR-37</option>
+          <option>NR-38</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Situacao</label>
+        <select class="form-select">
+          <option>Todos</option>
+          <option>Em dia</option>
+          <option>Proximo do vencimento</option>
+          <option>Vencido</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-outline-brand" type="button" (click)="abrirModalFuncionarios()">
+          <i class="bi bi-people"></i>
+          Adicionar funcionarios
+        </button>
+        <button class="btn btn-soft" type="button">
+          <i class="bi bi-search"></i>
+          Filtrar
+        </button>
+        <button class="btn btn-brand" type="button" (click)="adicionarNovoTreinamento()">Novo treinamento/Abrir Turma</button>
+      </div>
+    </div>
+	<div class="selected-panel">
+      <div class="selected-panel-header">
+        <div>
+          <strong>Funcionarios selecionados</strong>
+          <p>Visualize os funcionarios vinculados antes de abrir a nova turma.</p>
+        </div>
+        <!-- <button class="btn btn-soft" type="button" [disabled]="funcionariosSelecionados.length === 0" (click)="abrirModalFuncionariosSelecionados()">
+          Visualizar selecionados
+        </button> -->
+      </div>
+
+      <div class="selected-list-inline">
+        @for (funcionario of funcionariosSelecionados; track funcionario.id) {
+          <button class="selected-chip-inline" type="button" (click)="removerFuncionarioSelecionado(funcionario.id)">
+            {{ funcionario.nome }} - {{ funcionario.cpf }} - {{ funcionario.cargo }} - {{ funcionario.area }}
+            <i class="bi bi-x"></i>
+          </button>
+        } @empty {
+          <span>Nenhum funcionario selecionado.</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Treinamentos cadastrados</h2>
+        <p>Lista dos treinamentos registrados no sistema.</p>
+      </div>
+
+      <button class="btn btn-outline-brand" type="button" routerLink="/treinamento/historico">
+        <i class="bi bi-clock-history"></i>
+        Historico de alteracoes
+      </button>
+    </div>
+
+    @if (mensagem) {
+      <div class="form-message" role="status">
+        <i class="bi bi-info-circle"></i>
+        {{ mensagem }}
+      </div>
+    }
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>NR</th>
+            <th>Treinamento</th>
+            <th>Funcionario</th>
+            <th>Aplicacao</th>
+            <th>Vencimento</th>
+            <th>Situacao</th>
+            <th>Documento</th>
+            <th>Editar</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (treinamento of treinamentos; track treinamento.id) {
+            <tr>
+              <td><strong>{{ treinamento.id }}</strong></td>
+              <td><strong>{{ treinamento.nr }}</strong></td>
+              <td>{{ treinamento.treinamento }}</td>
+              <td>{{ treinamento.funcionario }}</td>
+              <td>{{ treinamento.aplicacao | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ treinamento.vencimento | date: 'dd/MM/yyyy' }}</td>
+              <td><span class="status-badge" [class]="'status-badge ' + situacaoClass(treinamento.situacao)">{{ treinamento.situacao }}</span></td>
+              <td><button class="btn btn-sm btn-soft" type="button"><i class="bi bi-eye"></i> Visualizar</button></td>
+              <td>
+                <button class="btn btn-sm btn-outline-brand" type="button" [disabled]="!podeEditarTreinamento" [title]="!podeEditarTreinamento ? 'Perfil sem permissao de edicao' : ''" (click)="abrirEdicaoTreinamento(treinamento)">
+                  <i class="bi bi-pencil-fill"></i> Editar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <app-editar-treinamento-modal
+    [isOpen]="isEditModalOpen"
+    [formTreinamento]="formTreinamento"
+    [situacoes]="situacoes"
+    (close)="fecharEdicaoTreinamento()"
+    (save)="salvarEdicaoTreinamento()"
+  />
+
+  <app-employee-selector-modal
+    [isOpen]="isEmployeeModalOpen"
+    [funcionarios]="funcionarios"
+    [selectedFuncionarioIds]="selectedFuncionarioIds"
+    titulo="Adicionar funcionarios"
+    (close)="fecharModalFuncionarios()"
+    (save)="salvarFuncionariosSelecionados($event)"
+  />
+
+  <app-selected-employees-modal
+    [isOpen]="isSelectedEmployeesModalOpen"
+    [funcionarios]="funcionariosSelecionados"
+    [allowRemove]="true"
+    titulo="Funcionarios selecionados"
+    (close)="fecharModalFuncionariosSelecionados()"
+    (remove)="removerFuncionarioSelecionado($event)"
+  />
+</section>

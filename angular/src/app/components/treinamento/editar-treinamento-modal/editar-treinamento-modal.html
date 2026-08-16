@@ -1,0 +1,35 @@
+@if (isOpen) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Editar treinamento" (click)="close.emit()">
+    <section class="employee-modal" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <h3>Editar treinamento</h3>
+        </div>
+        <button class="close-btn" type="button" aria-label="Fechar" (click)="close.emit()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+
+      <div class="modal-search-grid">
+        <div class="field"><label>NR</label><input class="form-control" [(ngModel)]="formTreinamento.nr" /></div>
+        <div class="field"><label>Treinamento</label><input class="form-control" [(ngModel)]="formTreinamento.treinamento" /></div>
+        <div class="field"><label>Funcionario</label><input class="form-control" [(ngModel)]="formTreinamento.funcionario" /></div>
+        <div class="field"><label>Aplicacao</label><input class="form-control" type="date" [(ngModel)]="formTreinamento.aplicacao" /></div>
+        <div class="field"><label>Vencimento</label><input class="form-control" type="date" [(ngModel)]="formTreinamento.vencimento" /></div>
+        <div class="field">
+          <label>Situacao</label>
+          <select class="form-select" [(ngModel)]="formTreinamento.situacao">
+            @for (situacao of situacoes; track situacao) {
+              <option [value]="situacao">{{ situacao }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <footer class="modal-actions">
+        <button class="btn btn-outline-brand" type="button" (click)="close.emit()">Cancelar</button>
+        <button class="btn btn-brand" type="button" (click)="save.emit()">Salvar alteracoes</button>
+      </footer>
+    </section>
+  </div>
+}

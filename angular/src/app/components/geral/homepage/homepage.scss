@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.homepage {
+  min-height: calc(100vh - 230px);
+  padding: 38px clamp(20px, 5vw, 80px) 60px;
+  background: linear-gradient(180deg, var(--mar-bg) 0%, #f8fafc 100%);
+  color: var(--mar-text-strong);
+}
+
+@media (max-width: 750px) {
+  .homepage {
+    padding: 20px 15px 40px;
+  }
+}

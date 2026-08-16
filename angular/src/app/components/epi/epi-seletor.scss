@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: var(--mar-page-padding-top) var(--mar-page-padding-x) var(--mar-page-padding-bottom);
+  box-sizing: border-box;
+  background: var(--mar-bg);
+  color: var(--mar-ink);
+}
+
+.content-area {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: var(--mar-page-max-width);
+  margin: 0 auto;
+  min-width: 0;
+}
+
+.epi-panel {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 680px) {
+  :host {
+    padding: 22px 14px 42px;
+  }
+}

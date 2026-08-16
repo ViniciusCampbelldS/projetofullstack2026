@@ -1,0 +1,98 @@
+<section class="stats-grid">
+  <article class="stat-card">
+    <div class="stat-icon stat-blue"><i class="bi bi-shield-shaded"></i></div>
+    <div class="stat-content"><span>EPIs monitorados</span><strong>{{ totalEpis() }}</strong><small>Equipamentos cadastrados</small></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-icon stat-green"><i class="bi bi-check-circle"></i></div>
+    <div class="stat-content"><span>EPIs em dia</span><strong>{{ episEmDia().length }}</strong><small>Sem alerta de vencimento</small></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-icon stat-orange"><i class="bi bi-clock-history"></i></div>
+    <div class="stat-content"><span>Próximos do vencimento</span><strong>{{ episProximos().length }}</strong><small>Precisam de acompanhamento</small></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-icon stat-red"><i class="bi bi-exclamation-octagon"></i></div>
+    <div class="stat-content"><span>EPIs vencidos</span><strong>{{ episVencidos().length }}</strong><small>Requerem atenção</small></div>
+  </article>
+</section>
+
+<section class="overview-panel mt-4">
+  <div class="section-heading">
+    <div>
+      <h2>Visão geral de conformidade</h2>
+      <p>Situação atual de EPIs e treinamentos.</p>
+    </div>
+
+    <span class="overview-status">
+      <span class="status-dot"></span>
+      Sistema atualizado
+    </span>
+  </div>
+
+  <div class="compliance-grid">
+    <article class="compliance-card">
+      <div class="compliance-card-top">
+        <div class="compliance-identification">
+          <div class="compliance-icon epi-icon"><i class="bi bi-shield-shaded"></i></div>
+          <div>
+            <h3>EPIs</h3>
+            <p>Validade dos equipamentos monitorados</p>
+          </div>
+        </div>
+
+        <div class="compliance-percentage">
+          <strong>{{ percentualEpisValidos() }}%</strong>
+          <span>válidos</span>
+        </div>
+      </div>
+
+      <div class="progress-track" role="progressbar" [attr.aria-valuenow]="percentualEpisValidos()" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-fill epi-progress" [style.width.%]="percentualEpisValidos()"></div>
+      </div>
+
+      <div class="compliance-details">
+        <span class="detail-ok"><i class="bi bi-circle-fill"></i>{{ episDentroDaValidade().length }} dentro da validade</span>
+        <span class="detail-warning"><i class="bi bi-circle-fill"></i>{{ episProximos().length }} próximo(s)</span>
+        <span class="detail-danger"><i class="bi bi-circle-fill"></i>{{ episVencidos().length }} vencido(s)</span>
+      </div>
+    </article>
+
+    <article class="compliance-card">
+      <div class="compliance-card-top">
+        <div class="compliance-identification">
+          <div class="compliance-icon training-icon"><i class="bi bi-mortarboard"></i></div>
+          <div>
+            <h3>Treinamentos e NRs</h3>
+            <p>Validade das capacitações dos funcionários</p>
+          </div>
+        </div>
+
+        <div class="compliance-percentage training-percentage">
+          @if (possuiDadosTreinamento()) {
+            <strong>0%</strong>
+            <span>válidos</span>
+          } @else {
+            <strong>-</strong>
+            <span>sem dados</span>
+          }
+        </div>
+      </div>
+
+      @if (possuiDadosTreinamento()) {
+        <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-fill training-progress" style="width: 0%"></div>
+        </div>
+      } @else {
+        <div class="progress-track progress-empty">
+          <div class="empty-progress-pattern"></div>
+        </div>
+      }
+
+      <div class="training-empty-message">
+        <i class="bi bi-info-circle"></i>
+        Nenhum treinamento monitorado no momento.
+      </div>
+    </article>
+  </div>
+</section>

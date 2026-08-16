@@ -1,0 +1,53 @@
+<!-- ==================================================
+       CARDS DE ESTATISTICAS
+  =================================================== -->
+
+<section class="stats-grid">
+  <article class="stat-card stat-total">
+    <div class="stat-icon">
+      <i class="bi bi-shield-shaded"></i>
+    </div>
+
+    <div class="stat-content">
+      <span>EPIs monitorados</span>
+      <strong>{{ totalEpis }}</strong>
+      <small>Total cadastrado</small>
+    </div>
+  </article>
+
+  <article class="stat-card stat-ok">
+    <div class="stat-icon">
+      <i class="bi bi-check-circle"></i>
+    </div>
+
+    <div class="stat-content">
+      <span>Em dia</span>
+      <strong>{{ episEmDia.length }}</strong>
+      <small>Sem alertas</small>
+    </div>
+  </article>
+
+  <article class="stat-card stat-warning">
+    <div class="stat-icon">
+      <i class="bi bi-clock-history"></i>
+    </div>
+
+    <div class="stat-content">
+      <span>Próximos</span>
+      <strong>{{ episProximos.length }}</strong>
+      <small>Perto do vencimento</small>
+    </div>
+  </article>
+
+  <article class="stat-card stat-danger">
+    <div class="stat-icon">
+      <i class="bi bi-exclamation-octagon"></i>
+    </div>
+
+    <div class="stat-content">
+      <span>Vencidos</span>
+      <strong>{{ episVencidos.length }}</strong>
+      <small>Requerem atenção</small>
+    </div>
+  </article>
+</section>

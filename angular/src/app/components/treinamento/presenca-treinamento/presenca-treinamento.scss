@@ -1,0 +1,401 @@
+@use "../../../../styles/shared" as shared;
+
+@include shared.form-message;
+@include shared.page-shell(".treinamento-view");
+
+:host {
+  color: var(--mar-ink);
+  min-width: 0;
+}
+
+.header-area h1 {
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
+}
+
+.header-area {
+  display: flex;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.page-shell {
+  width: 100%;
+  max-width: var(--mar-page-max-width) !important;
+  margin: 0 auto;
+  min-width: 0;
+}
+
+.header-area p {
+  max-width: 760px;
+  color: var(--mar-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  min-width: 0;
+}
+
+.panel {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--mar-panel-padding);
+  gap: 12px;
+  min-width: 0;
+}
+
+.panel-header h2 {
+  margin: 0 0 5px;
+  color: var(--mar-azul-escuro);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.panel-header p {
+  margin: 0;
+  color: #71808d;
+  font-size: 14px;
+}
+
+.form-grid,
+.schedule-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.schedule-filters {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mar-azul-escuro);
+}
+
+.participants-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: var(--mar-panel-padding);
+  padding: 14px;
+  border: 1px solid var(--mar-line-soft);
+  border-radius: 10px;
+  background: var(--mar-bg);
+}
+
+.participants-panel strong {
+  color: var(--mar-azul-escuro);
+  font-size: 0.9rem;
+}
+
+.participants-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.participant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--mar-muted-2);
+  font-size: 0.86rem;
+  min-width: 0;
+}
+
+.participant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid rgba(4, 103, 158, 0.18);
+  border-radius: 999px;
+  background: #e8f3f9;
+  color: var(--mar-azul-escuro);
+  font-size: 0.78rem;
+  font-weight: 800;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.upload-area {
+  margin-top: var(--mar-panel-padding);
+  padding: var(--mar-panel-padding);
+  border: 2px dashed rgba(4, 103, 158, 0.24);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #f8fbfd;
+  min-width: 0;
+}
+
+.upload-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(4, 103, 158, 0.1);
+  color: var(--mar-azul-medio);
+  font-size: 22px;
+}
+
+.upload-area strong {
+  font-size: 15px;
+}
+
+.upload-area p {
+  margin: 4px 0 0;
+  color: #758592;
+  font-size: 13px;
+}
+
+.upload-btn {
+  margin-left: auto;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 14px;
+  border: 1px solid rgba(21, 89, 124, 0.22);
+  background: #edf4f8;
+  color: #15597c;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.upload-btn:hover {
+  background: #e1eef5;
+}
+
+.preview-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(0, 61, 108, 0.1);
+  border-radius: var(--mar-radius-md);
+  background: var(--mar-bg);
+  min-width: 0;
+}
+
+.preview-box div {
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-box strong {
+  color: var(--mar-azul-escuro);
+  font-size: 0.95rem;
+}
+
+.preview-box span {
+  color: var(--mar-text-secondary);
+  font-size: 0.82rem;
+}
+
+.form-actions {
+  margin-top: var(--mar-panel-padding);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.submit-actions {
+  margin-top: 18px;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #c7d5df;
+  border-radius: 10px;
+  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+}
+
+table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 11px 12px;
+  border-right: 1px solid #e2eaf0;
+  border-bottom: 1px solid #e2eaf0;
+  color: var(--mar-text);
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+th {
+  background: var(--mar-azul-escuro);
+  color: var(--mar-surface);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+th:last-child,
+td:last-child {
+  border-right: 0;
+}
+
+tbody tr:nth-child(even) {
+  background: #f8fbfd;
+}
+
+.selectable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selectable-row:hover {
+  background: #eef6fb;
+}
+
+.selectable-row.is-selected {
+  background: #dcecf7;
+  box-shadow: inset 4px 0 0 var(--mar-azul-medio);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.status-badge.is-planned {
+  background: #dff1fb;
+  color: #1d78a8;
+}
+
+.status-badge.is-realized {
+  background: #dceee8;
+  color: #008f61;
+}
+
+.empty-row {
+  color: #60788c;
+  text-align: center;
+  padding: var(--mar-panel-padding);
+}
+
+@media (max-width: 900px) {
+  .form-grid,
+  .schedule-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .participants-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  table {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 620px) {
+  .treinamento-view {
+    padding: 22px 14px 42px;
+  }
+
+  .header-area,
+  .content-grid,
+  .page-shell {
+    max-width: 100%;
+  }
+
+  .form-grid,
+  .schedule-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-area,
+  .form-actions,
+  .preview-box {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .upload-btn,
+  .form-actions button,
+  .preview-box .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .upload-area {
+    padding: 16px;
+  }
+
+  .header-area h1 {
+    font-size: 1.55rem;
+  }
+
+  .header-area p,
+  .panel-header p {
+    font-size: 0.88rem;
+  }
+
+  .participant-list {
+    flex-direction: column;
+  }
+
+  .participant-chip {
+    justify-content: center;
+    width: 100%;
+  }
+
+  table {
+    min-width: 620px;
+  }
+}

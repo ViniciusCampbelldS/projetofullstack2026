@@ -1,0 +1,125 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(16, 38, 54, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mar-panel-padding);
+}
+
+.selected-modal {
+  width: min(860px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: var(--mar-radius-lg);
+  border: 1px solid rgba(0, 61, 108, 0.18);
+  background: var(--mar-surface);
+  box-shadow: 0 14px 36px rgba(0, 31, 58, 0.26);
+  padding: var(--mar-panel-padding);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: var(--mar-panel-padding);
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 61, 108, 0.1);
+}
+
+.modal-header h3 {
+  margin: 6px 0 0;
+  font-size: 21px;
+  color: #0a3e63;
+}
+
+.close-btn,
+.remove-btn {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--mar-line);
+  background: var(--mar-surface);
+  color: var(--mar-azul-escuro);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.close-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+
+.close-btn:hover,
+.remove-btn:hover {
+  background: #d8e8f1;
+}
+
+.selected-section {
+  padding: var(--mar-panel-padding);
+  border: 1px solid rgba(0, 61, 108, 0.12);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f9fc 100%);
+}
+
+.selected-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.selected-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid rgba(4, 103, 158, 0.18);
+  border-radius: 12px;
+  background: #e8f3f9;
+  color: var(--mar-azul-escuro);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.selected-chip span {
+  overflow-wrap: anywhere;
+}
+
+.remove-btn {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+}
+
+.empty-state {
+  color: #60788c;
+  text-align: center;
+  padding: var(--mar-panel-padding);
+}
+
+.modal-actions {
+  margin-top: var(--mar-panel-padding);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .selected-modal {
+    padding: 16px;
+  }
+
+  .selected-chip {
+    align-items: flex-start;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}

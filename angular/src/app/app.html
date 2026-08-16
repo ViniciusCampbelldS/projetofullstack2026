@@ -1,0 +1,235 @@
+@if (showHeader) {
+
+<header>
+  <div class="row align-items-center justify-content-center">
+    <div id="logoDiv" class="col-lg-3 col-md-3 col-sm-12 d-flex align-items-center justify-content-center">
+      <img src="img/logo.png" class="logo" alt="Logo da MAR Metalurgica." />
+    </div>
+
+    <div id="metalDiv" class="col-lg-4 col-md-5 col-sm-12 d-flex align-items-center justify-content-center">
+      <div>
+        <h1>A Metalurgica</h1>
+        <h2>Especialista na sua praia</h2>
+      </div>
+    </div>
+
+    <div id="TSTDiv" class="col-lg-4 col-md-4 col-sm-12 text-center">
+      <h2>{{ tituloArea }}</h2>
+      <p>{{ subtituloArea }}</p>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <ul class="nav nav-tabs nav-fill justify-content-center align-items-center" [class.portal-nav]="isOperario">
+    @if (isOperario) {
+      <li>
+        <a class="btn d-flex align-items-center justify-content-center" routerLink="/" routerLinkActive="nav-active" [routerLinkActiveOptions]="{ exact: true }">
+          <i class="bi bi-house-door"></i>
+          Home
+        </a>
+      </li>
+
+      <li>
+        <a class="btn d-flex align-items-center justify-content-center" [routerLink]="rotaMeusEpis" routerLinkActive="nav-active">
+          <i class="bi bi-shield-check"></i>
+          Meus EPIs
+        </a>
+      </li>
+
+      <li>
+        <a class="btn d-flex align-items-center justify-content-center" [routerLink]="rotaMeusTreinamentos" routerLinkActive="nav-active">
+          <i class="bi bi-journal-check"></i>
+          Meus Treinamentos
+        </a>
+      </li>
+    } @else {
+      @if (isTst) {
+        <li>
+          <a class="btn d-flex align-items-center justify-content-center" routerLink="/" routerLinkActive="nav-active" [routerLinkActiveOptions]="{ exact: true }">
+            <i class="bi bi-house-door"></i>
+            Home
+          </a>
+        </li>
+
+        <li routerLinkActive="is-active">
+          <a class="btn d-flex align-items-center justify-content-center" routerLink="/funcionario" routerLinkActive="nav-active">
+            <i class="bi bi-person-badge"></i>
+            Minha area
+          </a>
+
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" [routerLink]="rotaMeusEpis">Meus EPIs</a>
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="rotaMeusTreinamentos">Meus Treinamentos</a>
+            </li>
+          </ul>
+        </li>
+
+        <li routerLinkActive="is-active">
+          <a class="btn d-flex align-items-center justify-content-center" [routerLink]="rotaEpiBusca">
+            <i class="bi bi-shield-shaded"></i>
+            Gerenciar EPIs
+          </a>
+
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" [routerLink]="rotaEpiBusca">Cadastro/Recebimento</a>
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="rotaEpiEntrega">Entrega de EPIs</a>
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="rotaEpiHistorico">Historico de Alteracoes</a>
+            </li>
+          </ul>
+        </li>
+
+        <li>
+          <a class="btn d-flex align-items-center justify-content-center" routerLink="/treinamento" routerLinkActive="nav-active">
+            <i class="bi bi-file-text-fill"></i>
+            Gerenciar Treinamentos
+          </a>
+
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" [routerLink]="['/treinamento/editar']">Nova Turma/Treinamentos</a>
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="['/treinamento/presenca']">Presença</a>
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="['/treinamento/historico']">Historico de Alteracoes</a>
+            </li>
+          </ul>
+        </li>
+
+        <li>
+          <a class="btn d-flex align-items-center justify-content-center" routerLink="/gerenciar-funcionarios" routerLinkActive="nav-active">
+            <i class="bi bi-people-fill"></i>
+            Gerenciar Funcionarios
+          </a>
+        </li>
+      }
+    }
+  </ul>
+</nav>
+
+<div class="top-right-actions">
+  <div class="notification-area">
+    <button
+      class="btn notification-button d-flex align-items-center justify-content-center"
+      type="button"
+      [class.is-open]="notificacoesAbertas"
+      (click)="alternarNotificacoes($event)"
+      aria-label="Abrir notificacoes"
+    >
+      <i class="bi bi-bell-fill"></i>
+
+      @if (totalNotificacoes > 0) {
+        <span class="notification-badge">
+          {{ totalNotificacoes }}
+        </span>
+      }
+    </button>
+
+    @if (notificacoesAbertas) {
+      <div class="notification-panel" (click)="$event.stopPropagation()">
+        <div class="notification-header">
+          <div class="notification-title">
+            <strong>Notificacoes</strong>
+            <span>Avisos de vencimento</span>
+          </div>
+
+          <button
+            type="button"
+            class="notification-settings"
+            (click)="alternarConfiguracao($event)"
+            aria-label="Configurar notificacoes"
+          >
+            <i class="bi bi-gear-fill"></i>
+          </button>
+        </div>
+
+        @if (configuracaoAberta) {
+          <div class="notification-config">
+            <strong class="config-title">Configurar aviso previo</strong>
+
+            <label for="diasAvisoEpi">Avisar sobre vencimento de EPI com:</label>
+
+            <div class="days-input">
+              <input id="diasAvisoEpi" type="number" min="0" [(ngModel)]="diasAvisoEpi" />
+              <span>dias de antecedencia</span>
+            </div>
+
+            <label for="diasAvisoNr">Avisar sobre vencimento de NR com:</label>
+
+            <div class="days-input">
+              <input id="diasAvisoNr" type="number" min="0" [(ngModel)]="diasAvisoNr" />
+              <span>dias de antecedencia</span>
+            </div>
+
+            <button class="save-notification-config" type="button" (click)="salvarConfiguracao($event)">
+              <i class="bi bi-check-lg"></i>
+              Salvar configuracao
+            </button>
+          </div>
+        } @else {
+          @if (totalNotificacoes === 0) {
+            <div class="notification-empty">
+              <i class="bi bi-check-circle-fill"></i>
+              <strong>Nenhum vencimento proximo</strong>
+              <span>Os avisos de EPI e NR aparecerao aqui.</span>
+            </div>
+          } @else {
+            <div class="notification-list">
+              @for (epi of episComNotificacao; track epi.id) {
+                <div class="notification-item" [class.notification-item-expired]="estaVencido(epi)">
+                  <div class="notification-item-icon">
+                    @if (estaVencido(epi)) {
+                      <i class="bi bi-x-circle-fill"></i>
+                    } @else {
+                      <i class="bi bi-exclamation-triangle-fill"></i>
+                    }
+                  </div>
+
+                  <div class="notification-item-content">
+                    @if (estaVencido(epi)) {
+                      <strong class="notification-status expired">EPI vencido</strong>
+                    } @else {
+                      <strong class="notification-status warning">EPI proximo do vencimento</strong>
+                    }
+
+                    <span class="notification-epi-name">{{ epi.nome }}</span>
+                    <small>CA: {{ epi.ca }}</small>
+                    <small>Funcionario: {{ epi.funcionario }}</small>
+                    <small class="notification-date" [class.expired]="estaVencido(epi)">
+                      {{ textoVencimento(epi) }}
+                    </small>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  @if (estaNoTopo) {
+    <a class="logout-link" routerLink="/login" aria-label="Logout">
+      <i class="bi bi-person-fill-x"></i>
+      Logout
+    </a>
+  } @else {
+    <button class="back-to-top-button" type="button" (click)="voltarAoTopo()" aria-label="Voltar ao topo">
+      <i class="bi bi-chevron-up"></i>
+    </button>
+  }
+</div>
+
+}
+
+<router-outlet></router-outlet>

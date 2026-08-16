@@ -1,0 +1,13 @@
+<section class="homepage">
+	@if (isOperario) {
+	<app-painel-operario [saudacao]="saudacao" [funcionario]="funcionario" [resumoFuncionario]="resumoFuncionario"
+		[pendenciasFuncionario]="pendenciasFuncionario" />
+	} @else {
+	<app-painel-administrativo [dataHoje]="dataHoje" [saudacao]="saudacao"
+		[percentualEpisValidos]="percentualEpisValidos" [possuiDadosTreinamento]="possuiDadosTreinamento"
+		[totalEpis]="totalEpis" [episEmDia]="episEmDia" [episProximos]="episProximos" [episVencidos]="episVencidos"
+		[episDentroDaValidade]="episDentroDaValidade" [totalPendencias]="totalPendencias"
+		[mensagemPrioridade]="mensagemPrioridade" [episComNotificacao]="episComNotificacao"
+		[estaVencido]="estaVencido.bind(this)" [textoVencimento]="textoVencimento.bind(this)" />
+	}
+</section>

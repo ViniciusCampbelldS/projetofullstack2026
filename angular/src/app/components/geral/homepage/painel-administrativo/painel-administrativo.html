@@ -1,0 +1,38 @@
+<section class="admin-dashboard">
+  <app-hero-administrativo [dataHoje]="dataHoje()" [saudacao]="saudacao()" />
+
+  <app-painel-pendencias
+    [totalPendencias]="totalPendencias()"
+    [mensagemPrioridade]="mensagemPrioridade()"
+    [episComNotificacao]="episComNotificacao()"
+    [estaVencido]="estaVencido()"
+    [textoVencimento]="textoVencimento()"
+  />
+
+  <app-painel-conformidade
+    [percentualEpisValidos]="percentualEpisValidos()"
+    [possuiDadosTreinamento]="possuiDadosTreinamento()"
+    [totalEpis]="totalEpis()"
+    [episEmDia]="episEmDia()"
+    [episProximos]="episProximos()"
+    [episVencidos]="episVencidos()"
+    [episDentroDaValidade]="episDentroDaValidade()"
+  />
+
+  <section class="safety-banner">
+    <div class="banner-decoration banner-decoration-one"></div>
+    <div class="banner-decoration banner-decoration-two"></div>
+
+    <div class="safety-banner-icon">
+      <i class="bi bi-shield-check"></i>
+    </div>
+
+    <div class="safety-banner-content">
+      <h2>Prevenção hoje e segurança para o amanhã.</h2>
+      <p>
+        Informação, acompanhamento e prevenção fazem
+        parte de um ambiente de trabalho mais seguro.
+      </p>
+    </div>
+  </section>
+</section>

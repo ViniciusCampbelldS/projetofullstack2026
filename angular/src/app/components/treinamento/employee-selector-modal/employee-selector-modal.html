@@ -1,0 +1,76 @@
+@if (isOpen) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" [attr.aria-label]="titulo" (click)="fechar()">
+    <section class="employee-modal" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <h3>{{ titulo }}</h3>
+        </div>
+        <button class="close-btn" type="button" aria-label="Fechar" (click)="fechar()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+
+      <div class="employee-section">
+        <div class="modal-search-grid">
+          <div class="field">
+            <label for="modal-funcionario-cpf">CPF</label>
+            <input id="modal-funcionario-cpf" type="text" class="form-control" [value]="filtroCPF" (input)="filtroCPF = $any($event.target).value" placeholder="Pesquisar por CPF" />
+          </div>
+
+          <div class="field">
+            <label for="modal-funcionario-nome">Nome</label>
+            <input id="modal-funcionario-nome" type="text" class="form-control" [value]="filtroNome" (input)="filtroNome = $any($event.target).value" placeholder="Pesquisar por nome" />
+          </div>
+
+          <div class="field">
+            <label for="modal-funcionario-cargo">Cargo</label>
+            <input id="modal-funcionario-cargo" type="text" class="form-control" [value]="filtroCargo" (input)="filtroCargo = $any($event.target).value" placeholder="Pesquisar por cargo" />
+          </div>
+
+          <div class="field">
+            <label for="modal-funcionario-area">Área</label>
+            <input id="modal-funcionario-area" type="text" class="form-control" [value]="filtroArea" (input)="filtroArea = $any($event.target).value" placeholder="Pesquisar por área" />
+          </div>
+        </div>
+
+        <div class="modal-table-container">
+          <table class="modal-table">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" [checked]="allFilteredChecked" (change)="toggleAllFiltered($any($event.target).checked)" aria-label="Selecionar todos os resultados filtrados" />
+                </th>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Cargo</th>
+                <th>Área</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (funcionario of filteredFuncionarios; track funcionario.id) {
+                <tr>
+                  <td>
+                    <input type="checkbox" [checked]="checkedFuncionarioIds.has(funcionario.id)" (change)="toggleFuncionarioChecked(funcionario.id, $any($event.target).checked)" [attr.aria-label]="'Selecionar ' + funcionario.nome" />
+                  </td>
+                  <td>{{ funcionario.nome }}</td>
+                  <td>{{ funcionario.cpf }}</td>
+                  <td>{{ funcionario.cargo }}</td>
+                  <td>{{ funcionario.area }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="empty-row">Nenhum funcionário encontrado com os filtros informados.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="modal-actions">
+          <button class="btn btn-outline-brand" type="button" (click)="fechar()">Cancelar</button>
+          <button class="btn btn-brand" type="button" [disabled]="!hasCheckedFuncionarios" (click)="confirmarSelecao()">Adicionar selecionados</button>
+        </footer>
+      </div>
+    </section>
+  </div>
+}

@@ -1,0 +1,26 @@
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-delivery-title"
+	(click)="closed.emit()">
+	<section class="epi-modal" (click)="$event.stopPropagation()">
+		<header class="modal-header">
+			<div>
+				<p class="eyebrow">Registrar Entrega</p>
+				<h3 id="confirm-delivery-title">Confirmar registro de entrega</h3>
+				<span>Confira os dados da entrega antes de confirmar</span>
+			</div>
+			<button class="modal-close" type="button" aria-label="Fechar" (click)="closed.emit()">
+				<i class="bi bi-x-lg"></i>
+			</button>
+		</header>
+
+		<app-delivery-items-review [deliveryItems]="deliveryItems()" [employeeName]="employeeName()"
+			[deliveryDate]="deliveryDate()"></app-delivery-items-review>
+
+		<footer class="modal-actions">
+			<button class="btn btn-soft" type="button" (click)="closed.emit()">Cancelar</button>
+			<button class="btn btn-brand" type="button" (click)="confirm.emit()">
+				<i class="bi bi-check2-circle"></i>
+				Confirmar entrega
+			</button>
+		</footer>
+	</section>
+</div>

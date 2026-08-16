@@ -1,0 +1,48 @@
+<section class="training-dashboard">
+  <div class="training-heading">
+    <div>
+      <h2>Meus treinamentos</h2>
+      <p class="training-description">
+        Consulte as NRs vinculadas ao seu cadastro e acompanhe vencimentos para manter a regularidade.
+      </p>
+    </div>
+  </div>
+
+  <section class="panel trainings-card" id="meus-treinamentos">
+    <div class="section-header">
+      <div>
+        <h3>Treinamentos obrigatórios</h3>
+        <p class="section-description">Status atualizado de validade por NR.</p>
+      </div>
+      <span class="item-count">{{ employeeTrainings.length }} treinamentos</span>
+    </div>
+
+    <div class="training-table-wrapper">
+      <table class="training-table">
+        <thead>
+          <tr>
+            <th>Código da NR</th>
+            <th>Data do treinamento</th>
+            <th>Data do vencimento</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (treinamento of employeeTrainings; track treinamento.id) {
+            <tr>
+              <td><span class="nr-badge">{{ treinamento.nr }}</span></td>
+              <td>{{ treinamento.trainingDate }}</td>
+              <td>{{ treinamento.dueDate }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-badge ' + classeTreinamento(treinamento)">
+                  <span class="status-dot"></span>
+                  {{ situacaoTreinamento(treinamento) }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

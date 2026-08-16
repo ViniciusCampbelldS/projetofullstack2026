@@ -1,0 +1,87 @@
+:host {
+  display: block;
+}
+
+.admin-dashboard {
+  display: grid;
+  gap: 0;
+  max-width: var(--mar-page-max-width);
+  margin: 0 auto;
+}
+
+.safety-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 22px;
+  padding: 27px 30px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(120deg, var(--mar-azul-escuro) 0%, #034f82 100%);
+  box-shadow: 0 14px 35px rgba(0, 61, 108, 0.13);
+  color: var(--mar-surface);
+}
+
+.banner-decoration {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.banner-decoration-one {
+  top: -130px;
+  right: 80px;
+  width: 200px;
+  height: 200px;
+  border: 35px solid rgba(255, 255, 255, 0.025);
+}
+
+.banner-decoration-two {
+  right: -40px;
+  bottom: -70px;
+  width: 130px;
+  height: 130px;
+  background: rgba(246, 141, 23, 0.08);
+}
+
+.safety-banner-icon {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--mar-laranja-claro);
+  font-size: 26px;
+}
+
+.safety-banner-content {
+  position: relative;
+  z-index: 2;
+}
+
+.safety-banner-content h2 {
+  margin: 3px 0 4px;
+  color: var(--mar-surface);
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 750;
+}
+
+.safety-banner-content p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 10.5px;
+}
+
+@media (max-width: 750px) {
+  .safety-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 23px;
+  }
+}

@@ -1,0 +1,83 @@
+<section class="employee-dashboard">
+  <section class="employee-hero">
+    <div class="employee-hero-mark">
+      <i class="bi bi-person-workspace"></i>
+    </div>
+
+    <div class="employee-hero-content">
+      <span class="employee-badge">
+        <i class="bi bi-shield-check"></i>
+        Area do operario
+      </span>
+
+      <h1>{{ saudacao() }}, {{ funcionario().nome }}!</h1>
+
+      <p>
+        Resumo dos seus EPIs, treinamentos e pendencias
+        de seguranca em um so lugar.
+      </p>
+
+      <div class="employee-hero-meta">
+        <span><i class="bi bi-shield-check"></i>3 EPIs ativos</span>
+        <span><i class="bi bi-journal-check"></i>3 treinamentos</span>
+        <span><i class="bi bi-exclamation-triangle"></i>1 pendencia</span>
+      </div>
+    </div>
+
+    <div class="employee-card">
+      <span class="employee-avatar">
+        <i class="bi bi-person-badge"></i>
+      </span>
+
+      <div>
+        <strong>{{ funcionario().nome }}</strong>
+        <span>{{ funcionario().cargo }} - {{ funcionario().setor }}</span>
+        <small>Matricula {{ funcionario().matricula }}</small>
+      </div>
+    </div>
+  </section>
+
+  <div class="employee-summary-grid">
+    @for (item of resumoFuncionario(); track item.rotulo) {
+      <article class="employee-summary-card" [class.good]="item.classe === 'good'" [class.warning]="item.classe === 'warning'">
+        <span class="employee-summary-icon">
+          <i class="bi" [ngClass]="item.icone"></i>
+        </span>
+        <i class="bi employee-summary-bg-icon" [ngClass]="item.icone"></i>
+        <div>
+          <small>{{ item.rotulo }}</small>
+          <strong>{{ item.valor }}</strong>
+          <span>{{ item.detalhe }}</span>
+        </div>
+      </article>
+    }
+  </div>
+
+  <section class="employee-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Pendencias e avisos</h2>
+        <p>Itens que precisam de acompanhamento.</p>
+      </div>
+
+      <span class="employee-panel-counter">1</span>
+    </div>
+
+    <div class="employee-pending-list">
+      @for (pendencia of pendenciasFuncionario(); track pendencia.titulo) {
+        <article class="employee-pending-item">
+          <span class="employee-pending-icon">
+            <i class="bi" [ngClass]="pendencia.icone"></i>
+          </span>
+
+          <div>
+            <strong>{{ pendencia.titulo }}</strong>
+            <span>{{ pendencia.detalhe }}</span>
+          </div>
+
+          <small [class]="pendencia.classe">{{ pendencia.status }}</small>
+        </article>
+      }
+    </div>
+  </section>
+</section>

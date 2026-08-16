@@ -1,0 +1,57 @@
+<section class="attention-panel">
+  <div class="section-heading attention-heading-main">
+    <div>
+      <h2>Pendências</h2>
+      <p>{{ mensagemPrioridade() }}</p>
+    </div>
+
+    @if (totalPendencias() > 0) {
+      <span class="attention-counter">{{ totalPendencias() }}</span>
+    }
+  </div>
+
+  @if (totalPendencias() === 0) {
+    <div class="attention-empty">
+      <div class="attention-empty-icon"><i class="bi bi-check-lg"></i></div>
+      <div>
+        <strong>Tudo certo!</strong>
+        <span>Nenhum EPI precisa de atenção no momento.</span>
+      </div>
+    </div>
+  } @else {
+    <div class="attention-list">
+      @for (epi of episComNotificacao(); track epi.id) {
+        <article class="attention-item" [class.attention-expired]="estaVencido()(epi)">
+          <div class="attention-item-icon">
+            @if (estaVencido()(epi)) {
+              <i class="bi bi-x-circle-fill"></i>
+            } @else {
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            }
+          </div>
+
+          <div class="attention-info">
+            <div class="attention-title-row">
+              <strong>{{ epi.nome }}</strong>
+              @if (estaVencido()(epi)) {
+                <span class="status-tag expired">Vencido</span>
+              } @else {
+                <span class="status-tag warning">Próximo</span>
+              }
+            </div>
+
+            <div class="attention-meta">
+              <span><i class="bi bi-upc-scan"></i>CA {{ epi.ca }}</span>
+              <span><i class="bi bi-person"></i>{{ epi.funcionario }}</span>
+            </div>
+
+            <span class="attention-time" [class.expired]="estaVencido()(epi)">
+              <i class="bi bi-clock"></i>
+              {{ textoVencimento()(epi) }}
+            </span>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

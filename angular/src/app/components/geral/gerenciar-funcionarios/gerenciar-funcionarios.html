@@ -1,0 +1,327 @@
+<section class="funcionarios-page">
+	<div class="page-shell">
+		<div class="header-area">
+			<div>
+				<h1>Gerenciar Funcionários</h1>
+				<p>Cadastro, consulta e atualização dos funcionários da empresa.</p>
+			</div>
+
+			<button class="btn btn-brand" type="button" [disabled]="!podeGerenciarFuncionarios"
+				[title]="!podeGerenciarFuncionarios ? 'Perfil Operário possui apenas visualização' : ''"
+				(click)="abrirNovoFuncionario()">
+				<i class="bi bi-person-plus-fill"></i>
+				Novo funcionário
+			</button>
+		</div>
+
+		<div class="stats-grid">
+			<article class="stat-card">
+				<span class="stat-icon blue"><i class="bi bi-people-fill"></i></span>
+				<div>
+					<span>Total</span>
+					<strong>{{ funcionarios.length }}</strong>
+				</div>
+			</article>
+
+			<article class="stat-card">
+				<span class="stat-icon green"><i class="bi bi-person-check-fill"></i></span>
+				<div>
+					<span>Ativos</span>
+					<strong>{{ totalAtivos }}</strong>
+				</div>
+			</article>
+
+			<article class="stat-card">
+				<span class="stat-icon orange"><i class="bi bi-person-dash-fill"></i></span>
+				<div>
+					<span>Afastados</span>
+					<strong>{{ totalAfastados }}</strong>
+				</div>
+			</article>
+
+			<article class="stat-card">
+				<span class="stat-icon cyan"><i class="bi bi-file-earmark-check-fill"></i></span>
+				<div>
+					<span>Com NR</span>
+					<strong>{{ totalComNr }}</strong>
+				</div>
+			</article>
+		</div>
+
+		<article class="filter-box">
+			<div class="section-title">
+				<h2>Parâmetros de busca</h2>
+				<button class="btn btn-soft" type="button" (click)="limparFiltros()">
+					<i class="bi bi-eraser-fill"></i>
+					Limpar
+				</button>
+			</div>
+
+			<div class="row g-3">
+				<div class="col-lg-4">
+					<label class="form-label" for="busca-funcionario">Busca</label>
+					<div class="input-group">
+						<input id="busca-funcionario" class="form-control" type="text" placeholder="Nome, CPF ou cargo"
+							[(ngModel)]="filtroBusca" />
+						<span class="input-group-text"><i class="bi bi-search"></i></span>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6">
+					<label class="form-label" for="setor-funcionario">Setor</label>
+					<select id="setor-funcionario" class="form-select" [(ngModel)]="filtroSetor">
+						<option value="">Todos os setores</option>
+						@for (setor of setores; track setor) {
+						<option [value]="setor">{{ setor }}</option>
+						}
+					</select>
+				</div>
+
+				<div class="col-lg-3 col-md-6">
+					<label class="form-label" for="cargo-funcionario">Cargo</label>
+					<select id="cargo-funcionario" class="form-select" [(ngModel)]="filtroCargo">
+						<option value="">Todos os cargos</option>
+						@for (cargo of cargos; track cargo) {
+						<option [value]="cargo">{{ cargo }}</option>
+						}
+					</select>
+				</div>
+
+				<div class="col-lg-2 col-md-6">
+					<label class="form-label" for="status-funcionario">Status</label>
+					<select id="status-funcionario" class="form-select" [(ngModel)]="filtroStatus">
+						<option value="">Todos os status</option>
+						@for (status of statusOptions; track status) {
+						<option [value]="status">{{ status }}</option>
+						}
+					</select>
+				</div>
+			</div>
+		</article>
+
+		<article class="list-card">
+			<div class="section-title">
+				<div>
+					<h2>Funcionários</h2>
+					<p>{{ funcionariosFiltrados.length }} registro(s) encontrado(s)</p>
+				</div>
+			</div>
+
+			<div class="table-responsive">
+				<table class="table funcionarios-table align-middle mb-0">
+					<thead>
+						<tr>
+							<th>Nome</th>
+							<th>CPF</th>
+							<th>Setor</th>
+							<th>Cargo</th>
+							<th>Perfil</th>
+							<th>NRs</th>
+							<th>Status</th>
+							<th>Ações</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						@for (funcionario of funcionariosFiltrados; track funcionario.id) {
+						<tr>
+							<td>
+								<strong>{{ funcionario.nome }}</strong>
+							</td>
+							<td>{{ formatarCpfTabela(funcionario.cpf) }}</td>
+							<td>{{ funcionario.setor }}</td>
+							<td>{{ funcionario.cargo }}</td>
+							<td>{{ funcionario.perfil }}</td>
+							<td>
+								<div class="nr-list">
+									@for (nr of funcionario.nrs; track nr) {
+									<span>{{ nr }}</span>
+									}
+									@empty {
+									<small>Nenhuma</small>
+									}
+								</div>
+							</td>
+							<td>
+								<span class="status-badge" [class]="statusClass(funcionario.status)">
+									{{ funcionario.status }}
+								</span>
+							</td>
+							<td>
+								<div class="table-actions">
+									<button class="btn btn-sm btn-outline-brand" type="button"
+										[disabled]="!podeGerenciarFuncionarios"
+										[title]="!podeGerenciarFuncionarios ? 'Perfil Operário possui apenas visualização' : ''"
+										(click)="editarFuncionario(funcionario)">
+										<i class="bi bi-pencil-fill"></i>
+										Editar
+									</button>
+
+									<button class="btn btn-sm btn-soft action-status-button" type="button"
+										[disabled]="!podeGerenciarFuncionarios"
+										[title]="!podeGerenciarFuncionarios ? 'Perfil Operário possui apenas visualização' : ''"
+										(click)="abrirModalStatus(funcionario)">
+										<i class="bi bi-sliders"></i>
+										Alterar situação
+									</button>
+								</div>
+							</td>
+						</tr>
+						}
+						@empty {
+						<tr>
+							<td colspan="8" class="empty-state">
+								Nenhum funcionário encontrado.
+							</td>
+						</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</article>
+	</div>
+</section>
+
+@if (modalAberto) {
+<div class="modal-backdrop" (click)="fecharModal()"></div>
+
+<section class="funcionario-modal" role="dialog" aria-modal="true" aria-labelledby="funcionario-modal-title">
+	<div class="modal-header">
+		<div>
+			<h2 id="funcionario-modal-title">
+				{{ funcionarioEditandoId ? 'Editar funcionário' : 'Novo funcionário' }}
+			</h2>
+		</div>
+
+		<button class="icon-button" type="button" (click)="fecharModal()" aria-label="Fechar">
+			<i class="bi bi-x-lg"></i>
+		</button>
+	</div>
+
+	<div class="modal-body">
+		<div class="row g-3">
+			<div class="col-md-8">
+				<label class="form-label" for="nome">Nome</label>
+				<input id="nome" class="form-control" type="text" [(ngModel)]="form.nome" />
+			</div>
+
+			<div class="col-md-4">
+				<label class="form-label" for="cpf">CPF</label>
+				<input id="cpf" class="form-control" type="text" [(ngModel)]="form.cpf" />
+			</div>
+
+			<div class="col-md-4">
+				<label class="form-label" for="setor">Setor</label>
+				<select id="setor" class="form-select" [(ngModel)]="form.setor">
+					@for (setor of setores; track setor) {
+					<option [value]="setor">{{ setor }}</option>
+					}
+				</select>
+			</div>
+
+			<div class="col-md-4">
+				<label class="form-label" for="cargo">Cargo</label>
+				<select id="cargo" class="form-select" [(ngModel)]="form.cargo">
+					@for (cargo of cargos; track cargo) {
+					<option [value]="cargo">{{ cargo }}</option>
+					}
+				</select>
+			</div>
+
+			<div class="col-md-4">
+				<label class="form-label" for="perfil">Perfil de acesso</label>
+				<select id="perfil" class="form-select" [(ngModel)]="form.perfil">
+					@for (perfil of perfis; track perfil) {
+					<option [value]="perfil">{{ perfil }}</option>
+					}
+				</select>
+			</div>
+		</div>
+
+		<div class="nr-panel">
+			<strong>NRs necessárias para a função</strong>
+
+			<div class="nr-search">
+				<input id="nr-busca" class="form-control" type="text" placeholder="Digite para buscar uma NR"
+					[(ngModel)]="nrBusca" />
+
+				@if (nrOptionsFiltradas.length > 0) {
+				<div class="nr-suggestions">
+					@for (nr of nrOptionsFiltradas; track nr) {
+					<button class="nr-suggestion" type="button" (click)="selecionarNr(nr)">
+						{{ nr }}
+					</button>
+					}
+				</div>
+				}
+			</div>
+
+			<div class="nr-list selected">
+				@for (nr of form.nrs; track nr) {
+				<button class="nr-chip" type="button" (click)="removerNr(nr)" [attr.aria-label]="'Remover ' + nr">
+					<span>{{ nr }}</span>
+					<i class="bi bi-x-lg"></i>
+				</button>
+				}
+				@empty {
+				<small>Nenhuma NR selecionada.</small>
+				}
+			</div>
+		</div>
+	</div>
+
+	<div class="modal-footer">
+		<button class="btn btn-soft" type="button" (click)="fecharModal()">
+			Cancelar
+		</button>
+
+		<button class="btn btn-brand" type="button" (click)="salvarFuncionario()">
+			<i class="bi bi-check-lg"></i>
+			Salvar funcionário
+		</button>
+	</div>
+</section>
+}
+
+@if (modalStatusAberto && funcionarioStatusSelecionado) {
+<div class="modal-backdrop" (click)="fecharModalStatus()"></div>
+
+<section class="status-modal" role="dialog" aria-modal="true" aria-labelledby="status-modal-title">
+	<div class="modal-header">
+		<div>
+			<h2 id="status-modal-title">Alterar situação do funcionário</h2>
+		</div>
+
+		<button class="icon-button" type="button" (click)="fecharModalStatus()" aria-label="Fechar">
+			<i class="bi bi-x-lg"></i>
+		</button>
+	</div>
+
+	<div class="modal-body">
+		<div class="status-person-card">
+			<strong>{{ funcionarioStatusSelecionado.nome }}</strong>
+			<span>{{ funcionarioStatusSelecionado.cpf }}</span>
+		</div>
+
+		<div class="status-option-list">
+			@for (status of statusOptions; track status) {
+			<button class="status-option-button" type="button" [class.is-selected]="statusTemporario === status"
+				(click)="selecionarStatusTemporario(status)">
+				{{ status }}
+			</button>
+			}
+		</div>
+	</div>
+
+	<div class="modal-footer">
+		<button class="btn btn-soft" type="button" (click)="fecharModalStatus()">
+			Cancelar
+		</button>
+
+		<button class="btn btn-brand" type="button" (click)="salvarAlteracaoStatus()">
+			<i class="bi bi-check-lg"></i>
+			Salvar alteração
+		</button>
+	</div>
+</section>
+}

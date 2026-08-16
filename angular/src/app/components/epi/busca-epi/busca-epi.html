@@ -1,0 +1,370 @@
+<section class="epi-view">
+	<div class="page-shell">
+		<div class="header-area">
+			<div>
+				<h1>Cadastro e Busca de EPI</h1>
+				<p>Gerencie cadastros, consulte entregas e acompanhe a situação dos equipamentos.</p>
+			</div>
+		</div>
+
+		<div class="panel cadastro-panel filter-pannel">
+			<section class="epi-filter-panel">
+				<article class="filter-box">
+					<div class="filter-box-title">
+						<h4>EPI - Cadastro e busca</h4>
+					</div>
+
+					<div class="row g-3">
+						<div class="col-lg-3 col-md-6">
+							<label class="form-label" for="epi-nome">EPI</label>
+							<input
+								id="epi-nome"
+								type="text"
+								class="form-control"
+								placeholder="Capacete de segurança"
+								[(ngModel)]="form.nome"
+								(ngModelChange)="aplicarFiltros()"
+							/>
+						</div>
+
+						<div class="col-lg-3 col-md-6">
+							<label class="form-label" for="epi-ca">CA</label>
+							<input
+								id="epi-ca"
+								type="text"
+								class="form-control"
+								placeholder="00000"
+								[(ngModel)]="form.ca"
+								(ngModelChange)="aplicarFiltros()"
+							/>
+						</div>
+
+						<div class="col-lg-3 col-md-6">
+							<label class="form-label" for="epi-lote">Lote</label>
+							<input
+								id="epi-lote"
+								type="text"
+								class="form-control"
+								placeholder="ABC123"
+								[(ngModel)]="form.lote"
+							/>
+						</div>
+
+						<div class="col-lg-3 col-md-6">
+							<label class="form-label" for="epi-validade">Validade</label>
+							<input
+								id="epi-validade"
+								type="text"
+								class="form-control"
+								placeholder="31/12/2026"
+								[(ngModel)]="form.validade"
+								(ngModelChange)="aplicarFiltros()"
+							/>
+						</div>
+
+						<div class="col-lg-3 col-md-6">
+							<label class="form-label" for="epi-quantidade">Quantidade (Apenas cadastro)</label>
+							<input
+								id="epi-quantidade"
+								type="number"
+								min="1"
+								placeholder="1"
+								class="form-control"
+								[(ngModel)]="form.quantidade"
+							/>
+						</div>
+
+						<div class="col-lg-3 col-md-6">
+							<label class="form-label" for="filter-funcionario">Funcionário (Apenas busca)</label>
+							<div class="input-group">
+								<input
+									id="filter-funcionario"
+									type="text"
+									class="form-control"
+									placeholder="Fulano de Tal"
+									[(ngModel)]="form.funcionario"
+									(ngModelChange)="aplicarFiltros()"
+								/>
+								<button class="btn btn-icon-filter" type="button" aria-label="Filtrar funcionário" (click)="aplicarFiltros()">
+									<i class="bi bi-funnel"></i>
+								</button>
+							</div>
+						</div>
+
+						<div class="col-lg-3 col-md-6">
+							<label class="form-label" for="filter-situacao">Situação (Apenas busca)</label>
+							<div class="input-group">
+								<input
+									id="filter-situacao"
+									type="text"
+									class="form-control"
+									placeholder="Próximo do vencimento"
+									[(ngModel)]="form.situacao"
+									(ngModelChange)="aplicarFiltros()"
+								/>
+								<button class="btn btn-icon-filter" type="button" aria-label="Filtrar situação" (click)="aplicarFiltros()">
+									<i class="bi bi-funnel"></i>
+								</button>
+							</div>
+						</div>
+
+						<div class="col-12">
+							<div class="table-actions">
+								<button class="btn btn-soft" type="button" (click)="limpar()">Limpar</button>
+								<button class="btn btn-brand" type="button" [disabled]="!podeSalvar || !podeEditar" (click)="salvarEpi()">
+									<i class="bi bi-check-lg"></i>
+									Salvar EPI
+								</button>
+							</div>
+						</div>
+					</div>
+				</article>
+
+				<article class="list-card">
+					<div class="delivery-list-head">
+						<div>
+							<h4>Resultados:</h4>
+							@if (exportMessage) {
+								<span class="export-message">{{ exportMessage }}</span>
+							}
+						</div>
+
+						<div class="export-actions" aria-label="Exportar relatório de EPIs">
+							<button class="btn btn-sm btn-outline-brand" type="button" (click)="exportarRelatorio('pdf')">PDF</button>
+							<button class="btn btn-sm btn-outline-brand" type="button" (click)="exportarRelatorio('xlsx')">XLSX</button>
+							<button class="btn btn-sm btn-outline-brand" type="button" (click)="exportarRelatorio('xml')">XML</button>
+							<button class="btn btn-sm btn-outline-brand" type="button" (click)="exportarRelatorio('odf')">ODF</button>
+						</div>
+					</div>
+
+					<div class="table-responsive desktop-table">
+						<div class="table-clip">
+							<table class="table table-hover align-middle mb-0 epi-table">
+								<thead>
+									<tr>
+										<th>Funcionário</th>
+										<th>EPI</th>
+										<th>CA</th>
+										<th>Validade</th>
+										<th>Status</th>
+										<th>Ações</th>
+									</tr>
+								</thead>
+
+								<tbody>
+									@for (item of resultados; track item.id) {
+									<tr>
+										<td>{{ item.funcionario }}</td>
+										<td>{{ item.nome }}</td>
+										<td>{{ item.ca }}</td>
+										<td>{{ item.vencimento }}</td>
+										<td>
+											<span class="status-badge" [class]="'status-badge ' + item.statusClass">
+												{{ item.status }}
+											</span>
+										</td>
+										<td>
+											<div class="table-actions">
+												<button class="btn btn-sm btn-outline-brand" type="button" [disabled]="!podeEditar" [title]="!podeEditar ? 'Perfil sem permissão de edição' : ''" (click)="abrirEdicao(item)">
+													Editar
+												</button>
+
+												<button class="btn btn-sm btn-danger-brand" type="button" [disabled]="!podeEditar" [title]="!podeEditar ? 'Perfil sem permissão de exclusão' : ''" (click)="abrirDescarte(item)">
+													Exclusão
+												</button>
+											</div>
+										</td>
+									</tr>
+									}
+									@empty {
+									<tr>
+										<td colspan="6" class="text-center py-4">Nenhum resultado encontrado.</td>
+									</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="mobile-mirror-wrap">
+						<div class="table-mirror-clip">
+							<table class="epi-table-mirror">
+								<tbody>
+									<tr>
+										<th>Funcionário</th>
+										@for (item of resultados; track item.id) {
+										<td>{{ item.funcionario }}</td>
+										}
+									</tr>
+
+									<tr>
+										<th>EPI</th>
+										@for (item of resultados; track item.id) {
+										<td>{{ item.nome }}</td>
+										}
+									</tr>
+
+									<tr>
+										<th>CA</th>
+										@for (item of resultados; track item.id) {
+										<td>{{ item.ca }}</td>
+										}
+									</tr>
+
+									<tr>
+										<th>Validade</th>
+										@for (item of resultados; track item.id) {
+										<td>{{ item.vencimento }}</td>
+										}
+									</tr>
+
+									<tr>
+										<th>Status</th>
+										@for (item of resultados; track item.id) {
+										<td>
+											<span class="status-badge" [class]="'status-badge ' + item.statusClass">
+												{{ item.status }}
+											</span>
+										</td>
+										}
+									</tr>
+
+									<tr>
+										<th>Ações</th>
+										@for (item of resultados; track item.id) {
+										<td>
+											<div class="table-actions table-actions-mirror">
+												<button class="btn btn-sm btn-outline-brand" type="button" [disabled]="!podeEditar" (click)="abrirEdicao(item)">
+													Editar
+												</button>
+
+												<button class="btn btn-sm btn-danger-brand" type="button" [disabled]="!podeEditar" (click)="abrirDescarte(item)">
+													Exclusão
+												</button>
+											</div>
+										</td>
+										}
+									</tr>
+
+									@if (resultados.length === 0) {
+									<tr>
+										<th>Resultado</th>
+										<td>Nenhum resultado encontrado.</td>
+									</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</article>
+			</section>
+		</div>
+	</div>
+</section>
+
+@if (modalEdicaoAberto && itemEditando) {
+	<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="edicao-epi-title" (click)="fecharModais()">
+		<section class="epi-modal" (click)="$event.stopPropagation()">
+			<header class="modal-header">
+				<div>
+					<h3 id="edicao-epi-title">{{ itemEditando.nome }}</h3>
+					<span>CA {{ itemEditando.ca }}</span>
+				</div>
+				<button class="modal-close" type="button" aria-label="Fechar" (click)="fecharModais()">
+					<i class="bi bi-x-lg"></i>
+				</button>
+			</header>
+
+			<section class="epi-detail-box" aria-label="Detalhes do EPI">
+				<p class="eyebrow">Detalhes</p>
+				<h4>Editar EPI</h4>
+				<p>Apenas para uso quando houver erro no registro ou modificação nas informações reais.</p>
+				<div class="epi-detail-grid">
+					<div>
+						<label class="modal-field" for="edit-epi-nome">
+							Nome do EPI
+							<input id="edit-epi-nome" class="form-control" type="text" [(ngModel)]="editForm.nome" />
+						</label>
+					</div>
+					<div>
+						<label class="modal-field" for="edit-epi-ca">
+							CA
+							<input id="edit-epi-ca" class="form-control" type="text" [(ngModel)]="editForm.ca" />
+						</label>
+					</div>
+					<div>
+						<label class="modal-field" for="edit-epi-lote">
+							Lote
+							<input id="edit-epi-lote" class="form-control" type="text" [(ngModel)]="editForm.lote" />
+						</label>
+					</div>
+					<div>
+						<label class="modal-field" for="edit-epi-validade">
+							Validade
+							<input id="edit-epi-validade" class="form-control" type="date" [(ngModel)]="editForm.validade" />
+						</label>
+					</div>
+					<div>
+						<label class="modal-field" for="edit-epi-quantidade">
+							Quantidade
+							<input id="edit-epi-quantidade" class="form-control" type="number" min="1" [(ngModel)]="editForm.quantidade" />
+						</label>
+					</div>
+					<div>
+						<label class="modal-field" for="edit-epi-funcionario">
+							Funcionário
+							<input id="edit-epi-funcionario" class="form-control" type="text" [(ngModel)]="editForm.funcionario" />
+						</label>
+					</div>
+					<div class="epi-detail-grid-full">
+						<label class="checkbox-field" for="edit-epi-substituido">
+							<input id="edit-epi-substituido" type="checkbox" [(ngModel)]="editForm.substituido" />
+							<span>Marcar EPI como substituído</span>
+						</label>
+					</div>
+				</div>
+			</section>
+
+			<label class="modal-field" for="dias-aviso-ca">
+				Avisar quantos dias antes do vencimento?
+				<input id="dias-aviso-ca" class="form-control" type="number" min="0" [(ngModel)]="diasAvisoEdicao" />
+			</label>
+
+			<footer class="modal-actions">
+				<button class="btn btn-soft" type="button" (click)="fecharModais()">Cancelar</button>
+				<button class="btn btn-brand" type="button" (click)="salvarEdicao()">Salvar edição</button>
+			</footer>
+		</section>
+	</div>
+}
+
+@if (modalDescarteAberto && itemSelecionado) {
+	<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="descarte-epi-title" (click)="fecharModais()">
+		<section class="epi-modal" (click)="$event.stopPropagation()">
+			<header class="modal-header">
+				<div>
+					<h3 id="descarte-epi-title">{{ itemSelecionado.nome }}</h3>
+					<span>CA {{ itemSelecionado.ca }} - {{ itemSelecionado.funcionario }}</span>
+				</div>
+				<button class="modal-close" type="button" aria-label="Fechar" (click)="fecharModais()">
+					<i class="bi bi-x-lg"></i>
+				</button>
+			</header>
+
+			<label class="modal-field" for="motivo-descarte">
+				Quantidade
+				<input id="quantidade-descarte" class="form-control" type="number" min="1" [(ngModel)]="quantidadeDescarte" />
+			</label>
+
+			<label class="modal-field" for="motivo-descarte">
+				Motivo da exclusão
+				<textarea id="motivo-descarte" class="form-control" rows="4" [(ngModel)]="motivoDescarte" placeholder="Ex.: Registro errado"></textarea>
+			</label>
+
+			<footer class="modal-actions">
+				<button class="btn btn-soft" type="button" (click)="fecharModais()">Cancelar</button>
+				<button class="btn btn-danger-brand" type="button" (click)="confirmarDescarte()">Confirmar exclusão</button>
+			</footer>
+		</section>
+	</div>
+}

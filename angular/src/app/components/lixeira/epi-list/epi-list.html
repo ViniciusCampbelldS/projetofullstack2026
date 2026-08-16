@@ -1,0 +1,47 @@
+<section class="container mt-4">
+	<article class="mb-4">
+		<h2>Listas de Equipamentos de Proteção Individual</h2>
+
+		<!-- TABELA FIXA/Teste -->
+		<!-- <ul>
+            <li><strong>Capacete de segurança</strong><br>
+                Tipo: Proteção de Cabeça<br>
+                Validade: 12 meses
+            </li>
+            <li><strong>Óculos de Proteção</strong><br>
+                Tipo: Proteção de Olhos<br>
+                Validade: 24 meses</li>
+            <li><strong>Luva de Proteção</strong><br>
+                Tipo: Proteção de Mãos<br>
+                Validade: 6 meses</li>
+        </ul> -->
+
+		<!-- TABELA COM DATABASE -->
+		<table class="table table-striped table-bordered table-hover">
+			<thead class="table-dark">
+				<tr class="table-dark">
+					<th>Nome do EPI</th>
+					<th>CA</th>
+					<!-- Seria uma lista muito grande, não ia ficar bom aqui. -->
+					<!-- <th>Funcionário</th> -->
+					<th>Vencimento</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let epi of epis; trackBy: trackById">
+					<td [routerLink]="['/epi/detalhe']" [queryParams]="{ id: 1 }">{{ epi.nome }}</td>
+					<td [routerLink]="['/epi/detalhe']" [queryParams]="{ id: 1 }">{{ epi.ca }}</td>
+					<!-- o array de funcionários vai estar na página de 'detalhes' do EPI-->
+					<!-- <td [routerLink]="['/epi/detalhe']" [queryParams]="{ id: 1 }">{{ epi.funcionarios }}</td> -->
+					<!-- vencimento se for data, se não, mostra '-' -->
+					<td [routerLink]="['/epi/detalhe']" [queryParams]="{ id: 1 }">{{ epi.vencimento ? (epi.vencimento | date:'dd/MM/yyyy') : '-' }}</td>
+				</tr>
+			</tbody>
+		</table>
+	</article>
+
+	<a routerLink="/epi/cadastrar" class="btn btn-sm btn-primary ms-2 mt-2">
+		Cadastrar</a>
+	<a routerLink="/epi/detalhe" class="btn btn-sm btn-primary ms-2 mt-2">
+		Ver detalhes</a>
+</section>

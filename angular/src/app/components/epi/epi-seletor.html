@@ -1,0 +1,19 @@
+<section class="content-area">
+  <section class="epi-panel">
+	<app-epi-status></app-epi-status>
+    @if (activeSstView === 'busca') {
+      <app-busca-epi>
+	  </app-busca-epi>
+    }
+
+    @if (activeSstView === 'entrega') {
+      <app-entrega-epi>
+      </app-entrega-epi>
+    }
+
+    @if (activeSstView === 'historico') {
+      <app-historico-alt-epi>
+      </app-historico-alt-epi>
+    }
+  </section>
+</section>

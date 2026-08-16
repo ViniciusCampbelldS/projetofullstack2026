@@ -1,0 +1,127 @@
+@use "../../../../styles/shared" as shared;
+
+@include shared.page-shell(".epi-view");
+
+.epi-view {
+  padding: 0;
+}
+
+.panel {
+  padding: var(--mar-panel-padding);
+  border: 1px solid var(--mar-line-soft);
+  border-radius: var(--mar-radius-md);
+  background: var(--mar-surface);
+  box-shadow: var(--mar-shadow-soft);
+}
+
+.panel-header {
+  margin-bottom: 14px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: var(--mar-azul-escuro);
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.panel-header p {
+  margin: 6px 0 0;
+  color: var(--mar-text);
+  font-size: 0.92rem;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  min-width: 920px;
+  border: 1px solid #b8c6d1;
+  border-top: 0;
+  border-radius: 10px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+thead {
+  background: var(--mar-azul-escuro);
+}
+
+th,
+td {
+  padding: 11px 12px;
+  border-right: 1px solid #d7e1e9;
+  border-bottom: 1px solid #d7e1e9;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+th {
+  color: var(--mar-surface);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+td {
+  color: var(--mar-text);
+}
+
+td:last-child,
+th:last-child {
+  border-right: 0;
+}
+
+tbody tr:hover {
+  background: #f8fbfd;
+  box-shadow: inset 4px 0 0 var(--mar-laranja-claro);
+}
+
+tbody tr:nth-child(even) {
+  background: #fbfdfe;
+}
+
+.status {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+tbody td:nth-child(4) {
+  text-align: center;
+}
+
+.status.success {
+  background: #dceee8;
+  color: #008f61;
+}
+
+.status.warning {
+  background: #fff0dc;
+  color: #c86713;
+}
+
+.status.danger {
+  background: #ffe3e9;
+  color: #e3173f;
+}
+
+@media (max-width: 620px) {
+  .epi-view {
+    padding: 0;
+  }
+}

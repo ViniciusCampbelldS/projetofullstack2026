@@ -1,0 +1,199 @@
+<section class="portal-dashboard">
+  <div class="portal-heading">
+    <div>
+      <h2>Meus equipamentos de proteção</h2>
+      <p class="portal-description">
+        Consulte seus EPIs, visualize fichas e informe o estado dos equipamentos quando houver desgaste.
+      </p>
+    </div>
+  </div>
+
+  @if (reportSent) {
+    <div class="alert alert-success portal-alert" role="alert">
+      <i class="bi bi-check-circle-fill"></i>
+      Relatório enviado para análise da equipe de segurança.
+    </div>
+  }
+
+  <div class="portal-grid">
+    <section class="panel epi-panel">
+      <div class="section-header">
+        <div>
+          <h3>Meus EPIs</h3>
+        </div>
+        <span class="item-count">{{ employeeEpis.length }} equipamentos</span>
+      </div>
+
+      <div class="epi-list">
+        @for (epi of employeeEpis; track epi.ca) {
+          <article class="epi-card">
+            <div class="epi-icon" aria-hidden="true">
+              <i class="bi" [class]="'bi ' + iconeEpi(epi)"></i>
+            </div>
+
+            <div class="epi-info">
+              <h4>{{ epi.name }}</h4>
+              <div class="epi-meta">
+                <span><small>CA</small>{{ epi.ca }}</span>
+                <span><small>Data da entrega</small>{{ epi.deliveredAt }}</span>
+              </div>
+            </div>
+
+            <div class="epi-actions">
+              <span class="status-badge" [class]="'status-badge ' + classeEstado(epi)">
+                <span class="status-dot"></span>
+                {{ epi.status }}
+              </span>
+
+              <button class="btn btn-outline-brand report-button" type="button" (click)="abrirModal(epi)">
+                <i class="bi bi-clipboard2-pulse"></i>
+                Relatar estado
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <aside class="panel summary-card">
+      <h3>Situação dos EPIs</h3>
+
+      <div class="summary-number">{{ employeeEpis.length }}</div>
+      <p class="summary-description">Equipamentos vinculados a você</p>
+
+      <div class="summary-list">
+        <div>
+          <span class="summary-icon good"><i class="bi bi-check-lg"></i></span>
+          EPIs atualmente em uso
+        </div>
+        <div>
+          <span class="summary-icon warning"><i class="bi bi-exclamation-lg"></i></span>
+          Relate desgaste ou dano
+        </div>
+        <div>
+          <span class="summary-icon info"><i class="bi bi-file-earmark-text"></i></span>
+          Fichas disponíveis abaixo
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="panel documents-card">
+    <div class="section-header">
+      <div>
+        <h3>Fichas de EPI</h3>
+        <p class="section-description">Abra uma ficha em uma nova guia ou baixe uma cópia.</p>
+      </div>
+    </div>
+
+    <div class="document-list">
+      @for (documento of documents; track documento.id) {
+        <article class="document-row">
+          <div class="document-icon"><i class="bi bi-file-earmark-text"></i></div>
+
+          <div class="document-info">
+            <strong>{{ documento.name }}</strong>
+            <span>Emitida em {{ documento.date }}</span>
+          </div>
+
+          <div class="document-actions">
+            <button
+              type="button"
+              title="Abrir em nova guia"
+              aria-label="Abrir ficha em nova guia"
+              (click)="visualizarFicha(documento)"
+              class="btn btn-outline-brand"
+            >
+              <i class="bi bi-box-arrow-up-right"></i>
+              Abrir
+            </button>
+
+            <button
+              type="button"
+              title="Baixar"
+              aria-label="Baixar ficha"
+              (click)="baixarFicha(documento)"
+              class="btn btn-brand"
+            >
+              <i class="bi bi-download"></i>
+              Baixar
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  @if (selectedEpi) {
+    <div class="modal-backdrop-custom" (click)="fecharModal()"></div>
+
+    <div class="modal-wrapper-custom" role="dialog" aria-modal="true" aria-labelledby="report-title">
+      <section class="panel modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header-custom">
+          <div>
+            <h3 id="report-title">{{ selectedEpi.name }}</h3>
+            <small>CA {{ selectedEpi.ca }}</small>
+          </div>
+
+          <button type="button" class="btn-close-custom" aria-label="Fechar" (click)="fecharModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="form-group-custom">
+          <label for="report-state">Situação identificada</label>
+          <select id="report-state" [(ngModel)]="reportState">
+            <option>Distante do vencimento</option>
+            <option>Desgaste leve</option>
+            <option>Precisa substituição</option>
+            <option>Danificado</option>
+          </select>
+        </div>
+
+        <div class="form-group-custom">
+          <label for="report-comment">Comentário</label>
+          <textarea
+            id="report-comment"
+            rows="4"
+            placeholder="Descreva o estado atual do EPI"
+            [(ngModel)]="reportComment"
+          ></textarea>
+        </div>
+
+        <div class="form-group-custom">
+          <label for="report-images">Anexar imagens</label>
+          <input
+            id="report-images"
+            type="file"
+            multiple
+            accept="image/*"
+            (change)="onReportImages($event)"
+          />
+
+          @if (selectedReportImages.length > 0) {
+            <div class="image-preview-list">
+              @for (img of selectedReportImages; track img; let index = $index) {
+                <figure class="image-preview-item">
+                  <img [src]="img" alt="Prévia da imagem anexada" />
+                  <button
+                    type="button"
+                    class="remove-image"
+                    (click)="removerImagem(index)"
+                    aria-label="Remover imagem"
+                  >
+                    <i class="bi bi-x-circle-fill"></i>
+                  </button>
+                </figure>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline-brand" (click)="fecharModal()">Cancelar</button>
+          <button type="button" class="btn btn-brand" (click)="submitReport()">Enviar relatório</button>
+        </div>
+      </section>
+    </div>
+  }
+</section>

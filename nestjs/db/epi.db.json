@@ -1,0 +1,23 @@
+[
+  {
+    "id": 0,
+    "ca": "18695",
+    "nome": "Capacete em Termoplástico de Bombeiro Visor de 6\" Modelo LTX Amarelo Bullard",
+    "funcionario": "João Pedro da Rocha de Alcântara",
+    "vencimento": "2030-12-31T00:00:00.000Z"
+  },
+  {
+    "id": 1,
+    "ca": "34456",
+    "nome": "Luva Anticorte Cut Oil Volk",
+    "funcionario": "Fernanda Beatriz de Lima Barreto",
+    "vencimento": "2026-11-31T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "ca": "51403",
+    "nome": "Bota de Segurança Gogowear KW2024 100% Couro Marrom Eletricista",
+    "funcionario": "Marcos Paulo Ferreira Pereira Filho",
+    "vencimento": "2026-06-31T00:00:00.000Z"
+  }
+]
