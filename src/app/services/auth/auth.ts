@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { timeout } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type UserRole = 'Técnico de Segurança do Trabalho' | 'Funcionário';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private readonly roleKey = 'userRole';
 
   constructor(private http: HttpClient) {}

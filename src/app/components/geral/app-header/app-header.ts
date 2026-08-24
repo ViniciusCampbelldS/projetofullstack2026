@@ -6,8 +6,8 @@ import {
   RouterLinkActive,
 } from '@angular/router';
 
-import { AuthService } from '../../../service/auth';
-import { NotificacaoService } from '../../../service/notificacao';
+import { AuthService } from '../../../services/auth/auth';
+import { NotificacaoService } from '../../../services/notificacao';
 
 @Component({
   selector: 'app-header',

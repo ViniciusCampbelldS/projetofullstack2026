@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { Epi } from '../epi.models';
-import { NotificacaoService } from '../../../service/notificacao';
+import { NotificacaoService } from '../../../services/notificacao';
+import { environment } from '../../../../environments/environment.development';
 
 @Component({
 	selector: 'app-epi-status',
@@ -35,7 +36,7 @@ export class EpiStatus {
 	providedIn: 'root',
 })
 export class EpiService {
-	private apiUrl = 'http://localhost:3000/epis';
+	private apiUrl = `${environment.apiUrl}/epis`;
 
 	// O construtor injeta o serviço HttpClient para fazer requisições HTTP
 	constructor(private http: HttpClient) { }

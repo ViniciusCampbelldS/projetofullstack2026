@@ -2,9 +2,9 @@ import { EpiService } from '../epi-status/epi-status';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NotificacaoService, EpiMonitorado } from '../../../service/notificacao';
+import { NotificacaoService, EpiMonitorado } from '../../../services/notificacao';
 import type { Epi } from '../epi.models';
-import { AuthService } from '../../../service/auth';
+import { AuthService } from '../../../services/auth/auth';
 
 type StatusClass = 'status-expired' | 'status-warning' | 'status-good';
 

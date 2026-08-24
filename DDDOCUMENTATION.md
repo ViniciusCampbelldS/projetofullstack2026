@@ -74,7 +74,7 @@ O cabeçalho também permite configurar os dias de aviso de vencimento para EPIs
 - `src/app/components/geral/admin-history/admin-history.html`: lista de alterações da administração.
 
 ### Dados de exemplo e modelos
-- `src/app/services/epi-data.ts`: provê dados de exemplo para EPIs, entregas, histórico e relatórios.
+- `src/app/services/epi-service.ts`: provê dados de exemplo para EPIs, entregas, histórico e relatórios.
 - `src/app/models/epi.models.ts`: modelagem de tipos como `EpiRecord`, `EmployeeEpi`, `DeliveryItem`, `HistoryEntry`, entre outros.
 
 <!-- ===== Portal do funcionário ===== -->

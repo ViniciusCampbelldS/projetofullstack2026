@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmployeeEpi } from '../../epi/epi.models';
-import { EpiData } from '../../../services/epi-data';
+import { EpiService } from '../../../services/epi-service';
 
 interface EpiDocument {
   id: number;
@@ -39,8 +39,8 @@ export class MeusEpis {
     },
   ];
 
-  constructor(private readonly epiData: EpiData) {
-    this.employeeEpis = this.epiData.getEmployeeEpis();
+  constructor(private readonly epiService: EpiService) {
+    this.employeeEpis = this.epiService.getEmployeeEpis();
   }
 
   abrirModal(epi: EmployeeEpi): void {

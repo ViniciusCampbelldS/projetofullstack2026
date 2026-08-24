@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { HistoryEntry } from '../epi.models';
-import { EpiData } from '../../../services/epi-data';
+import { EpiService } from '../../../services/epi-service';
 
 @Component({
   selector: 'app-historico-alt-epi',
@@ -13,8 +13,8 @@ import { EpiData } from '../../../services/epi-data';
 export class HistóricoAltEpi {
   history: HistoryEntry[];
 
-  constructor(private readonly epiData: EpiData) {
-    this.history = this.epiData.getHistory().map((item, index) =>
+  constructor(private readonly epiService: EpiService) {
+    this.history = this.epiService.getHistory().map((item, index) =>
       index === 2
         ? {
             ...item,

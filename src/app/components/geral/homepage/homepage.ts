@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { PainelAdministrativo } from './painel-administrativo/painel-administrativo';
 import { PainelOperario } from './painel-operario/painel-operario';
 
-import { NotificacaoService } from '../../../service/notificacao';
-import { AuthService } from '../../../service/auth';
+import { NotificacaoService } from '../../../services/notificacao';
+import { AuthService } from '../../../services/auth/auth';
 
 @Component({
 	selector: 'app-homepage',

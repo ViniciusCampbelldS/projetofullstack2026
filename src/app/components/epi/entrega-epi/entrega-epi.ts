@@ -2,7 +2,7 @@ import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeliveryItem, EpiOption } from '../epi.models';
-import { EpiData } from '../../../services/epi-data';
+import { EpiService } from '../../../services/epi-service';
 import { ConfirmarEntregaModal } from '../../../modals/entrega-epi/confirmar-entrega-modal/confirmar-entrega-modal';
 import { DeliveryItemsReview } from '../../../modals/entrega-epi/delivery-items-review/delivery-items-review';
 
@@ -44,9 +44,9 @@ export class EntregaEpi {
   fichaPreviewUrl = '';
   deliverySaved = false;
 
-  constructor(private readonly epiData: EpiData) {
-    this.availableEpis = this.epiData.getAvailableEpis();
-    this.deliveryItems = this.epiData.getDeliveryDraft().map((item) => ({
+  constructor(private readonly epiService: EpiService) {
+    this.availableEpis = this.epiService.getAvailableEpis();
+    this.deliveryItems = this.epiService.getDeliveryDraft().map((item) => ({
       ...item,
       quantity: 1,
     }));

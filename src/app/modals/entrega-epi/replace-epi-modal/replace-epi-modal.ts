@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { output } from '@angular/core';
-import { EpiData } from '../../../services/epi-data';
+import { EpiService } from '../../../services/epi-service';
 import { PreviousEpi } from '../../../components/epi/epi.models';
 
 @Component({
@@ -14,7 +14,7 @@ export class ReplaceEpiModal {
   closed = output<void>();
   previousEpis: PreviousEpi[];
 
-  constructor(private readonly epiData: EpiData) {
-    this.previousEpis = this.epiData.getPreviousEpis();
+  constructor(private readonly epiService: EpiService) {
+    this.previousEpis = this.epiService.getPreviousEpis();
   }
 }

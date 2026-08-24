@@ -12,8 +12,8 @@ import {
 import {
   NotificacaoService,
   EpiMonitorado,
-} from './service/notificacao';
-import { AuthService } from './service/auth';
+} from './services/notificacao';
+import { AuthService } from './services/auth/auth';
 
 @Component({
   selector: 'app-root',

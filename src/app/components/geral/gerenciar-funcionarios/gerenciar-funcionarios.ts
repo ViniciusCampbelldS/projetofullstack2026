@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../service/auth';
+import { AuthService } from '../../../services/auth/auth';
 
 type FuncionarioStatus = 'Ativo' | 'Afastado' | 'Inativo';
 
