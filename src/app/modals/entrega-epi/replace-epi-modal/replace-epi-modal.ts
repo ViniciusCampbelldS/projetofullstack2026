@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { output } from '@angular/core';
-import { EpiService } from '../../../services/epi-service';
+import { EpiService } from '../../../services/epi.service';
 import { PreviousEpi } from '../../../components/epi/epi.models';
 
 @Component({

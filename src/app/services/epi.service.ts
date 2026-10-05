@@ -1,15 +1,22 @@
-import { Injectable } from '@angular/core';
-import {
-	DeliveryItem,
-	EmployeeEpi,
-	EpiOption,
-	EpiRecord,
-	HistoryEntry,
-	PreviousEpi,
-} from '../components/epi/epi.models';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient} from '@angular/common/http';
+import { Observable} from 'rxjs';
+import { Funcionario } from '../models/funcionario';
+import { Epi, EpiRequest } from '../models/epi';
+import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, HistoryEntry, PreviousEpi,} from '../components/epi/epi.models';
 
 @Injectable({ providedIn: 'root' })
 export class EpiService {
+	//Integração com API Java DB mySQL
+	private readonly http = inject(HttpClient);
+
+	private readonly apiEpis = 'http://localhost:8080/api/epis';
+
+	listar(): Observable<Epi[]>{
+		return this.http.get<Epi[]>(this.apiEpis);
+	}
+
+	//antes da integração com mySQL e Java API
 	getAvailableEpis(): EpiOption[] {
 		return [
 			{ name: 'Capacete de segurança', ca: '101022', validity: '2026-09-12' },

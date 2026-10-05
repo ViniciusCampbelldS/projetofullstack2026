@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { HistoryEntry } from '../epi.models';
-import { EpiService } from '../../../services/epi-service';
+import { EpiService } from '../../../services/epi.service';
 
 @Component({
   selector: 'app-historico-alt-epi',

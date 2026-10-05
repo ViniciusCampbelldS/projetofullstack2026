@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmployeeEpi } from '../../epi/epi.models';
-import { EpiService } from '../../../services/epi-service';
+import { EpiService } from '../../../services/epi.service';
 
 interface EpiDocument {
   id: number;
