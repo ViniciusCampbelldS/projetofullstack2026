@@ -19,8 +19,8 @@ export class FuncionarioService {
     return this.repository.findAll();
   }
 
-  getFuncionarioByCpf(cpf: string) {
-    const funcionario = this.repository.findByCpf(cpf);
+  getFuncionarioById(id: number) {
+    const funcionario = this.repository.findById(id);
     if (!funcionario) {
       throw new NotFoundException('Funcionario nao encontrado');
     }
@@ -31,39 +31,39 @@ export class FuncionarioService {
   create(funcionario: Funcionario) {
     this.validarFuncionario(funcionario);
 
-    if (this.repository.findByCpf(funcionario.cpf)) {
+    if (this.repository.findAll().some((item) => item.cpf === funcionario.cpf)) {
       throw new BadRequestException('CPF ja cadastrado');
     }
 
     return this.repository.create(funcionario);
   }
 
-  delete(cpf: string) {
-    if (!this.repository.delete(cpf)) {
+  delete(id: number) {
+    if (!this.repository.delete(id)) {
       throw new NotFoundException('Funcionario nao encontrado');
     }
 
     return { deleted: true };
   }
 
-  update(cpf: string, funcionario: Funcionario) {
-    this.validarFuncionario({ ...funcionario, cpf });
+  update(id: number, funcionario: Funcionario) {
+    this.validarFuncionario(funcionario);
 
-    if (!this.repository.update(cpf, funcionario)) {
+    if (!this.repository.update(id, funcionario)) {
       throw new NotFoundException('Funcionario nao encontrado');
     }
 
-    return this.getFuncionarioByCpf(cpf);
+    return this.getFuncionarioById(id);
   }
 
-  patch(cpf: string, funcionario: Partial<Funcionario>) {
+  patch(id: number, funcionario: Partial<Funcionario>) {
     this.validarPatch(funcionario);
 
-    if (!this.repository.patch(cpf, funcionario)) {
+    if (!this.repository.patch(id, funcionario)) {
       throw new NotFoundException('Funcionario nao encontrado');
     }
 
-    return this.getFuncionarioByCpf(cpf);
+    return this.getFuncionarioById(id);
   }
 
   private validarFuncionario(funcionario: Funcionario) {

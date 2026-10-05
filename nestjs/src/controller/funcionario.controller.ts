@@ -1,47 +1,53 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
 import { FuncionarioService } from '../service/funcionario.service';
 
 type FuncionarioBody = {
-  cpf: string;
-  nome: string;
-  setor: string;
-  cargo: string;
-  permicoes: string;
-  NRs: string[];
-  status?: string;
+	cpf: string;
+	nome: string;
+	setor: string;
+	cargo: string;
+	permicoes: string;
+	NRs: string[];
+	status?: string;
 };
 
 @Controller('funcionarios')
 export class FuncionarioController {
-  constructor(private readonly funcionarioService: FuncionarioService) {}
+	constructor(private readonly funcionarioService: FuncionarioService) { }
 
-  @Get()
-  getDados() {
-    return this.funcionarioService.getDados();
-  }
+	// List all - GET http://localhost:3000/funcionarios
+	@Get()
+	getDados() {
+		return this.funcionarioService.getDados();
+	}
 
-  @Get(':cpf')
-  getFuncionario(@Param('cpf') cpf: string) {
-    return this.funcionarioService.getFuncionarioByCpf(cpf);
-  }
+	// Find by ID - GET http://localhost:3000/funcionarios/1
+	@Get(':id')
+	getFuncionario(@Param('id', ParseIntPipe) id: number) {
+		return this.funcionarioService.getFuncionarioById(id);
+	}
 
-  @Post()
-  create(@Body() body: FuncionarioBody) {
-    return this.funcionarioService.create(body);
-  }
+	// New entry - POST http://localhost:3000/funcionarios
+	@Post()
+	create(@Body() body: FuncionarioBody) {
+		return this.funcionarioService.create(body);
+	}
 
-  @Delete(':cpf')
-  delete(@Param('cpf') cpf: string) {
-    return this.funcionarioService.delete(cpf);
-  }
+	// Delete by ID - DELETE http://localhost:3000/funcionarios/1
+	@Delete(':id')
+	delete(@Param('id', ParseIntPipe) id: number) {
+		return this.funcionarioService.delete(id);
+	}
 
-  @Put(':cpf')
-  update(@Param('cpf') cpf: string, @Body() body: FuncionarioBody) {
-    return this.funcionarioService.update(cpf, body);
-  }
+	// Update by ID - PUT http://localhost:3000/funcionarios/1
+	@Put(':id')
+	update(@Param('id', ParseIntPipe) id: number, @Body() body: FuncionarioBody) {
+		return this.funcionarioService.update(id, body);
+	}
 
-  @Patch(':cpf')
-  patch(@Param('cpf') cpf: string, @Body() body: Partial<FuncionarioBody>) {
-    return this.funcionarioService.patch(cpf, body);
-  }
+	// Update specific fields by ID - PATCH http://localhost:3000/funcionarios/1
+	@Patch(':id')
+	patch(@Param('id', ParseIntPipe) id: number, @Body() body: Partial<FuncionarioBody>) {
+		return this.funcionarioService.patch(id, body);
+	}
 }

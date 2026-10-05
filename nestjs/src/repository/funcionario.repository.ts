@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 type Funcionario = {
+  id: number;
   cpf: string;
   nome: string;
   setor: string;
@@ -21,14 +22,15 @@ export class FuncionarioRepository {
     return JSON.parse(dados);
   }
 
-  findByCpf(cpf: string) {
+  findById(id: number) {
     const funcionarios = this.findAll();
-    return funcionarios.find((funcionario) => funcionario.cpf === cpf);
+    return funcionarios.find((funcionario) => funcionario.id === id);
   }
 
-  create(funcionario: Funcionario) {
+  create(funcionario: Omit<Funcionario, 'id'>) {
     const funcionarios = this.findAll();
     const novoFuncionario = {
+      id: funcionarios.reduce((maiorId, item) => Math.max(maiorId, item.id), 0) + 1,
       ...funcionario,
       status: funcionario.status ?? 'At',
     };
@@ -38,23 +40,23 @@ export class FuncionarioRepository {
     return novoFuncionario;
   }
 
-  delete(cpf: string) {
+  delete(id: number) {
     const funcionarios = this.findAll();
-    const idx = funcionarios.findIndex((funcionario) => funcionario.cpf === cpf);
+    const idx = funcionarios.findIndex((funcionario) => funcionario.id === id);
     if (idx === -1) return false;
     funcionarios.splice(idx, 1);
     fs.writeFileSync(this.dbPath, JSON.stringify(funcionarios, null, 2), 'utf8');
     return true;
   }
 
-  update(cpf: string, funcionario: Funcionario) {
+  update(id: number, funcionario: Omit<Funcionario, 'id'>) {
     const funcionarios = this.findAll();
-    const idx = funcionarios.findIndex((item) => item.cpf === cpf);
+    const idx = funcionarios.findIndex((item) => item.id === id);
     if (idx === -1) return false;
 
     funcionarios[idx] = {
       ...funcionario,
-      cpf,
+      id,
       status: funcionario.status ?? 'At',
     };
 
@@ -62,15 +64,15 @@ export class FuncionarioRepository {
     return true;
   }
 
-  patch(cpf: string, funcionario: Partial<Funcionario>) {
+  patch(id: number, funcionario: Partial<Omit<Funcionario, 'id'>>) {
     const funcionarios = this.findAll();
-    const idx = funcionarios.findIndex((item) => item.cpf === cpf);
+    const idx = funcionarios.findIndex((item) => item.id === id);
     if (idx === -1) return false;
 
     funcionarios[idx] = {
       ...funcionarios[idx],
       ...funcionario,
-      cpf,
+      id,
     };
 
     fs.writeFileSync(this.dbPath, JSON.stringify(funcionarios, null, 2), 'utf8');

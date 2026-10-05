@@ -4,32 +4,37 @@ import { EpiService } from '../service/epi.service';
 
 @Controller('epis') // rota padrão
 export class EpiController {
-  constructor(private readonly epiService: EpiService) { }
+	constructor(private readonly epiService: EpiService) { }
 
-  @Get()
-  getDados() {
-    return this.epiService.getDados()
-  }
+	// List all - GET http://localhost:3000/epis
+	@Get()
+	getDados() {
+		return this.epiService.getDados()
+	}
 
-  @Get(':id')
-  getEpi(@Param('id') id: string) {
-    return this.epiService.getEpiById(Number(id));
-  }
+	// Find by id - GET http://localhost:3000/epis/1
+	@Get(':id')
+	getEpi(@Param('id') id: string) {
+		return this.epiService.getEpiById(Number(id));
+	}
 
-  @Post() // responde ao POST /epis
-  create(@Body() body: { nome: string; ca: string; funcionario: string; vencimento: string }) {
-    return this.epiService.create(body);
-  }
+	// New entry - POST http://localhost:3000/epis
+	@Post()
+	create(@Body() body: { nome: string; ca: string; funcionario: string; vencimento: string }) {
+		return this.epiService.create(body);
+	}
 
-  @Delete(':id')
-  delete(@Param('id') id: string) { return this.epiService.delete(Number(id)); }
-  //Mudamos o método  (DELETE). A rota epis é padrão, e o id 3 indica o registro apagado
+	// Delete by id - DELETE http://localhost:3000/epis/1
+	@Delete(':id')
+	delete(@Param('id') id: string) { return this.epiService.delete(Number(id)); }
 
-  @Put(':id') // → PUT (id) localhost:3000/epis/
-  update(@Param('id') id: string, @Body() body: any) { return this.epiService.update(Number(id), body); }
+	// Update by id - PUT http://localhost:3000/epis/1
+	@Put(':id')
+	update(@Param('id') id: string, @Body() body: any) { return this.epiService.update(Number(id), body); }
 
-  @Patch(':id') // → PATCH (id) localhost:3000/epis/
-  patch(@Param('id') id: string, @Body() body: any) { return this.epiService.patch(Number(id), body); }
+	// Update specific fields by id - PATCH http://localhost:3000/epis/1
+	@Patch(':id')
+	patch(@Param('id') id: string, @Body() body: any) { return this.epiService.patch(Number(id), body); }
 }
 
 // ,
