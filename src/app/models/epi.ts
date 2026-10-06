@@ -1,3 +1,5 @@
+import { Funcionario } from '../models/funcionario';
+
 export interface Epi{
     id: number;
     nome: string;

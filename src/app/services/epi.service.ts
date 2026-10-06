@@ -7,15 +7,37 @@ import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, HistoryEntry, Previous
 
 @Injectable({ providedIn: 'root' })
 export class EpiService {
-	//Integração com API Java DB mySQL
+	// Integração com API Java DB mySQL
+	// OBSSERVABLE and PROMISSE
+	// No outro nos dissemos que iremos enviar um tipo de dado, aqui nós temos que informar o tipo de dado que vamos receber, no caso Epi[] onde cada Epi contém id, validade, quantidade, nome, descrição e funcionarios.
+	//O EpiRequest é o tipo de dado que vamos enviar para a API, que contém nome, validade, quantidade, descrição e funcionarios.
 	private readonly http = inject(HttpClient);
 
 	private readonly apiEpis = 'http://localhost:8080/api/epis';
 
+	// GET all
 	listar(): Observable<Epi[]>{
+		//endereço da requisição enviado para a API, que retorna uma lista de Epi para o front
 		return this.http.get<Epi[]>(this.apiEpis);
 	}
 
+	// POST
+	cadastrar(epi: EpiRequest): Observable<Epi> {
+		return this.http.post<Epi>(this.apiEpis, epi);
+	} 
+	
+	// PUT by id 
+	atualizar(id: number, epi: EpiRequest): Observable<Epi> {
+		//${this.apiEpis}/ é o endereço da requisição enviado para a APIdeve ser atualizado, assim como ${id}
+		return this.http.put<Epi>(`${this.apiEpis}/${id}`, epi);
+		//depois da vírgula, passamos o conteúdo novo (id), no corpo da requisição
+	}
+	
+	// DELETE
+	excluir(id:number): Observable<void> {
+		return this.http.delete<void>(`${this.apiEpis}/${id}`);
+	}
+	
 	//antes da integração com mySQL e Java API
 	getAvailableEpis(): EpiOption[] {
 		return [
