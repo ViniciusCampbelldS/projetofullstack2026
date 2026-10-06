@@ -11,7 +11,7 @@ export interface RegraAviso {
 
 @Injectable()
 export class RegraAvisoRepository {
-    private readonly dbPath = path.resolve(process.cwd(), 'db', 'avisos.db.json');
+    private readonly dbPath = path.resolve(process.cwd(), 'db', 'dias_notificacao.db.json');
 
     findAll(): RegraAviso[] {
         return JSON.parse(fs.readFileSync(this.dbPath, 'utf8')) as RegraAviso[];

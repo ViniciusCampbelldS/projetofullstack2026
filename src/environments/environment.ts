@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://projetofullstack2026.onrender.com' // URL Backend do Render
+  apiUrl: 'http://localhost:8080/api' // Backend local verificado em localhost:8080
 };

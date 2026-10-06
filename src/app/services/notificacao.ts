@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface EpiMonitorado {
   id: number;
@@ -23,7 +24,7 @@ export interface RegraAviso {
 export class NotificacaoService {
 
   private readonly http = inject(HttpClient);
-  private readonly apiAvisos = 'http://localhost:3000/avisos';
+  private readonly apiAvisos = `${environment.apiUrl}/dias-notificacao`;
   private readonly regrasAvisoState = signal<RegraAviso[]>([]);
   readonly regrasAviso = this.regrasAvisoState.asReadonly();
   private readonly diasPadrao = 30;

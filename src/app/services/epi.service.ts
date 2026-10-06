@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { EpiBulkCreateResponse, EpiCreateRequest, EpiResponse, EpiUpdateRequest } from '../models/epi';
 import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, HistoryEntry, PreviousEpi } from '../components/epi/epi.models';
 
 @Injectable({ providedIn: 'root' })
 export class EpiService {
 	private readonly http = inject(HttpClient);
-	private readonly apiEpis = 'http://localhost:3000/epis';
+	private readonly apiEpis = `${environment.apiUrl}/epis`;
 
 	listar(): Observable<EpiResponse[]> {
 		return this.http.get<EpiResponse[]>(this.apiEpis);
