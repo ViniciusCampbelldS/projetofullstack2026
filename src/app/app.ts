@@ -1,6 +1,4 @@
-﻿import {
-  Component,
-} from '@angular/core';
+﻿import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   Router,
@@ -9,10 +7,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 
-import {
-  NotificacaoService,
-  EpiMonitorado,
-} from './services/notificacao';
+import { NotificacaoService, EpiMonitorado, } from './services/notificacao';
 import { AuthService } from './services/auth/auth';
 
 @Component({
@@ -31,7 +26,7 @@ import { AuthService } from './services/auth/auth';
   styleUrl: './app.scss',
 })
 export class App {
-
+	protected readonly title = signal('tst-gestao');
   readonly rotaMeusEpis = ['/funcionario/meus-epis'];
   readonly rotaMeusTreinamentos = ['/funcionario/meus-treinamentos'];
   readonly rotaEpiBusca = ['/epi/busca'];

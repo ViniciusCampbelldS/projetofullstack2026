@@ -1,9 +1,10 @@
-import { EpiService } from '../epi-status/epi-status';
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Funcionario } from '../../../models/funcionario';
+import { Epi, EpiRequest } from '../../../models/epi';
+import { EpiService } from '../../..//services/epi.service';
+import { Component, inject, OnInit } from '@angular/core';
 import { NotificacaoService, EpiMonitorado } from '../../../services/notificacao';
-import type { Epi } from '../epi.models';
 import { AuthService } from '../../../services/auth/auth';
 
 type StatusClass = 'status-expired' | 'status-warning' | 'status-good';
@@ -45,14 +46,16 @@ interface BuscaEpiRow {
 @Component({
 	selector: 'app-busca-epi',
 	standalone: true,
-	imports: [CommonModule, FormsModule],
+	imports: [CommonModule, FormsModule, ReactiveFormsModule],
 	templateUrl: './busca-epi.html',
 	styleUrl: './busca-epi.scss'
 })
 export class BuscaEpi implements OnInit {
 	private readonly diasAvisoPadrao = 30;
 
-	private epiService = inject(EpiService);
+	private readonly epiService = inject(EpiService);
+	private readonly formBuilder =
+		inject(FormBuilder).nonNullable;
 	private notificacaoService = inject(NotificacaoService);
 	private authService = inject(AuthService);
 
@@ -68,6 +71,9 @@ export class BuscaEpi implements OnInit {
 	diasAvisoEdicao = this.diasAvisoPadrao;
 	form: BuscaEpiForm = this.criarFormVazio();
 	editForm: BuscaEpiEditForm = this.criarEditFormVazio();
+	epiEditandoId: number | null = null;
+	mensagem = '';
+	erro = '';
 
 	get podeEditar(): boolean {
 		return this.authService.podeEditarEpi();
@@ -87,8 +93,29 @@ export class BuscaEpi implements OnInit {
 		);
 	}
 
+	formulario = this.formBuilder.group({
+		nome: ['', Validators.required],
+		ca: [''],
+		vencimento: [0, [
+			Validators.required
+		]],
+		funcionarioId: [0]
+	});
+
+	carregarEpis(): void {
+		this.epiService.listar().subscribe({
+			next: epis => {
+				this.epis = epis;
+			},
+			error: () => {
+				this.erro = 'Não foi possível carregar os epis.';
+			}
+		});
+	}
+
 	ngOnInit(): void {
 		this.carregarFallbackLocal();
+		this.carregarEpis();
 
 		this.epiService.listar().subscribe({
 			next: (epis) => {
@@ -102,7 +129,7 @@ export class BuscaEpi implements OnInit {
 				this.recalcularStatuses();
 				this.aplicarFiltros();
 			},
-			error: () => {},
+			error: () => { },
 		});
 	}
 
@@ -139,10 +166,17 @@ export class BuscaEpi implements OnInit {
 			return;
 		}
 
+		if (this.formulario.invalid) {
+			this.formulario.markAllAsTouched();
+			return;
+		}
+
 		if (!this.podeSalvar) {
 			this.exportMessage = 'Preencha todos os campos obrigatórios antes de salvar.';
 			return;
 		}
+
+
 
 		const novoEpiBase: BuscaEpiRow = {
 			id: Math.max(...this.epis.map((item) => item.id), 0) + 1,

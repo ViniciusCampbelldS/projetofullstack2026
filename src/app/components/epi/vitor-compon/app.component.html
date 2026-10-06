@@ -1,0 +1,136 @@
+<main class="container">
+  <h1>Loja Senac</h1>
+
+  @if (mensagem) {
+    <div class="mensagem sucesso">
+      {{ mensagem }}
+    </div>
+  }
+
+  @if (erro) {
+    <div class="mensagem erro">
+      {{ erro }}
+    </div>
+  }
+
+  <section class="card">
+    <h2>
+      {{ epiEditandoId === null
+        ? 'Novo epi'
+        : 'Editar epi' }}
+    </h2>
+
+    <form
+      [formGroup]="formulario"
+      (ngSubmit)="salvar()">
+
+      <label for="nome">Nome</label>
+      <input
+        id="nome"
+        type="text"
+        formControlName="nome">
+
+      <label for="descricao">Descrição</label>
+      <textarea
+        id="descricao"
+        formControlName="descricao">
+      </textarea>
+
+      <label for="preco">Preço</label>
+      <input
+        id="preco"
+        type="number"
+        step="0.01"
+        formControlName="preco">
+
+      <label for="quantidade">Quantidade</label>
+      <input
+        id="quantidade"
+        type="number"
+        formControlName="quantidade">
+
+      <label for="funcionario">Funcionario</label>
+      <select
+        id="funcionario"
+        formControlName="funcionarioId">
+
+        <option [value]="1">
+1        </option>
+<option [value]="2">
+  2       </option>
+  <option [value]="3">
+    3       </option>
+
+
+      </select>
+
+      <div class="acoes">
+        <button type="submit">
+          Salvar
+        </button>
+
+        @if (epiEditandoId !== null) {
+          <button
+            type="button"
+            class="secundario"
+            (click)="cancelarEdicao()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Epis cadastrados</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Quantidade</th>
+          <th>Funcionario</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (epi of epis; track epi.id) {
+          <tr>
+            <td>{{ epi.nome }}</td>
+
+            <td>
+              {{ epi.preco | currency:'BRL' }}
+            </td>
+
+            <td>{{ epi.quantidade }}</td>
+
+            <td>{{ epi.funcionario.nome }}</td>
+
+            <td>
+              <button
+                type="button"
+                (click)="editar(epi)">
+                Editar
+              </button>
+
+              <button
+                type="button"
+                class="excluir"
+                (click)="excluir(epi)">
+                Excluir
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5">
+              Nenhum epi cadastrado.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</main>
