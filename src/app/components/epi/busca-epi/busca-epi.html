@@ -54,9 +54,9 @@
 							<label class="form-label" for="epi-validade">Validade</label>
 							<input
 								id="epi-validade"
-								type="text"
+								type="date"
 								class="form-control"
-								placeholder="31/12/2026"
+								required
 								[(ngModel)]="form.validade"
 								(ngModelChange)="aplicarFiltros()"
 							/>
@@ -68,6 +68,7 @@
 								id="epi-quantidade"
 								type="number"
 								min="1"
+								step="1"
 								placeholder="1"
 								class="form-control"
 								[(ngModel)]="form.quantidade"
@@ -105,6 +106,19 @@
 								<button class="btn btn-icon-filter" type="button" aria-label="Filtrar situação" (click)="aplicarFiltros()">
 									<i class="bi bi-funnel"></i>
 								</button>
+							</div>
+						</div>
+
+						<div class="col-lg-3 col-md-6 d-flex align-items-end">
+							<div class="form-check mb-2">
+								<input
+									id="filter-substituidos"
+									class="form-check-input"
+									type="checkbox"
+									[(ngModel)]="incluirSubstituidos"
+									(ngModelChange)="aplicarFiltros()"
+								/>
+								<label class="form-check-label" for="filter-substituidos">Incluír substituídos?</label>
 							</div>
 						</div>
 
@@ -162,6 +176,9 @@
 											<span class="status-badge" [class]="'status-badge ' + item.statusClass">
 												{{ item.status }}
 											</span>
+											@if (item.substituido) {
+												<span class="substituido-badge">Substituído</span>
+											}
 										</td>
 										<td>
 											<div class="table-actions">
@@ -219,12 +236,15 @@
 									</tr>
 
 									<tr>
-										<th>Status</th>
+										<th>Status / Substituição</th>
 										@for (item of resultados; track item.id) {
 										<td>
 											<span class="status-badge" [class]="'status-badge ' + item.statusClass">
 												{{ item.status }}
 											</span>
+											@if (item.substituido) {
+												<span class="substituido-badge">Substituído</span>
+											}
 										</td>
 										}
 									</tr>
@@ -301,19 +321,7 @@
 					<div>
 						<label class="modal-field" for="edit-epi-validade">
 							Validade
-							<input id="edit-epi-validade" class="form-control" type="date" [(ngModel)]="editForm.validade" />
-						</label>
-					</div>
-					<div>
-						<label class="modal-field" for="edit-epi-quantidade">
-							Quantidade
-							<input id="edit-epi-quantidade" class="form-control" type="number" min="1" [(ngModel)]="editForm.quantidade" />
-						</label>
-					</div>
-					<div>
-						<label class="modal-field" for="edit-epi-funcionario">
-							Funcionário
-							<input id="edit-epi-funcionario" class="form-control" type="text" [(ngModel)]="editForm.funcionario" />
+							<input id="edit-epi-validade" class="form-control" type="date" required [(ngModel)]="editForm.validade" />
 						</label>
 					</div>
 					<div class="epi-detail-grid-full">
@@ -324,11 +332,6 @@
 					</div>
 				</div>
 			</section>
-
-			<label class="modal-field" for="dias-aviso-ca">
-				Avisar quantos dias antes do vencimento?
-				<input id="dias-aviso-ca" class="form-control" type="number" min="0" [(ngModel)]="diasAvisoEdicao" />
-			</label>
 
 			<footer class="modal-actions">
 				<button class="btn btn-soft" type="button" (click)="fecharModais()">Cancelar</button>
@@ -350,11 +353,6 @@
 					<i class="bi bi-x-lg"></i>
 				</button>
 			</header>
-
-			<label class="modal-field" for="motivo-descarte">
-				Quantidade
-				<input id="quantidade-descarte" class="form-control" type="number" min="1" [(ngModel)]="quantidadeDescarte" />
-			</label>
 
 			<label class="modal-field" for="motivo-descarte">
 				Motivo da exclusão

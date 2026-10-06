@@ -157,24 +157,43 @@
           <div class="notification-config">
             <strong class="config-title">Configurar aviso previo</strong>
 
-            <label for="diasAvisoEpi">Avisar sobre vencimento de EPI com:</label>
+            <label for="regraCaOuNr">CA ou NR</label>
 
             <div class="days-input">
-              <input id="diasAvisoEpi" type="number" min="0" [(ngModel)]="diasAvisoEpi" />
+              <input id="regraCaOuNr" type="text" maxlength="15" [(ngModel)]="regraCaOuNr" />
+            </div>
+
+            <label for="isNorma">Tipo do código</label>
+            <select id="isNorma" class="form-select" [(ngModel)]="isNorma">
+              <option [ngValue]="false">CA de EPI</option>
+              <option [ngValue]="true">Número de NR</option>
+            </select>
+
+            <label for="diasAviso">Avisar com antecedencia</label>
+
+            <div class="days-input">
+              <input id="diasAviso" type="number" min="1" step="1" [(ngModel)]="diasAviso" />
               <span>dias de antecedencia</span>
             </div>
 
-            <label for="diasAvisoNr">Avisar sobre vencimento de NR com:</label>
+            @if (erroConfiguracaoAviso) {
+              <span class="notification-config-error" role="alert">{{ erroConfiguracaoAviso }}</span>
+            }
 
-            <div class="days-input">
-              <input id="diasAvisoNr" type="number" min="0" [(ngModel)]="diasAvisoNr" />
-              <span>dias de antecedencia</span>
-            </div>
-
-            <button class="save-notification-config" type="button" (click)="salvarConfiguracao($event)">
+            <button class="save-notification-config" type="button" (click)="salvarRegraAviso($event)">
               <i class="bi bi-check-lg"></i>
-              Salvar configuracao
+              Salvar regra
             </button>
+
+            <div class="notification-rules">
+              @for (regra of regrasAviso; track regra.id) {
+                <div class="notification-rule">
+                  <span><strong>{{ regra.isNorma ? 'NR' : 'CA' }} {{ regra.caOuNr }}</strong> · {{ regra.diasAviso }} dias</span>
+                  <button type="button" (click)="editarRegraAviso(regra)">Editar</button>
+                  <button type="button" (click)="excluirRegraAviso(regra, $event)">Excluir</button>
+                </div>
+              }
+            </div>
           </div>
         } @else {
           @if (totalNotificacoes === 0) {

@@ -351,6 +351,18 @@
 	overflow-wrap: break-word;
 }
 
+.substituido-badge {
+	display: inline-flex;
+	align-items: center;
+	margin-top: 4px;
+	padding: 4px 8px;
+	border-radius: 999px;
+	background: #efe4ff;
+	color: #6c3bb3;
+	font-size: 0.75rem;
+	font-weight: 700;
+}
+
 .status-good {
 	background: #dceee8;
 	color: #008f61;

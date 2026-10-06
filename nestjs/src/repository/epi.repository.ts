@@ -50,6 +50,21 @@ export class EpiRepository {
         return novoEpi;
     }
 
+    createMany(epi: any, quantidade: number) {
+        const epis = this.findAll();
+        const primeiroId = epis.length > 0
+            ? Math.max(...epis.map(e => e.id)) + 1
+            : 1;
+        const novosEpis = Array.from({ length: quantidade }, (_, index) => ({
+            id: primeiroId + index,
+            ...epi,
+        }));
+
+        epis.push(...novosEpis);
+        fs.writeFileSync(this.dbPath, JSON.stringify(epis, null, 2), 'utf8');
+        return novosEpis;
+    }
+
     // Método responsável por deletar um EPI pelo seu ID.
     delete(id: number) {
         const epis = this.findAll();
@@ -66,9 +81,9 @@ export class EpiRepository {
         const epis = this.findAll();
         const idx = epis.findIndex(epi => epi.id === id);
         if (idx === -1) return false;
-        epis[idx] = { id, ...epi };
+        epis[idx] = { ...epis[idx], ...epi, id };
         fs.writeFileSync(this.dbPath, JSON.stringify(epis, null, 2), 'utf8');
-        return true;
+        return epis[idx];
     }
 
     // PATCH → patch()
@@ -79,6 +94,6 @@ export class EpiRepository {
         if (idx === -1) return false;
         epis[idx] = { ...epis[idx], ...epi };
         fs.writeFileSync(this.dbPath, JSON.stringify(epis, null, 2), 'utf8');
-        return true;
+        return epis[idx];
     }
 } 

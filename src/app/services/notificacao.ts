@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
 
 export interface EpiMonitorado {
   id: number;
@@ -8,14 +10,22 @@ export interface EpiMonitorado {
   vencimento: string;
 }
 
+export interface RegraAviso {
+  id: number;
+  caOuNr: string;
+  diasAviso: number;
+  isNorma: boolean; //true é um número de NR, false é um CA de EPI
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class NotificacaoService {
 
-  private readonly chaveDiasEpi = 'diasAvisoEpi';
-  private readonly chaveDiasNr = 'diasAvisoNr';
-
+  private readonly http = inject(HttpClient);
+  private readonly apiAvisos = 'http://localhost:3000/avisos';
+  private readonly regrasAvisoState = signal<RegraAviso[]>([]);
+  readonly regrasAviso = this.regrasAvisoState.asReadonly();
   private readonly diasPadrao = 30;
 
 
@@ -50,66 +60,39 @@ export class NotificacaoService {
   ];
 
 
-  /* =========================================
-     CONFIGURAÇÃO DOS DIAS
-  ========================================= */
-
-  obterDiasAvisoEpi(): number {
-    const valor =
-      localStorage.getItem(this.chaveDiasEpi);
-
-    const dias = Number(valor);
-
-    if (
-      valor === null ||
-      Number.isNaN(dias) ||
-      dias < 0
-    ) {
-      return this.diasPadrao;
-    }
-
-    return dias;
-  }
-
-
-  obterDiasAvisoNr(): number {
-    const valor =
-      localStorage.getItem(this.chaveDiasNr);
-
-    const dias = Number(valor);
-
-    if (
-      valor === null ||
-      Number.isNaN(dias) ||
-      dias < 0
-    ) {
-      return this.diasPadrao;
-    }
-
-    return dias;
-  }
-
-
-  salvarDiasAvisoEpi(dias: number): void {
-    if (dias < 0) {
-      return;
-    }
-
-    localStorage.setItem(
-      this.chaveDiasEpi,
-      String(dias)
+  carregarRegrasAviso(): Observable<RegraAviso[]> {
+    return this.http.get<RegraAviso[]>(this.apiAvisos).pipe(
+      tap((regras) => this.regrasAvisoState.set(regras)),
     );
   }
 
+  obterDiasAviso(caOuNr: string, isNorma: boolean): number {
+    const chave = this.normalizarCaOuNr(caOuNr);
+    return this.regrasAvisoState().find(
+      (regra) => regra.isNorma === isNorma && this.normalizarCaOuNr(regra.caOuNr) === chave,
+    )?.diasAviso ?? this.diasPadrao;
+  }
 
-  salvarDiasAvisoNr(dias: number): void {
-    if (dias < 0) {
-      return;
-    }
+  salvarRegraAviso(regra: Omit<RegraAviso, 'id'>): Observable<RegraAviso> {
+    const chave = this.normalizarCaOuNr(regra.caOuNr);
+    const existente = this.regrasAvisoState().find(
+      (item) => item.isNorma === regra.isNorma && this.normalizarCaOuNr(item.caOuNr) === chave,
+    );
+    const request = existente
+      ? this.http.put<RegraAviso>(`${this.apiAvisos}/${existente.id}`, regra)
+      : this.http.post<RegraAviso>(this.apiAvisos, regra);
 
-    localStorage.setItem(
-      this.chaveDiasNr,
-      String(dias)
+    return request.pipe(
+      tap((salva) => this.regrasAvisoState.update((regras) => [
+        ...regras.filter((item) => item.id !== salva.id && !(item.isNorma === salva.isNorma && this.normalizarCaOuNr(item.caOuNr) === chave)),
+        salva,
+      ])),
+    );
+  }
+
+  excluirRegraAviso(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiAvisos}/${id}`).pipe(
+      tap(() => this.regrasAvisoState.update((regras) => regras.filter((item) => item.id !== id))),
     );
   }
 
@@ -169,7 +152,9 @@ export class NotificacaoService {
   ========================================= */
 
   deveAvisarEpi(
-    vencimento: Date | string | null
+    vencimento: Date | string | null,
+    caOuNr: string,
+    isNorma = false,
   ): boolean {
 
     const diasRestantes =
@@ -186,7 +171,7 @@ export class NotificacaoService {
     return (
       diasRestantes >= 0 &&
       diasRestantes <=
-        this.obterDiasAvisoEpi()
+        this.obterDiasAviso(caOuNr, isNorma)
     );
   }
 
@@ -196,7 +181,8 @@ export class NotificacaoService {
   ========================================= */
 
   deveAvisarNr(
-    vencimento: Date | string | null
+    vencimento: Date | string | null,
+    caOuNr: string,
   ): boolean {
 
     const diasRestantes =
@@ -213,7 +199,7 @@ export class NotificacaoService {
     return (
       diasRestantes >= 0 &&
       diasRestantes <=
-        this.obterDiasAvisoNr()
+        this.obterDiasAviso(caOuNr, true)
     );
   }
 
@@ -252,7 +238,9 @@ export class NotificacaoService {
             epi.vencimento
           ) ||
           this.deveAvisarEpi(
-            epi.vencimento
+            epi.vencimento,
+            epi.ca,
+            false,
           )
         );
 
@@ -283,14 +271,14 @@ export class NotificacaoService {
   get episProximos(): EpiMonitorado[] {
     return this.todosEpis.filter(
       (epi) =>
-        !this.estaVencido(epi.vencimento) && this.deveAvisarEpi(epi.vencimento)
+        !this.estaVencido(epi.vencimento) && this.deveAvisarEpi(epi.vencimento, epi.ca)
     );
   }
 
   get episEmDia(): EpiMonitorado[] {
     return this.todosEpis.filter(
       (epi) =>
-        !this.estaVencido(epi.vencimento) && !this.deveAvisarEpi(epi.vencimento)
+        !this.estaVencido(epi.vencimento) && !this.deveAvisarEpi(epi.vencimento, epi.ca)
     );
   }
 
@@ -379,5 +367,9 @@ export class NotificacaoService {
     return this
       .obterEpisComNotificacao()
       .length;
+  }
+
+  private normalizarCaOuNr(caOuNr: string): string {
+    return caOuNr.trim().toLocaleUpperCase('pt-BR');
   }
 }

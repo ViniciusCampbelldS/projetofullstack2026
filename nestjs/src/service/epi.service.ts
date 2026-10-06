@@ -14,7 +14,7 @@ export class EpiService {
 
   getEpiById(id: number) { return this.repository.findById(id); }
   
-  create(epi:any){ return this.repository.create(epi); }
+  createMany(epi: any, quantidade: number) { return this.repository.createMany(epi, quantidade); }
 
   delete(id: number) { return this.repository.delete(id); }
 

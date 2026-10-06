@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Funcionario } from '../../../models/funcionario';
-import { Epi, EpiRequest } from '../../../models/epi';
+import { FormsModule } from '@angular/forms';
+import { EpiCreateRequest, EpiResponse, EpiUpdateRequest } from '../../../models/epi';
 import { EpiService } from '../../..//services/epi.service';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
 import { NotificacaoService, EpiMonitorado } from '../../../services/notificacao';
 import { AuthService } from '../../../services/auth/auth';
 
@@ -24,8 +23,6 @@ interface BuscaEpiEditForm {
 	ca: string;
 	lote: string;
 	validade: string;
-	quantidade: number;
-	funcionario: string;
 	substituido: boolean;
 }
 
@@ -36,9 +33,7 @@ interface BuscaEpiRow {
 	ca: string;
 	vencimento: string;
 	lote?: string;
-	quantidade?: number;
 	substituido?: boolean;
-	diasAvisoEpi: number;
 	status: string;
 	statusClass: StatusClass;
 }
@@ -46,16 +41,12 @@ interface BuscaEpiRow {
 @Component({
 	selector: 'app-busca-epi',
 	standalone: true,
-	imports: [CommonModule, FormsModule, ReactiveFormsModule],
+	imports: [CommonModule, FormsModule],
 	templateUrl: './busca-epi.html',
 	styleUrl: './busca-epi.scss'
 })
 export class BuscaEpi implements OnInit {
-	private readonly diasAvisoPadrao = 30;
-
 	private readonly epiService = inject(EpiService);
-	private readonly formBuilder =
-		inject(FormBuilder).nonNullable;
 	private notificacaoService = inject(NotificacaoService);
 	private authService = inject(AuthService);
 
@@ -67,13 +58,17 @@ export class BuscaEpi implements OnInit {
 	itemSelecionado: BuscaEpiRow | null = null;
 	itemEditando: BuscaEpiRow | null = null;
 	motivoDescarte = '';
-	quantidadeDescarte = 1;
-	diasAvisoEdicao = this.diasAvisoPadrao;
+	incluirSubstituidos = false;
 	form: BuscaEpiForm = this.criarFormVazio();
 	editForm: BuscaEpiEditForm = this.criarEditFormVazio();
 	epiEditandoId: number | null = null;
 	mensagem = '';
 	erro = '';
+	private readonly observarRegrasAviso = effect(() => {
+		this.notificacaoService.regrasAviso();
+		this.recalcularStatuses();
+		this.aplicarFiltros();
+	});
 
 	get podeEditar(): boolean {
 		return this.authService.podeEditarEpi();
@@ -89,23 +84,17 @@ export class BuscaEpi implements OnInit {
 			this.form.ca.trim() &&
 			this.form.lote.trim() &&
 			this.form.validade &&
+			Number.isInteger(this.form.quantidade) &&
 			this.form.quantidade > 0
 		);
 	}
 
-	formulario = this.formBuilder.group({
-		nome: ['', Validators.required],
-		ca: [''],
-		vencimento: [0, [
-			Validators.required
-		]],
-		funcionarioId: [0]
-	});
-
 	carregarEpis(): void {
 		this.epiService.listar().subscribe({
-			next: epis => {
-				this.epis = epis;
+			next: (epis) => {
+				this.epis = this.extrairListaEpis(epis).map((epi) => this.mapearEpiParaLinha(epi));
+				this.recalcularStatuses();
+				this.aplicarFiltros();
 			},
 			error: () => {
 				this.erro = 'Não foi possível carregar os epis.';
@@ -117,20 +106,6 @@ export class BuscaEpi implements OnInit {
 		this.carregarFallbackLocal();
 		this.carregarEpis();
 
-		this.epiService.listar().subscribe({
-			next: (epis) => {
-				const lista = this.extrairListaEpis(epis);
-
-				if (lista.length === 0) {
-					return;
-				}
-
-				this.epis = lista.map((epi) => this.mapearEpiParaLinha(epi));
-				this.recalcularStatuses();
-				this.aplicarFiltros();
-			},
-			error: () => { },
-		});
 	}
 
 	exportarRelatorio(formato: 'pdf' | 'odf' | 'xlsx' | 'xml'): void {
@@ -166,38 +141,30 @@ export class BuscaEpi implements OnInit {
 			return;
 		}
 
-		if (this.formulario.invalid) {
-			this.formulario.markAllAsTouched();
-			return;
-		}
-
 		if (!this.podeSalvar) {
 			this.exportMessage = 'Preencha todos os campos obrigatórios antes de salvar.';
 			return;
 		}
 
-
-
-		const novoEpiBase: BuscaEpiRow = {
-			id: Math.max(...this.epis.map((item) => item.id), 0) + 1,
-			funcionario: 'Não vinculado',
+		const payload: EpiCreateRequest = {
 			nome: this.form.nome.trim(),
 			ca: this.form.ca.trim(),
 			lote: this.form.lote.trim(),
-			vencimento: this.formatarData(this.toDate(this.form.validade)),
+			validade: this.form.validade,
 			quantidade: this.form.quantidade,
-			substituido: false,
-			diasAvisoEpi: this.diasAvisoPadrao,
-			status: 'Distante do vencimento',
-			statusClass: 'status-good',
 		};
 
-		const novoEpi = this.atualizarStatusDoItem(novoEpiBase);
-
-		this.epis = [novoEpi, ...this.epis];
-		this.limparCadastro();
-		this.aplicarFiltros();
-		this.exportMessage = 'EPI cadastrado localmente no frontend.';
+		this.epiService.cadastrar(payload).subscribe({
+			next: (response) => {
+				this.epis = [...response.epis.map((epi) => this.mapearEpiParaLinha(epi)), ...this.epis];
+				this.limparCadastro();
+				this.aplicarFiltros();
+				this.exportMessage = `${response.quantidade} EPI(s) cadastrado(s) com sucesso.`;
+			},
+			error: () => {
+				this.exportMessage = 'Não foi possível cadastrar o EPI.';
+			},
+		});
 	}
 
 	limpar(): void {
@@ -225,7 +192,8 @@ export class BuscaEpi implements OnInit {
 				(!caFiltro || ca.includes(caFiltro)) &&
 				(!validadeFiltro || vencimento.includes(validadeFiltro)) &&
 				(!funcionarioFiltro || funcionario.includes(funcionarioFiltro)) &&
-				(!situacaoFiltro || situacao.includes(situacaoFiltro))
+				(!situacaoFiltro || situacao.includes(situacaoFiltro)) &&
+				(this.incluirSubstituidos || item.substituido === false)
 			);
 		});
 	}
@@ -237,14 +205,11 @@ export class BuscaEpi implements OnInit {
 		}
 
 		this.itemEditando = item;
-		this.diasAvisoEdicao = item.diasAvisoEpi;
 		this.editForm = {
 			nome: item.nome,
 			ca: item.ca,
 			lote: item.lote ?? '',
 			validade: this.dataParaInput(item.vencimento),
-			quantidade: item.quantidade ?? 1,
-			funcionario: item.funcionario,
 			substituido: item.substituido ?? false,
 		};
 		this.modalEdicaoAberto = true;
@@ -255,42 +220,40 @@ export class BuscaEpi implements OnInit {
 			return;
 		}
 
-		if (this.diasAvisoEdicao < 0) {
-			this.exportMessage = 'Os dias de aviso por CA devem ser maiores ou iguais a zero.';
-			return;
-		}
-
 		if (
 			!this.editForm.nome.trim() ||
 			!this.editForm.ca.trim() ||
 			!this.editForm.lote.trim() ||
-			!this.editForm.validade ||
-			this.editForm.quantidade < 1 ||
-			!this.editForm.funcionario.trim()
+			!this.editForm.validade
 		) {
 			this.exportMessage = 'Preencha todos os campos do EPI antes de salvar a edição.';
 			return;
 		}
 
-		this.epis = this.epis.map((item) =>
-			item.id === this.itemEditando?.id
-				? this.atualizarStatusDoItem({
-					...item,
-					nome: this.editForm.nome.trim(),
-					ca: this.editForm.ca.trim(),
-					lote: this.editForm.lote.trim(),
-					vencimento: this.formatarData(this.toDate(this.editForm.validade)),
-					quantidade: this.editForm.quantidade,
-					funcionario: this.editForm.funcionario.trim(),
-					substituido: this.editForm.substituido,
-					diasAvisoEpi: this.diasAvisoEdicao,
-				})
-				: item
-		);
+		const payload: EpiUpdateRequest = {
+			nome: this.editForm.nome.trim(),
+			ca: this.editForm.ca.trim(),
+			lote: this.editForm.lote.trim(),
+			validade: this.editForm.validade,
+			substituido: this.editForm.substituido,
+		};
 
-		this.aplicarFiltros();
-		this.exportMessage = `EPI ${this.editForm.nome} atualizado localmente no frontend.`;
-		this.fecharModais();
+		this.epiService.atualizar(this.itemEditando.id, payload).subscribe({
+			next: (epi) => {
+				this.epis = this.epis.map((item) =>
+					item.id === epi.id
+						? this.mapearEpiParaLinha(epi)
+						: item
+				);
+				this.recalcularStatuses();
+				this.aplicarFiltros();
+				this.exportMessage = `EPI ${epi.nome} atualizado com sucesso.`;
+				this.fecharModais();
+			},
+			error: () => {
+				this.exportMessage = 'Não foi possível atualizar o EPI.';
+			},
+		});
 	}
 
 	abrirDescarte(item: BuscaEpiRow): void {
@@ -301,7 +264,6 @@ export class BuscaEpi implements OnInit {
 
 		this.itemSelecionado = item;
 		this.motivoDescarte = '';
-		this.quantidadeDescarte = 1;
 		this.modalDescarteAberto = true;
 	}
 
@@ -310,15 +272,18 @@ export class BuscaEpi implements OnInit {
 			return;
 		}
 
-		if (this.quantidadeDescarte < 1) {
-			this.exportMessage = 'Informe uma quantidade válida para exclusão.';
-			return;
-		}
-
-		this.epis = this.epis.filter((item) => item.id !== this.itemSelecionado?.id);
-		this.aplicarFiltros();
-		this.exportMessage = `Exclusão local registrada para ${this.quantidadeDescarte} unidade(s)${this.motivoDescarte ? ': ' + this.motivoDescarte : '.'}`;
-		this.fecharModais();
+		const item = this.itemSelecionado;
+		this.epiService.excluir(item.id).subscribe({
+			next: () => {
+				this.epis = this.epis.filter((epi) => epi.id !== item.id);
+				this.aplicarFiltros();
+				this.exportMessage = `EPI ${item.nome} excluído com sucesso${this.motivoDescarte ? ': ' + this.motivoDescarte : '.'}`;
+				this.fecharModais();
+			},
+			error: () => {
+				this.exportMessage = 'Não foi possível excluir o EPI.';
+			},
+		});
 	}
 
 	fecharModais(): void {
@@ -326,7 +291,6 @@ export class BuscaEpi implements OnInit {
 		this.modalEdicaoAberto = false;
 		this.itemSelecionado = null;
 		this.itemEditando = null;
-		this.quantidadeDescarte = 1;
 		this.editForm = this.criarEditFormVazio();
 	}
 
@@ -335,7 +299,10 @@ export class BuscaEpi implements OnInit {
 	}
 
 	private atualizarStatusDoItem(item: BuscaEpiRow): BuscaEpiRow {
-		const statusInfo = this.calcularStatus(this.toDate(item.vencimento), item.diasAvisoEpi);
+		const statusInfo = this.calcularStatus(
+			this.toDate(item.vencimento),
+			this.notificacaoService.obterDiasAviso(item.ca, false),
+		);
 
 		return {
 			...item,
@@ -389,15 +356,15 @@ export class BuscaEpi implements OnInit {
 			.replace(/'/g, '&apos;');
 	}
 
-	private extrairListaEpis(epis: unknown): Epi[] {
+	private extrairListaEpis(epis: unknown): EpiResponse[] {
 		if (Array.isArray(epis)) {
-			return epis as Epi[];
+			return epis as EpiResponse[];
 		}
 
 		const episComValue = epis as { value?: unknown } | null;
 
 		if (Array.isArray(episComValue?.value)) {
-			return episComValue.value as Epi[];
+			return episComValue.value as EpiResponse[];
 		}
 
 		return [];
@@ -418,21 +385,20 @@ export class BuscaEpi implements OnInit {
 			ca: epi.ca,
 			vencimento: this.formatarData(this.toDate(epi.vencimento)),
 			substituido: false,
-			diasAvisoEpi: this.obterDiasAvisoInicial(epi.ca),
 			status: 'Distante do vencimento',
 			statusClass: 'status-good',
 		});
 	}
 
-	private mapearEpiParaLinha(epi: Epi): BuscaEpiRow {
+	private mapearEpiParaLinha(epi: EpiResponse): BuscaEpiRow {
 		return this.atualizarStatusDoItem({
 			id: epi.id,
-			funcionario: epi.funcionario,
+			funcionario: epi.funcionario ?? 'Não vinculado',
 			nome: epi.nome,
 			ca: epi.ca,
-			vencimento: this.formatarData(this.toDate(epi.vencimento)),
-			substituido: false,
-			diasAvisoEpi: this.obterDiasAvisoInicial(epi.ca),
+			lote: epi.lote ?? '',
+			vencimento: this.formatarData(this.toDate(epi.vencimento ?? epi.validade ?? null)),
+			substituido: epi.substituido ?? false,
 			status: 'Distante do vencimento',
 			statusClass: 'status-good',
 		});
@@ -473,7 +439,7 @@ export class BuscaEpi implements OnInit {
 		return new Intl.DateTimeFormat('pt-BR').format(value);
 	}
 
-	private calcularStatus(vencimento: Date | null, diasAvisoEpi = this.diasAvisoPadrao): { status: string; statusClass: StatusClass } {
+	private calcularStatus(vencimento: Date | null, diasAvisoEpi: number): { status: string; statusClass: StatusClass } {
 		if (!vencimento) {
 			return {
 				status: 'Distante do vencimento',
@@ -528,14 +494,8 @@ export class BuscaEpi implements OnInit {
 			ca: '',
 			lote: '',
 			validade: '',
-			quantidade: 1,
-			funcionario: '',
 			substituido: false,
 		};
-	}
-
-	private obterDiasAvisoInicial(ca: string): number {
-		return ca === '34456' ? 120 : this.diasAvisoPadrao;
 	}
 
 	private dataParaInput(valor: string): string {

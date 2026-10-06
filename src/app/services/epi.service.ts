@@ -1,40 +1,27 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient} from '@angular/common/http';
-import { Observable} from 'rxjs';
-import { Funcionario } from '../models/funcionario';
-import { Epi, EpiRequest } from '../models/epi';
-import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, HistoryEntry, PreviousEpi,} from '../components/epi/epi.models';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { EpiBulkCreateResponse, EpiCreateRequest, EpiResponse, EpiUpdateRequest } from '../models/epi';
+import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, HistoryEntry, PreviousEpi } from '../components/epi/epi.models';
 
 @Injectable({ providedIn: 'root' })
 export class EpiService {
-	// Integração com API Java DB mySQL
-	// OBSSERVABLE and PROMISSE
-	// No outro nos dissemos que iremos enviar um tipo de dado, aqui nós temos que informar o tipo de dado que vamos receber, no caso Epi[] onde cada Epi contém id, validade, quantidade, nome, descrição e funcionarios.
-	//O EpiRequest é o tipo de dado que vamos enviar para a API, que contém nome, validade, quantidade, descrição e funcionarios.
 	private readonly http = inject(HttpClient);
+	private readonly apiEpis = 'http://localhost:3000/epis';
 
-	private readonly apiEpis = 'http://localhost:8080/api/epis';
-
-	// GET all
-	listar(): Observable<Epi[]>{
-		//endereço da requisição enviado para a API, que retorna uma lista de Epi para o front
-		return this.http.get<Epi[]>(this.apiEpis);
+	listar(): Observable<EpiResponse[]> {
+		return this.http.get<EpiResponse[]>(this.apiEpis);
 	}
 
-	// POST
-	cadastrar(epi: EpiRequest): Observable<Epi> {
-		return this.http.post<Epi>(this.apiEpis, epi);
-	} 
-	
-	// PUT by id 
-	atualizar(id: number, epi: EpiRequest): Observable<Epi> {
-		//${this.apiEpis}/ é o endereço da requisição enviado para a APIdeve ser atualizado, assim como ${id}
-		return this.http.put<Epi>(`${this.apiEpis}/${id}`, epi);
-		//depois da vírgula, passamos o conteúdo novo (id), no corpo da requisição
+	cadastrar(epi: EpiCreateRequest): Observable<EpiBulkCreateResponse> {
+		return this.http.post<EpiBulkCreateResponse>(this.apiEpis, epi);
 	}
-	
-	// DELETE
-	excluir(id:number): Observable<void> {
+
+	atualizar(id: number, epi: EpiUpdateRequest): Observable<EpiResponse> {
+		return this.http.put<EpiResponse>(`${this.apiEpis}/${id}`, epi);
+	}
+
+	excluir(id: number): Observable<void> {
 		return this.http.delete<void>(`${this.apiEpis}/${id}`);
 	}
 	

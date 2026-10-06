@@ -7,7 +7,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 
-import { NotificacaoService, EpiMonitorado, } from './services/notificacao';
+import { NotificacaoService, EpiMonitorado, RegraAviso } from './services/notificacao';
 import { AuthService } from './services/auth/auth';
 
 @Component({
@@ -39,19 +39,21 @@ export class App {
   notificacoesAbertas = false;
   configuracaoAberta = false;
 
-  diasAvisoEpi: number;
-  diasAvisoNr: number;
+  regraCaOuNr = '';
+  isNorma = false;
+  diasAviso = 30;
+  erroConfiguracaoAviso = '';
 
   constructor(
     private readonly router: Router,
     private readonly notificacaoService: NotificacaoService,
     private readonly authService: AuthService,
   ) {
-    this.diasAvisoEpi =
-      this.notificacaoService.obterDiasAvisoEpi();
-
-    this.diasAvisoNr =
-      this.notificacaoService.obterDiasAvisoNr();
+    this.notificacaoService.carregarRegrasAviso().subscribe({
+      error: () => {
+        this.erroConfiguracaoAviso = 'Não foi possível carregar as regras de aviso.';
+      },
+    });
 
     this.atualizarPosicaoScroll();
   }
@@ -104,7 +106,8 @@ export class App {
           epi.vencimento
         ) &&
         this.notificacaoService.deveAvisarEpi(
-          epi.vencimento
+          epi.vencimento,
+          epi.ca,
         )
     );
   }
@@ -164,27 +167,48 @@ export class App {
      SALVAR CONFIGURAÇÃO
   ========================================= */
 
-  salvarConfiguracao(event?: MouseEvent): void {
+  get regrasAviso(): RegraAviso[] {
+    return this.notificacaoService.regrasAviso();
+  }
+
+  editarRegraAviso(regra: RegraAviso): void {
+    this.regraCaOuNr = regra.caOuNr;
+    this.isNorma = regra.isNorma;
+    this.diasAviso = regra.diasAviso;
+    this.erroConfiguracaoAviso = '';
+  }
+
+  salvarRegraAviso(event?: MouseEvent): void {
     event?.stopPropagation();
 
-    if (
-      this.diasAvisoEpi < 0 ||
-      this.diasAvisoNr < 0
-    ) {
+    const caOuNr = this.regraCaOuNr.trim();
+    if (!caOuNr || caOuNr.length > 15 || !Number.isInteger(this.diasAviso) || this.diasAviso <= 0) {
+      this.erroConfiguracaoAviso = 'Informe CA/NR com até 15 caracteres e dias de aviso inteiro maior que zero.';
       return;
     }
 
     this.notificacaoService
-      .salvarDiasAvisoEpi(
-        this.diasAvisoEpi
-      );
+      .salvarRegraAviso({ caOuNr, diasAviso: this.diasAviso, isNorma: this.isNorma })
+      .subscribe({
+        next: () => {
+          this.regraCaOuNr = '';
+          this.isNorma = false;
+          this.diasAviso = 30;
+          this.erroConfiguracaoAviso = '';
+        },
+        error: () => {
+          this.erroConfiguracaoAviso = 'Não foi possível salvar a regra de aviso.';
+        },
+      });
+  }
 
-    this.notificacaoService
-      .salvarDiasAvisoNr(
-        this.diasAvisoNr
-      );
-
-    this.configuracaoAberta = false;
+  excluirRegraAviso(regra: RegraAviso, event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.notificacaoService.excluirRegraAviso(regra.id).subscribe({
+      error: () => {
+        this.erroConfiguracaoAviso = 'Não foi possível excluir a regra de aviso.';
+      },
+    });
   }
 
   fecharNotificacoesSeClicarFora(event: MouseEvent): void {
