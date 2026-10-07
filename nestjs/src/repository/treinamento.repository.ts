@@ -1,56 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import { JavaApiClientService } from '../service/java-api-client.service';
 
 @Injectable()
 export class TreinamentoRepository {
-    private readonly dbPath = path.resolve(process.cwd(), 'db', 'treinamento.db.json');
+  constructor(private readonly javaApi: JavaApiClientService) {}
 
-    findAll() {
-        const dados = fs.readFileSync(this.dbPath, 'utf8');
-        return JSON.parse(dados);
-    }
+  async findAll() {
+    return this.javaApi.request({ method: 'GET', path: '/treinamentos' });
+  }
 
-    findById(id: number) {
-        const treinamentos = this.findAll();
-        return treinamentos.find((treinamento) => treinamento.id === id);
-    }
+  async findById(id: number) {
+    return this.javaApi.request({ method: 'GET', path: `/treinamentos/${id}` });
+  }
 
-    create(treinamento: any) {
-        const treinamentos = this.findAll();
-        const novoId = treinamentos.length > 0
-            ? Math.max(...treinamentos.map(e => e.id)) + 1
-            : 1;
-        const novoTreinamento = { id: novoId, ...treinamento };
-        treinamentos.push(novoTreinamento);
-        fs.writeFileSync(this.dbPath, JSON.stringify(treinamentos, null, 2), 'utf8');
-        return novoTreinamento;
-    }
+  async create(treinamento: unknown) {
+    return this.javaApi.request({ method: 'POST', path: '/treinamentos', body: treinamento });
+  }
 
-    delete(id: number) {
-        const treinamentos = this.findAll();
-        const idx = treinamentos.findIndex(treinamento => treinamento.id === id);
-        if (idx === -1) return false;
-        treinamentos.splice(idx, 1);
-        fs.writeFileSync(this.dbPath, JSON.stringify(treinamentos, null, 2), 'utf8');
-        return true;
-    }
+  async delete(id: number) {
+    await this.javaApi.request({ method: 'DELETE', path: `/treinamentos/${id}` });
+    return true;
+  }
 
-    update(id: number, treinamento: any) {
-        const treinamentos = this.findAll();
-        const idx = treinamentos.findIndex(treinamento => treinamento.id === id);
-        if (idx === -1) return false;
-        treinamentos[idx] = { id, ...treinamento };
-        fs.writeFileSync(this.dbPath, JSON.stringify(treinamentos, null, 2), 'utf8');
-        return true;
-    }
+  async update(id: number, treinamento: unknown) {
+    return this.javaApi.request({
+      method: 'PUT',
+      path: `/treinamentos/${id}`,
+      body: treinamento,
+    });
+  }
 
-    patch(id: number, treinamento: any) {
-        const treinamentos = this.findAll();
-        const idx = treinamentos.findIndex(treinamento => treinamento.id === id);
-        if (idx === -1) return false;
-        treinamentos[idx] = { ...treinamentos[idx], ...treinamento };
-        fs.writeFileSync(this.dbPath, JSON.stringify(treinamentos, null, 2), 'utf8');
-        return true;
-    }
-} 
+  async patch(id: number, treinamento: unknown) {
+    return this.javaApi.request({
+      method: 'PUT',
+      path: `/treinamentos/${id}`,
+      body: treinamento,
+    });
+  }
+}

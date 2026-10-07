@@ -1,48 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import { JavaApiClientService } from '../service/java-api-client.service';
 
 export interface RegraAviso {
-    id: number;
-    caOuNr: string;
-    diasAviso: number;
-    isNorma: boolean; //true é um número de NR, false é um CA de EPI
+  id: number;
+  caOuNr: string;
+  diasAviso: number;
+  isNorma: boolean;
 }
 
 @Injectable()
 export class RegraAvisoRepository {
-    private readonly dbPath = path.resolve(process.cwd(), 'db', 'dias_notificacao.db.json');
+  constructor(private readonly javaApi: JavaApiClientService) {}
 
-    findAll(): RegraAviso[] {
-        return JSON.parse(fs.readFileSync(this.dbPath, 'utf8')) as RegraAviso[];
-    }
+  async findAll(): Promise<RegraAviso[]> {
+    return this.javaApi.request({ method: 'GET', path: '/dias-notificacao' });
+  }
 
-    create(regra: Omit<RegraAviso, 'id'>): RegraAviso {
-        const regras = this.findAll();
-        const id = regras.length > 0 ? Math.max(...regras.map((item) => item.id)) + 1 : 1;
-        const novaRegra = { id, ...regra };
-        regras.push(novaRegra);
-        fs.writeFileSync(this.dbPath, JSON.stringify(regras, null, 2), 'utf8');
-        return novaRegra;
-    }
+  async create(regra: Omit<RegraAviso, 'id'>): Promise<RegraAviso> {
+    return this.javaApi.request({
+      method: 'POST',
+      path: '/dias-notificacao',
+      body: regra,
+    });
+  }
 
-    update(id: number, regra: Omit<RegraAviso, 'id'>): RegraAviso | undefined {
-        const regras = this.findAll();
-        const index = regras.findIndex((item) => item.id === id);
-        if (index === -1) return undefined;
+  async update(id: number, regra: Omit<RegraAviso, 'id'>): Promise<RegraAviso> {
+    return this.javaApi.request({
+      method: 'PUT',
+      path: `/dias-notificacao/${id}`,
+      body: regra,
+    });
+  }
 
-        regras[index] = { id, ...regra };
-        fs.writeFileSync(this.dbPath, JSON.stringify(regras, null, 2), 'utf8');
-        return regras[index];
-    }
-
-    delete(id: number): boolean {
-        const regras = this.findAll();
-        const index = regras.findIndex((item) => item.id === id);
-        if (index === -1) return false;
-
-        regras.splice(index, 1);
-        fs.writeFileSync(this.dbPath, JSON.stringify(regras, null, 2), 'utf8');
-        return true;
-    }
+  async delete(id: number): Promise<boolean> {
+    await this.javaApi.request({
+      method: 'DELETE',
+      path: `/dias-notificacao/${id}`,
+    });
+    return true;
+  }
 }

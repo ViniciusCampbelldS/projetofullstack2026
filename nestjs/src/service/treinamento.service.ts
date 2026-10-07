@@ -1,23 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { TreinamentoRepository } from '../repository/treinamento.repository';
 
-//valida, aplica regra de negócio, Decide o que chamar no Repository, Lança erros quando algo está errado
-
 @Injectable()
 export class TreinamentoService {
+  constructor(private readonly repository: TreinamentoRepository) {}
 
-  constructor(private repository: TreinamentoRepository) {}
-
-  getDados() { return this.repository.findAll(); }
-
-  getTreinamentoById(id: number) { return this.repository.findById(id); }
-  
-  create(treinamento:any){ return this.repository.create(treinamento); }
-
-  delete(id: number) { return this.repository.delete(id); }
-
-  update(id: number, treinamento: any) { return this.repository.update(id, treinamento); }
-  
-  patch(id: number, treinamento: any) { return this.repository.patch(id, treinamento); }
-
+  async getDados() { return this.repository.findAll(); }
+  async getTreinamentoById(id: number) { return this.repository.findById(id); }
+  async create(treinamento: unknown) { return this.repository.create(treinamento); }
+  async delete(id: number) { return this.repository.delete(id); }
+  async update(id: number, treinamento: unknown) { return this.repository.update(id, treinamento); }
+  async patch(id: number, treinamento: unknown) { return this.repository.patch(id, treinamento); }
 }

@@ -9,17 +9,17 @@ export class RegraAvisoController {
     constructor(private readonly service: RegraAvisoService) {}
 
     @Get()
-    findAll(): RegraAviso[] {
+    async findAll(): Promise<RegraAviso[]> {
         return this.service.findAll();
     }
 
     @Post()
-    create(@Body() body: unknown): RegraAviso {
+    async create(@Body() body: unknown): Promise<RegraAviso> {
         return this.service.create(this.validarBody(body));
     }
 
     @Put(':id')
-    update(@Param('id') id: string, @Body() body: unknown): RegraAviso {
+    async update(@Param('id') id: string, @Body() body: unknown): Promise<RegraAviso> {
         const parsedId = Number(id);
         if (!Number.isInteger(parsedId) || parsedId < 1) {
             throw new NotFoundException('Regra de aviso não encontrada.');
@@ -28,12 +28,12 @@ export class RegraAvisoController {
     }
 
     @Delete(':id')
-    delete(@Param('id') id: string): void {
+    async delete(@Param('id') id: string): Promise<void> {
         const parsedId = Number(id);
         if (!Number.isInteger(parsedId) || parsedId < 1) {
             throw new NotFoundException('Regra de aviso não encontrada.');
         }
-        this.service.delete(parsedId);
+        await this.service.delete(parsedId);
     }
 
     private validarBody(body: unknown): RegraAvisoBody {

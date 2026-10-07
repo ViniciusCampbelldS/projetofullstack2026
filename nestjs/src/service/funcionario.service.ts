@@ -15,55 +15,32 @@ type Funcionario = {
 export class FuncionarioService {
   constructor(private repository: FuncionarioRepository) {}
 
-  getDados() {
+  async getDados() {
     return this.repository.findAll();
   }
 
-  getFuncionarioById(id: number) {
-    const funcionario = this.repository.findById(id);
-    if (!funcionario) {
-      throw new NotFoundException('Funcionario nao encontrado');
-    }
-
-    return funcionario;
+  async getFuncionarioById(id: number) {
+    return this.repository.findById(id);
   }
 
-  create(funcionario: Funcionario) {
+  async create(funcionario: Funcionario) {
     this.validarFuncionario(funcionario);
-
-    if (this.repository.findAll().some((item) => item.cpf === funcionario.cpf)) {
-      throw new BadRequestException('CPF ja cadastrado');
-    }
-
     return this.repository.create(funcionario);
   }
 
-  delete(id: number) {
-    if (!this.repository.delete(id)) {
-      throw new NotFoundException('Funcionario nao encontrado');
-    }
-
+  async delete(id: number) {
+    await this.repository.delete(id);
     return { deleted: true };
   }
 
-  update(id: number, funcionario: Funcionario) {
+  async update(id: number, funcionario: Funcionario) {
     this.validarFuncionario(funcionario);
-
-    if (!this.repository.update(id, funcionario)) {
-      throw new NotFoundException('Funcionario nao encontrado');
-    }
-
-    return this.getFuncionarioById(id);
+    return this.repository.update(id, funcionario);
   }
 
-  patch(id: number, funcionario: Partial<Funcionario>) {
+  async patch(id: number, funcionario: Partial<Funcionario>) {
     this.validarPatch(funcionario);
-
-    if (!this.repository.patch(id, funcionario)) {
-      throw new NotFoundException('Funcionario nao encontrado');
-    }
-
-    return this.getFuncionarioById(id);
+    return this.repository.patch(id, funcionario);
   }
 
   private validarFuncionario(funcionario: Funcionario) {

@@ -5,21 +5,19 @@ import { RegraAviso, RegraAvisoRepository } from '../repository/regra-aviso.repo
 export class RegraAvisoService {
     constructor(private readonly repository: RegraAvisoRepository) {}
 
-    findAll(): RegraAviso[] {
+    async findAll(): Promise<RegraAviso[]> {
         return this.repository.findAll();
     }
 
-    create(regra: Omit<RegraAviso, 'id'>): RegraAviso {
+    async create(regra: Omit<RegraAviso, 'id'>): Promise<RegraAviso> {
         return this.repository.create(regra);
     }
 
-    update(id: number, regra: Omit<RegraAviso, 'id'>): RegraAviso {
-        const updated = this.repository.update(id, regra);
-        if (!updated) throw new NotFoundException('Regra de aviso não encontrada.');
-        return updated;
+    async update(id: number, regra: Omit<RegraAviso, 'id'>): Promise<RegraAviso> {
+        return this.repository.update(id, regra);
     }
 
-    delete(id: number): void {
-        if (!this.repository.delete(id)) throw new NotFoundException('Regra de aviso não encontrada.');
+    async delete(id: number): Promise<void> {
+        await this.repository.delete(id);
     }
 }
