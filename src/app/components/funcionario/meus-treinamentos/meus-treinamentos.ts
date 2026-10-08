@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { TreinamentoService } from '../../../services/treinamento.service';
 
 interface EmployeeTraining {
   id: number;
@@ -15,29 +16,31 @@ interface EmployeeTraining {
   templateUrl: './meus-treinamentos.html',
   styleUrl: './meus-treinamentos.scss',
 })
-export class MeusTreinamentos {
-  readonly employeeTrainings: EmployeeTraining[] = [
-    {
-      id: 1,
-      nr: 'NR 06',
-      trainingDate: '05/08/2026',
-      dueDate: '05/08/2027',
-    },
-    {
-      id: 2,
-      nr: 'NR 10',
-      trainingDate: '11/04/2026',
-      dueDate: '11/04/2028',
-    },
-    {
-      id: 3,
-      nr: 'NR 35',
-      trainingDate: '20/08/2025',
-      dueDate: '20/08/2026',
-    },
-  ];
+export class MeusTreinamentos implements OnInit {
+  employeeTrainings: EmployeeTraining[] = [];
+  errorMessage = '';
+  loading = true;
+
+  constructor(private readonly treinamentos: TreinamentoService) {}
+
+  ngOnInit(): void {
+    this.treinamentos.listarMeus().subscribe({
+      next: (dados) => {
+        const formato = (data?: string) => data ? new Date(`${data.slice(0, 10)}T12:00:00`).toLocaleDateString('pt-BR') : '—';
+        this.employeeTrainings = dados.map((item) => ({
+          id: item.id,
+          nr: item.tipo,
+          trainingDate: formato(item.aplicacao),
+          dueDate: formato(item.vencimento),
+        }));
+        this.loading = false;
+      },
+      error: () => { this.errorMessage = 'Não foi possível carregar seus treinamentos.'; this.loading = false; },
+    });
+  }
 
   situacaoTreinamento(treinamento: EmployeeTraining): string {
+    if (treinamento.dueDate === '—') return 'Sem data informada';
     const vencimento = this.dataBrParaDate(treinamento.dueDate);
     const hoje = this.inicioDoDia(new Date());
     const limite = new Date(hoje);

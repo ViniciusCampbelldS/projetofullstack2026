@@ -11,28 +11,28 @@
       <div class="stat-icon">📚</div>
       <div>
         <small>Total de treinamentos</small>
-        <strong>24</strong>
+        <strong>{{ treinamentos.length }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">🗓️</div>
       <div>
         <small>Agendados</small>
-        <strong>08</strong>
+        <strong>{{ totalAgendados }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">⚠️</div>
       <div>
         <small>Proximos do vencimento</small>
-        <strong>07</strong>
+        <strong>{{ totalProximos }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">❗</div>
       <div>
         <small>Vencidos</small>
-        <strong>01</strong>
+        <strong>{{ totalVencidos }}</strong>
       </div>
     </div>
   </div>
@@ -48,28 +48,28 @@
     <div class="filters">
       <div class="field">
         <label>ID</label>
-        <input type="text" class="form-control" placeholder="Digite o ID" />
+        <input type="text" class="form-control" placeholder="Digite o ID" [(ngModel)]="filtroId" />
       </div>
 
       <div class="field">
         <label>Treinamento</label>
-        <input type="text" class="form-control" placeholder="Digite o treinamento" />
+        <input type="text" class="form-control" placeholder="Digite o treinamento" [(ngModel)]="filtroTreinamento" />
       </div>
 
       <div class="field">
         <label>Data</label>
-        <input type="date" class="form-control" />
+        <input type="date" class="form-control" [(ngModel)]="filtroData" />
       </div>
 
       <div class="field">
         <label>Vencimento</label>
-        <input type="date" class="form-control" />
+        <input type="date" class="form-control" [(ngModel)]="filtroVencimento" />
       </div>
 
       <div class="field">
         <label>Codigo da NR</label>
-        <select class="form-select">
-          <option>Todos</option>
+        <select class="form-select" [(ngModel)]="filtroNr">
+          <option value="">Todos</option>
           <option>NR-01</option>
           <option>NR-02 (Revogada)</option>
           <option>NR-03</option>
@@ -113,8 +113,8 @@
 
       <div class="field">
         <label>Situacao</label>
-        <select class="form-select">
-          <option>Todos</option>
+        <select class="form-select" [(ngModel)]="filtroSituacao">
+          <option value="">Todos</option>
           <option>Em dia</option>
           <option>Proximo do vencimento</option>
           <option>Vencido</option>
@@ -126,9 +126,9 @@
           <i class="bi bi-people"></i>
           Adicionar funcionarios
         </button>
-        <button class="btn btn-soft" type="button">
-          <i class="bi bi-search"></i>
-          Filtrar
+        <button class="btn btn-soft" type="button" (click)="limparFiltros()">
+          <i class="bi bi-x-circle"></i>
+          Limpar filtros
         </button>
         <button class="btn btn-brand" type="button" (click)="adicionarNovoTreinamento()">Novo treinamento/Abrir Turma</button>
       </div>
@@ -177,6 +177,8 @@
       </div>
     }
 
+    @if (carregando) { <p role="status" class="loading-state">Carregando treinamentos...</p> }
+    @if (!carregando && treinamentosFiltrados.length === 0) { <p class="loading-state">Nenhum treinamento encontrado.</p> }
     <div class="table-container">
       <table>
         <thead>
@@ -193,7 +195,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (treinamento of treinamentos; track treinamento.id) {
+          @for (treinamento of treinamentosFiltrados; track treinamento.id) {
             <tr>
               <td><strong>{{ treinamento.id }}</strong></td>
               <td><strong>{{ treinamento.nr }}</strong></td>
@@ -202,7 +204,7 @@
               <td>{{ treinamento.aplicacao | date: 'dd/MM/yyyy' }}</td>
               <td>{{ treinamento.vencimento | date: 'dd/MM/yyyy' }}</td>
               <td><span class="status-badge" [class]="'status-badge ' + situacaoClass(treinamento.situacao)">{{ treinamento.situacao }}</span></td>
-              <td><button class="btn btn-sm btn-soft" type="button"><i class="bi bi-eye"></i> Visualizar</button></td>
+              <td><span class="text-muted" title="Emissão de documentos ainda não disponível">Pendente</span></td>
               <td>
                 <button class="btn btn-sm btn-outline-brand" type="button" [disabled]="!podeEditarTreinamento" [title]="!podeEditarTreinamento ? 'Perfil sem permissao de edicao' : ''" (click)="abrirEdicaoTreinamento(treinamento)">
                   <i class="bi bi-pencil-fill"></i> Editar

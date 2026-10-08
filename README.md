@@ -1,59 +1,20 @@
-# MarEpiFrontend
+# MAR — Frontend Angular 21
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.19.
+Interface corporativa de gestão de EPI, funcionários, entregas, notificações e treinamentos. O CSS foi refatorado mantendo a identidade MAR azul/laranja, sem alterar a navegação nem substituir as páginas por um dashboard genérico.
 
-## Development server
-
-To start a local development server, run:
+## Rodar
 
 ```bash
-ng serve
+npm ci
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Se você baixou a versão anterior e encontrou **`NG0908: Angular requires Zone.js`**, use esta versão corrigida e execute `npm ci` de novo. `zone.js` agora está incluído nas dependências e carregado antes do bootstrap do Angular em `src/main.ts`.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Acesse `http://localhost:4200` com a API Java rodando em `http://localhost:8080`. O proxy local em `proxy.conf.json` encaminha `/api` ao backend.
 
 ```bash
-ng generate component component-name
+npm run build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Consulte [`../README.md`](../README.md) para configuração completa do banco, credenciais de desenvolvimento e limitações.

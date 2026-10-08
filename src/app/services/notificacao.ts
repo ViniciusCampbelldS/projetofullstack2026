@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface EpiMonitorado {
@@ -34,31 +34,25 @@ export class NotificacaoService {
      EPIs MONITORADOS
   ========================================= */
 
-  readonly episMonitorados: EpiMonitorado[] = [
-    {
-      id: 1,
-      ca: '18695',
-      nome: 'Capacete em Termoplástico de Bombeiro Visor de 6" Modelo LTX Amarelo Bullard',
-      funcionario: 'João Pedro da Rocha de Alcântara',
-      vencimento: '2026-12-20',
-    },
+  private readonly episState = signal<EpiMonitorado[]>([]);
+  get episMonitorados(): EpiMonitorado[] { return this.episState(); }
 
-    {
-      id: 2,
-      ca: '34456',
-      nome: 'Luva Anticorte Cut Oil Volk',
-      funcionario: 'Fernanda Beatriz de Lima Barreto',
-      vencimento: '2026-08-20',
-    },
-
-    {
-      id: 3,
-      ca: '51403',
-      nome: 'Bota de Segurança Gogowear KW2024 100% Couro Marrom Eletricista',
-      funcionario: 'Marcos Paulo Ferreira Pereira Filho',
-      vencimento: '2026-08-01',
-    },
-  ];
+  carregarEpis(): Observable<EpiMonitorado[]> {
+    return this.http.get<Array<{
+      id: number; ca: string; nome: string; vencimento: string;
+      substituido: boolean; funcionarios?: Array<{ nome: string }>;
+    }>>(`${environment.apiUrl}/epis`).pipe(
+      tap((epis) => this.episState.set(epis.filter((epi) => !epi.substituido).map((epi) => ({
+        id: epi.id,
+        ca: epi.ca,
+        nome: epi.nome,
+        funcionario: epi.funcionarios?.map((f) => f.nome).join(', ') || 'Não vinculado',
+        vencimento: epi.vencimento,
+      })))),
+      // Keep observable type compatible with mapped EpiMonitorado[]
+      map(() => this.episState()),
+    );
+  }
 
 
   carregarRegrasAviso(): Observable<RegraAviso[]> {
@@ -113,7 +107,9 @@ export class NotificacaoService {
     const hoje = new Date();
 
     const dataVencimento =
-      new Date(vencimento);
+      typeof vencimento === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(vencimento)
+        ? new Date(`${vencimento}T12:00:00`)
+        : new Date(vencimento);
 
     if (
       Number.isNaN(

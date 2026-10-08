@@ -8,6 +8,10 @@
     </div>
   </div>
 
+  @if (errorMessage) { <div class="alert alert-danger" role="alert">{{ errorMessage }}</div> }
+  @if (loading) { <p>Carregando treinamentos...</p> }
+  @if (!loading && !employeeTrainings.length && !errorMessage) { <p>Não há treinamentos vinculados ao seu CPF.</p> }
+
   <section class="panel trainings-card" id="meus-treinamentos">
     <div class="section-header">
       <div>

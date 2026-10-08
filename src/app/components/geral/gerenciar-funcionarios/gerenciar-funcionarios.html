@@ -1,5 +1,8 @@
 <section class="funcionarios-page">
 	<div class="page-shell">
+    @if (erro) { <p class="alert alert-danger" role="alert">{{ erro }}</p> }
+    @if (carregando) { <p class="loading-state" role="status">Carregando funcionários...</p> }
+
 		<div class="header-area">
 			<div>
 				<h1>Gerenciar Funcionários</h1>

@@ -11,9 +11,13 @@
   @if (reportSent) {
     <div class="alert alert-success portal-alert" role="alert">
       <i class="bi bi-check-circle-fill"></i>
-      Relatório enviado para análise da equipe de segurança.
+      Rascunho salvo neste navegador. O envio à equipe ainda não está disponível.
     </div>
   }
+
+  @if (errorMessage) { <div class="alert alert-danger" role="alert">{{ errorMessage }}</div> }
+  @if (loading) { <p>Carregando equipamentos...</p> }
+  @if (!loading && !employeeEpis.length && !errorMessage) { <p>Nenhum EPI registrado para seu CPF.</p> }
 
   <div class="portal-grid">
     <section class="panel epi-panel">
@@ -81,8 +85,8 @@
   <section class="panel documents-card">
     <div class="section-header">
       <div>
-        <h3>Fichas de EPI</h3>
-        <p class="section-description">Abra uma ficha em uma nova guia ou baixe uma cópia.</p>
+        <h3>Resumo de entregas</h3>
+        <p class="section-description">Gere um resumo de equipamentos associados à sua conta; não substitui ficha assinada.</p>
       </div>
     </div>
 

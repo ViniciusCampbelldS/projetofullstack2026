@@ -11,18 +11,20 @@ import { EpiService } from '../../../services/epi.service';
   styleUrl: './historico-alt-epi.scss',
 })
 export class HistóricoAltEpi {
-  history: HistoryEntry[];
+  history: HistoryEntry[] = [];
+  errorMessage = '';
 
   constructor(private readonly epiService: EpiService) {
-    this.history = this.epiService.getHistory().map((item, index) =>
-      index === 2
-        ? {
-            ...item,
-            alteracao: 'Manual',
-            detalhe: 'EPI marcado como substituído pois não será mais exigido para o funcionário.',
-          }
-        : item
-    );
+    this.epiService.listarEntregas().subscribe({
+      next: (entregas) => this.history = entregas.map((item) => ({
+        data: new Date(`${item.dataEntrega}T12:00:00`).toLocaleDateString('pt-BR'),
+        usuario: 'MAR',
+        registro: `EPI #${item.epiId} — CA ${item.ca}`,
+        alteracao: 'Entrega registrada',
+        detalhe: `${item.epi} vinculado a ${item.funcionario}`,
+      })),
+      error: () => this.errorMessage = 'Não foi possível buscar as entregas.',
+    });
   }
 
   getActionClass(alteracao: string): 'success' | 'warning' | 'danger' {

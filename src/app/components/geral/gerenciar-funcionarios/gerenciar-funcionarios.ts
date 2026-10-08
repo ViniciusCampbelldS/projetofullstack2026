@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FuncionarioService } from '../../../services/funcionario.service';
+import type { Funcionario as FuncionarioApi } from '../../../models/funcionario';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth/auth';
 
@@ -33,7 +35,7 @@ interface FuncionarioForm {
   templateUrl: './gerenciar-funcionarios.html',
   styleUrl: './gerenciar-funcionarios.scss',
 })
-export class GerenciarFuncionarios {
+export class GerenciarFuncionarios implements OnInit {
   readonly setores = ['Operações', 'Manutenção', 'Produção', 'Qualidade', 'Logística', 'Administrativo'];
   readonly cargos = ['Operador', 'Soldador', 'Eletricista', 'Supervisor', 'Auxiliar', 'Técnico de Segurança'];
   readonly perfis: Funcionario['perfil'][] = ['Funcionário', 'Técnico de Segurança do Trabalho'];
@@ -91,69 +93,56 @@ export class GerenciarFuncionarios {
   funcionarioStatusSelecionado: Funcionario | null = null;
   statusTemporario: FuncionarioStatus | null = null;
 
-  funcionarios: Funcionario[] = [
-    {
-      id: 1,
-      matricula: '1001',
-      nome: 'João Pedro da Rocha',
-      cpf: '123.456.789-10',
-      setor: 'Operações',
-      cargo: 'Operador',
-      perfil: 'Funcionário',
-      status: 'Ativo',
-      nrs: [
-        'NR 06 - Equipamentos de Proteção Individual (EPI)',
-        'NR 12 - Segurança no Trabalho em Máquinas e Equipamentos',
-      ],
-    },
-    {
-      id: 2,
-      matricula: '1002',
-      nome: 'Fernanda Lima Barreto',
-      cpf: '987.654.321-00',
-      setor: 'Qualidade',
-      cargo: 'Supervisor',
-      perfil: 'Técnico de Segurança do Trabalho',
-      status: 'Ativo',
-      nrs: [
-        'NR 06 - Equipamentos de Proteção Individual (EPI)',
-        'NR 35 - Trabalho em Altura',
-      ],
-    },
-    {
-      id: 3,
-      matricula: '1003',
-      nome: 'Marcos Paulo Pereira',
-      cpf: '456.789.123-44',
-      setor: 'Manutenção',
-      cargo: 'Eletricista',
-      perfil: 'Funcionário',
-      status: 'Afastado',
-      nrs: [
-        'NR 06 - Equipamentos de Proteção Individual (EPI)',
-        'NR 10 - Segurança em Instalações e Serviços em Eletricidade',
-        'NR 35 - Trabalho em Altura',
-      ],
-    },
-    {
-      id: 4,
-      matricula: '1004',
-      nome: 'Ana Costa',
-      cpf: '321.654.987-22',
-      setor: 'Administrativo',
-      cargo: 'Técnico de Segurança',
-      perfil: 'Técnico de Segurança do Trabalho',
-      status: 'Ativo',
-      nrs: [
-        'NR 06 - Equipamentos de Proteção Individual (EPI)',
-        'NR 33 - Segurança e Saúde no Trabalho em Espaços Confinados',
-      ],
-    },
-  ];
+  funcionarios: Funcionario[] = [];
+  carregando = true;
+  erro = '';
 
   form: FuncionarioForm = this.criarFormVazio();
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService, private readonly api: FuncionarioService) {}
+
+  ngOnInit(): void { this.carregarFuncionarios(); }
+
+  private carregarFuncionarios(): void {
+    this.carregando = true;
+    this.erro = '';
+    this.api.listar().subscribe({
+      next: (registros) => {
+        this.funcionarios = registros.map((f) => this.mapear(f));
+        this.carregando = false;
+      },
+      error: () => {
+        this.carregando = false;
+        this.erro = 'Não foi possível consultar os funcionários. Verifique sua conexão.';
+      },
+    });
+  }
+
+  private mapear(f: FuncionarioApi): Funcionario {
+    return {
+      id: f.id,
+      matricula: this.gerarMatricula(f.id),
+      nome: f.nome,
+      cpf: f.cpf,
+      setor: f.setor,
+      cargo: f.cargo,
+      perfil: f.permicoes === 'tst' || f.permicoes === 'ADM' ? 'Técnico de Segurança do Trabalho' : 'Funcionário',
+      status: f.status === 'Af' ? 'Afastado' : f.status === 'In' ? 'Inativo' : 'Ativo',
+      nrs: (f.nRs ?? []).map((nr) => this.nrOptions.find((op) => op.startsWith(nr.replace('-', ' '))) ?? nr),
+    };
+  }
+
+  private prepararPayload(form: FuncionarioForm, status: FuncionarioStatus): Omit<FuncionarioApi, 'id'> {
+    return {
+      nome: form.nome.trim(),
+      cpf: form.cpf.replace(/\D/g, ''),
+      cargo: form.cargo,
+      setor: form.setor,
+      permicoes: form.perfil === 'Técnico de Segurança do Trabalho' ? 'tst' : 'field',
+      status: status === 'Afastado' ? 'Af' : status === 'Inativo' ? 'In' : 'At',
+      nRs: form.nrs.map((nr) => nr.slice(0, 5).replace('-', ' ')),
+    };
+  }
 
   get podeGerenciarFuncionarios(): boolean {
     return this.authService.podeCadastrarFuncionario();
@@ -254,17 +243,17 @@ export class GerenciarFuncionarios {
   }
 
   salvarAlteracaoStatus(): void {
-    if (!this.funcionarioStatusSelecionado || !this.statusTemporario) {
-      return;
-    }
-
-    this.funcionarios = this.funcionarios.map((funcionario) =>
-      funcionario.id === this.funcionarioStatusSelecionado?.id
-        ? { ...funcionario, status: this.statusTemporario as FuncionarioStatus }
-        : funcionario
-    );
-
-    this.fecharModalStatus();
+    if (!this.funcionarioStatusSelecionado || !this.statusTemporario) return;
+    const f = this.funcionarioStatusSelecionado;
+    const novoStatus = this.statusTemporario;
+    this.erro = '';
+    this.api.alterar(f.id, { status: novoStatus === 'Afastado' ? 'Af' : novoStatus === 'Inativo' ? 'In' : 'At' }).subscribe({
+      next: (atualizado) => {
+        this.funcionarios = this.funcionarios.map((item) => item.id === atualizado.id ? this.mapear(atualizado) : item);
+        this.fecharModalStatus();
+      },
+      error: () => { this.erro = 'Não foi possível atualizar o status no servidor.'; },
+    });
   }
 
   fecharModal(): void {
@@ -273,31 +262,23 @@ export class GerenciarFuncionarios {
   }
 
   salvarFuncionario(): void {
-    if (!this.form.nome.trim() || !this.form.cpf.trim()) {
+    if (!this.form.nome.trim() || this.form.cpf.replace(/\D/g, '').length !== 11) {
+      this.erro = 'Informe nome e CPF com 11 dígitos.';
       return;
     }
-
-    if (this.funcionarioEditandoId) {
-      this.funcionarios = this.funcionarios.map((funcionario) =>
-        funcionario.id === this.funcionarioEditandoId
-          ? { ...funcionario, ...this.form, nrs: [...this.form.nrs] }
-          : funcionario
-      );
-    } else {
-      const proximoId = Math.max(...this.funcionarios.map((funcionario) => funcionario.id), 0) + 1;
-      this.funcionarios = [
-        ...this.funcionarios,
-        {
-          id: proximoId,
-          matricula: this.gerarMatricula(proximoId),
-          status: 'Ativo',
-          ...this.form,
-          nrs: [...this.form.nrs],
-        },
-      ];
-    }
-
-    this.fecharModal();
+    this.erro = '';
+    const existente = this.funcionarios.find((f) => f.id === this.funcionarioEditandoId);
+    const payload = this.prepararPayload(this.form, existente?.status ?? 'Ativo');
+    const request = this.funcionarioEditandoId
+      ? this.api.atualizar(this.funcionarioEditandoId, payload)
+      : this.api.cadastrar(payload);
+    request.subscribe({
+      next: (salvo) => {
+        this.funcionarios = this.funcionarios.filter((f) => f.id !== salvo.id).concat(this.mapear(salvo));
+        this.fecharModal();
+      },
+      error: () => { this.erro = 'Falha ao salvar. Verifique os campos e tente novamente.'; },
+    });
   }
 
   limparFiltros(): void {

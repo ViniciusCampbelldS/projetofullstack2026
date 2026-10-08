@@ -1,12 +1,14 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeliveryItem, EpiOption } from '../epi.models';
 import { EpiService } from '../../../services/epi.service';
+import { FuncionarioService } from '../../../services/funcionario.service';
 import { ConfirmarEntregaModal } from '../../../modals/entrega-epi/confirmar-entrega-modal/confirmar-entrega-modal';
 import { DeliveryItemsReview } from '../../../modals/entrega-epi/delivery-items-review/delivery-items-review';
 
 interface EmployeeOption {
+  id: number;
   nome: string;
   cpf: string;
 }
@@ -18,23 +20,23 @@ interface EmployeeOption {
   templateUrl: './entrega-epi.html',
   styleUrls: ['./entrega-epi.scss'],
 })
-export class EntregaEpi {
-  readonly employeeOptions: EmployeeOption[] = [
-    { nome: 'João Pedro da Rocha', cpf: '123.456.789-10' },
-    { nome: 'Fernanda Beatriz', cpf: '987.654.321-00' },
-    { nome: 'Marcos Paulo Ferreira', cpf: '456.789.123-44' },
-  ];
-
-  availableEpis: EpiOption[];
-  deliveryItems: DeliveryItem[];
+export class EntregaEpi implements OnInit {
+  employeeOptions: EmployeeOption[] = [];
+  availableEpis: EpiOption[] = [];
+  deliveryItems: DeliveryItem[] = [];
+  selectedEmployeeId: number | null = null;
+  replacedEpiId: number | null = null;
+  saving = false;
+  loading = true;
+  errorMessage = '';
   showReplacedEpiSection = false;
   showConfirmarEntregaModal = false;
   showEmployeeSuggestions = false;
   showEpiSuggestions = false;
   showReplacedEpiSuggestions = false;
-  selectedEmployee = this.employeeLabel(this.employeeOptions[0]);
+  selectedEmployee = '';
   deliveryDate = this.getTodayDate();
-  employeeCpf = this.employeeOptions[0].cpf;
+  employeeCpf = '';
   epiSearch = '';
   replacedEpiSearch = '';
   replacedEpiName = '';
@@ -44,13 +46,30 @@ export class EntregaEpi {
   fichaPreviewUrl = '';
   deliverySaved = false;
 
-  constructor(private readonly epiService: EpiService) {
-    this.availableEpis = this.epiService.getAvailableEpis();
-    this.deliveryItems = this.epiService.getDeliveryDraft().map((item) => ({
-      ...item,
-      quantity: 1,
-    }));
-    this.epiSearch = this.deliveryItemLabel(this.deliveryItems[0]);
+  constructor(private readonly epiService: EpiService,
+              private readonly funcionarioService: FuncionarioService) {}
+
+  ngOnInit(): void {
+    this.funcionarioService.listar().subscribe({
+      next: (funcionarios) => this.employeeOptions = funcionarios.map((f) => ({ id: f.id, nome: f.nome, cpf: f.cpf })),
+      error: () => this.errorMessage = 'Não foi possível buscar os funcionários.',
+    });
+    this.epiService.listar().subscribe({
+      next: (epis) => {
+        this.availableEpis = epis.filter((epi) => !epi.substituido && !epi.funcionarios?.length)
+          .map((epi) => ({ id: epi.id, name: epi.nome, ca: epi.ca, validity: (epi.vencimento ?? epi.validade ?? '').slice(0, 10) }));
+        if (this.availableEpis.length) {
+          const first = this.availableEpis[0];
+          this.deliveryItems = [{ id: first.id, epi: first.name, ca: first.ca, quantity: 1, validity: first.validity }];
+          this.epiSearch = this.epiLabel(first);
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Não foi possível buscar os EPIs.';
+        this.loading = false;
+      },
+    });
   }
 
   get filteredEmployeeOptions(): EmployeeOption[] {
@@ -73,8 +92,13 @@ export class EntregaEpi {
   }
 
   addDeliveryItem(): void {
-    const fallback = this.availableEpis[0];
+    const fallback = this.availableEpis.find(epi => !this.deliveryItems.some(item => item.id === epi.id));
+    if (!fallback) {
+      this.errorMessage = 'Não há outro EPI disponível em estoque.';
+      return;
+    }
     this.deliveryItems.push({
+      id: fallback.id,
       epi: fallback.name,
       ca: fallback.ca,
       quantity: 1,
@@ -106,16 +130,19 @@ export class EntregaEpi {
 
     if (exactMatch) {
       this.employeeCpf = exactMatch.cpf;
+      this.selectedEmployeeId = exactMatch.id;
       this.selectedEmployee = this.employeeLabel(exactMatch);
       return;
     }
 
     this.employeeCpf = '';
+    this.selectedEmployeeId = null;
   }
 
   selectEmployee(employee: EmployeeOption): void {
     this.selectedEmployee = this.employeeLabel(employee);
     this.employeeCpf = employee.cpf;
+    this.selectedEmployeeId = employee.id;
     this.showEmployeeSuggestions = false;
   }
 
@@ -155,6 +182,7 @@ export class EntregaEpi {
     this.replacedEpiName = epi.name;
     this.replacedEpiCa = epi.ca;
     this.replacedEpiValidity = epi.validity;
+    this.replacedEpiId = epi.id;
     this.showReplacedEpiSuggestions = false;
   }
 
@@ -179,12 +207,41 @@ export class EntregaEpi {
   }
 
   registerDelivery(): void {
+    this.errorMessage = '';
+    if (!this.selectedEmployeeId || !this.deliveryItems.length || !this.deliveryDate) {
+      this.errorMessage = 'Selecione um funcionário, a data e pelo menos um EPI.';
+      return;
+    }
+    if (new Set(this.deliveryItems.map(item => item.id)).size !== this.deliveryItems.length) {
+      this.errorMessage = 'Selecione EPIs diferentes para a mesma entrega.';
+      return;
+    }
     this.showConfirmarEntregaModal = true;
   }
 
   onConfirmDelivery(): void {
-    this.deliverySaved = true;
-    this.showConfirmarEntregaModal = false;
+    if (!this.selectedEmployeeId || this.saving) return;
+    this.errorMessage = '';
+    this.saving = true;
+    this.epiService.registrarEntrega({
+      funcionarioId: this.selectedEmployeeId,
+      dataEntrega: this.deliveryDate,
+      epiIds: this.deliveryItems.map(item => item.id),
+      ...(this.replacedEpiId ? { epiSubstituidoId: this.replacedEpiId } : {}),
+    }).subscribe({
+      next: () => {
+        this.deliverySaved = true;
+        this.showConfirmarEntregaModal = false;
+        this.saving = false;
+        const usados = new Set(this.deliveryItems.map(item => item.id));
+        this.availableEpis = this.availableEpis.filter(epi => !usados.has(epi.id));
+      },
+      error: (error) => {
+        this.saving = false;
+        this.showConfirmarEntregaModal = false;
+        this.errorMessage = error?.error?.detail ?? 'Não foi possível registrar a entrega. Confira as informações.';
+      },
+    });
   }
 
   @HostListener('document:pointerdown', ['$event'])
@@ -218,6 +275,7 @@ export class EntregaEpi {
 
   private applyEpiSelection(epi: EpiOption): void {
     const item = this.deliveryItems[0];
+    item.id = epi.id;
     item.epi = epi.name;
     item.ca = epi.ca;
     item.validity = epi.validity;

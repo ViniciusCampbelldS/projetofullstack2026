@@ -7,6 +7,8 @@
 			</div>
 		</div>
 
+		<div class="alert alert-danger" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+		<div class="alert alert-info" *ngIf="!loading && !availableEpis.length && !deliverySaved" role="status">Nenhum EPI disponível para entrega. Cadastre EPIs em estoque primeiro.</div>
 		<div class="tool-grid">
 			<section class="panel delivery-panel">
 		<div class="panel-title">
@@ -86,7 +88,7 @@
 
 							@if (showEpiSuggestions && filteredEpiOptions.length > 0) {
 								<div class="employee-suggestions">
-									@for (epi of filteredEpiOptions; track epi.ca) {
+									@for (epi of filteredEpiOptions; track epi.id) {
 										<button
 											class="employee-suggestion"
 											type="button"
@@ -142,7 +144,7 @@
 
 							@if (showReplacedEpiSuggestions && filteredReplacedEpiOptions.length > 0) {
 								<div class="employee-suggestions">
-									@for (epi of filteredReplacedEpiOptions; track epi.ca) {
+									@for (epi of filteredReplacedEpiOptions; track epi.id) {
 										<button
 											class="employee-suggestion"
 											type="button"
@@ -173,6 +175,7 @@
 					<h4>Upload</h4>
 				</div>
 
+				<p class="text-muted small mb-2">O anexo é pré-visualizado localmente, mas ainda não é enviado ao servidor.</p>
 				<div class="upload-actions">
 					<label class="btn btn-outline-brand">
 						<i class="bi bi-upload"></i>
@@ -211,7 +214,7 @@
 		</div>
 
 		<div class="action-row mt-3">
-			<button class="btn btn-brand register-delivery-button" type="button" (click)="registerDelivery()">
+			<button class="btn btn-brand register-delivery-button" type="button" [disabled]="saving || loading || !availableEpis.length" (click)="registerDelivery()">
 				<i class="bi bi-check2-circle"></i>
 				Registrar entrega
 			</button>

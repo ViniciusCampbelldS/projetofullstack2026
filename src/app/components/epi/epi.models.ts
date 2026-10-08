@@ -1,10 +1,12 @@
 export interface EpiOption {
+  id: number;
   name: string;
   ca: string;
   validity: string;
 }
 
 export interface DeliveryItem {
+  id: number;
   epi: string;
   ca: string;
   quantity: number;

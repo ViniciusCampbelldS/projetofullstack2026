@@ -103,7 +103,7 @@ export class BuscaEpi implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.carregarFallbackLocal();
+		// A lista vem apenas do banco; não misturar registros fictícios com reais.
 		this.carregarEpis();
 
 	}
@@ -159,6 +159,7 @@ export class BuscaEpi implements OnInit {
 				this.epis = [...response.epis.map((epi) => this.mapearEpiParaLinha(epi)), ...this.epis];
 				this.limparCadastro();
 				this.aplicarFiltros();
+                this.notificacaoService.carregarEpis().subscribe({ error: () => {} });
 				this.exportMessage = `${response.quantidade} EPI(s) cadastrado(s) com sucesso.`;
 			},
 			error: () => {
@@ -247,6 +248,7 @@ export class BuscaEpi implements OnInit {
 				);
 				this.recalcularStatuses();
 				this.aplicarFiltros();
+				this.notificacaoService.carregarEpis().subscribe({ error: () => {} });
 				this.exportMessage = `EPI ${epi.nome} atualizado com sucesso.`;
 				this.fecharModais();
 			},
@@ -277,6 +279,7 @@ export class BuscaEpi implements OnInit {
 			next: () => {
 				this.epis = this.epis.filter((epi) => epi.id !== item.id);
 				this.aplicarFiltros();
+				this.notificacaoService.carregarEpis().subscribe({ error: () => {} });
 				this.exportMessage = `EPI ${item.nome} excluído com sucesso${this.motivoDescarte ? ': ' + this.motivoDescarte : '.'}`;
 				this.fecharModais();
 			},
@@ -393,7 +396,7 @@ export class BuscaEpi implements OnInit {
 	private mapearEpiParaLinha(epi: EpiResponse): BuscaEpiRow {
 		return this.atualizarStatusDoItem({
 			id: epi.id,
-			funcionario: epi.funcionario ?? 'Não vinculado',
+			funcionario: epi.funcionarios?.map((f) => f.nome).join(', ') || epi.funcionario || 'Não vinculado',
 			nome: epi.nome,
 			ca: epi.ca,
 			lote: epi.lote ?? '',

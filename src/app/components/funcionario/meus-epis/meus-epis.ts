@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmployeeEpi } from '../../epi/epi.models';
@@ -17,8 +17,10 @@ interface EpiDocument {
   templateUrl: './meus-epis.html',
   styleUrl: './meus-epis.scss',
 })
-export class MeusEpis {
-  employeeEpis: EmployeeEpi[];
+export class MeusEpis implements OnInit {
+  employeeEpis: EmployeeEpi[] = [];
+  loading = true;
+  errorMessage = '';
   selectedEpi: EmployeeEpi | null = null;
   reportState = 'Distante do vencimento';
   selectedReportImages: string[] = [];
@@ -26,21 +28,26 @@ export class MeusEpis {
   reportComment = '';
   reportSent = false;
 
-  readonly documents: EpiDocument[] = [
-    {
-      id: 1,
-      name: 'Ficha de entrega de EPI - Agosto 2026',
-      date: '06/08/2026',
-    },
-    {
-      id: 2,
-      name: 'Termo de responsabilidade de EPI',
-      date: '06/08/2026',
-    },
-  ];
+  documents: EpiDocument[] = [];
 
-  constructor(private readonly epiService: EpiService) {
-    this.employeeEpis = this.epiService.getEmployeeEpis();
+  constructor(private readonly epiService: EpiService) {}
+
+  ngOnInit(): void {
+    this.epiService.listarMinhasEntregas().subscribe({
+      next: (entregas) => {
+        this.employeeEpis = entregas.map((entrega) => ({
+          ca: entrega.ca,
+          name: entrega.epi,
+          deliveredAt: new Date(`${entrega.dataEntrega}T12:00:00`).toLocaleDateString('pt-BR'),
+          status: 'Em uso',
+        }));
+        if (entregas.length) {
+          this.documents = [{ id: 1, name: 'Resumo de EPIs entregues (não é ficha assinada)', date: new Date().toLocaleDateString('pt-BR') }];
+        }
+        this.loading = false;
+      },
+      error: () => { this.errorMessage = 'Não foi possível carregar seus EPIs.'; this.loading = false; },
+    });
   }
 
   abrirModal(epi: EmployeeEpi): void {
@@ -193,7 +200,7 @@ export class MeusEpis {
 <body>
   <h1>${this.escapeHtml(documento.name)}</h1>
   <p class="meta">Emitida em ${this.escapeHtml(documento.date)}</p>
-  <p>Documento demonstrativo do Portal do Funcionário.</p>
+  <p>Resumo de registros do sistema. Não substitui ficha assinada ou comprovante oficial.</p>
   <table>
     <thead>
       <tr><th>EPI</th><th>CA</th><th>Entrega</th><th>Situação</th></tr>

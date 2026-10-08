@@ -1,4 +1,4 @@
-﻿import { Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   Router,
@@ -49,6 +49,9 @@ export class App {
     private readonly notificacaoService: NotificacaoService,
     private readonly authService: AuthService,
   ) {
+    if (this.authService.isAuthenticated()) {
+      this.notificacaoService.carregarEpis().subscribe({ error: () => {} });
+    }
     this.notificacaoService.carregarRegrasAviso().subscribe({
       error: () => {
         this.erroConfiguracaoAviso = 'Não foi possível carregar as regras de aviso.';

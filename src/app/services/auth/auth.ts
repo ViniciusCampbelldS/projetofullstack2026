@@ -13,7 +13,7 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(dados: any) {
-    return this.http.post<any>(`${this.apiUrl}/login`, dados).pipe(
+    return this.http.post<{ access_token: string; role: UserRole }>(`${this.apiUrl}/login`, dados).pipe(
       timeout(8000),
     );
   }
@@ -32,7 +32,7 @@ export class AuthService {
 
   obterPerfil(): UserRole {
     const perfil = sessionStorage.getItem(this.roleKey) as UserRole | null;
-    return perfil ?? 'Técnico de Segurança do Trabalho';
+    return perfil ?? 'Funcionário';
   }
 
   podeEditarEpi(): boolean {
@@ -56,6 +56,9 @@ export class AuthService {
   }
 
   logout() {
+    if (this.obterToken()) {
+      this.http.post(`${this.apiUrl}/logout`, {}).subscribe({ error: () => {} });
+    }
     sessionStorage.removeItem('token');
     sessionStorage.removeItem(this.roleKey);
   }

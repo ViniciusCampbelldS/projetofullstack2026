@@ -3,7 +3,7 @@
     <div class="header-area">
       <div>
         <h1>Histórico de Alterações de EPI</h1>
-        <p>Consulte alterações manuais, entregas e substituições registradas nos EPIs.</p>
+        <p>Consulte as entregas efetivamente registradas no sistema.</p>
       </div>
     </div>
 
@@ -11,10 +11,12 @@
       <div class="panel-header">
         <div>
           <h2>Alterações registradas</h2>
-          <p>Últimas movimentações administrativas relacionadas aos EPIs.</p>
+          <p>Entregas persistidas no banco de dados.</p>
         </div>
       </div>
 
+      <p *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+      <p *ngIf="!history.length && !errorMessage">Ainda não há entregas registradas.</p>
       <div class="table-container">
         <table>
           <thead>

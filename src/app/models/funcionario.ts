@@ -4,7 +4,7 @@ export interface Funcionario {
     cpf: string;
     cargo: string;
     setor: string;
-    permissoes: string;
+    permicoes: string;
     nRs: string[];
     status?: string;
 }

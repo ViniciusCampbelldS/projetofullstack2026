@@ -37,6 +37,7 @@ export interface EpiResponse {
 	funcionario?: string;
 	vencimento?: string;
 	funcionarioIds?: number[];
+	funcionarios?: Array<{ id: number; nome: string }>;
 	substituido?: boolean;
 }
 

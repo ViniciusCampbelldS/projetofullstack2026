@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
-import { AuthService, UserRole } from '../../../services/auth/auth';
+import { AuthService } from '../../../services/auth/auth';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NotificacaoService } from '../../../services/notificacao';
 
 interface LoginResponse {
   access_token?: string;
+  role?: 'Técnico de Segurança do Trabalho' | 'Funcionário';
 }
 
 @Component({
@@ -17,8 +19,6 @@ interface LoginResponse {
 export class Login {
   cpf = '';
   senha = '';
-  perfil: UserRole = 'Técnico de Segurança do Trabalho';
-  readonly perfis: UserRole[] = ['Técnico de Segurança do Trabalho', 'Funcionário'];
 
   erroLogin = false;
   mensagemErroLogin = 'CPF ou senha inválidos.';
@@ -28,6 +28,7 @@ export class Login {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly notificacao: NotificacaoService,
   ) {}
 
   entrar(): void {
@@ -58,7 +59,16 @@ export class Login {
           }
 
           this.authService.salvarToken(token);
-          this.authService.salvarPerfil(this.perfil);
+          if (!response.role) {
+            this.erroLogin = true;
+            this.mensagemErroLogin = 'O servidor não informou o perfil de acesso.';
+            this.carregando = false;
+            this.authService.logout();
+            return;
+          }
+          this.authService.salvarPerfil(response.role);
+          this.notificacao.carregarEpis().subscribe({ error: () => {} });
+          this.notificacao.carregarRegrasAviso().subscribe({ error: () => {} });
 
           this.router
             .navigateByUrl('/')

@@ -1,4 +1,4 @@
-﻿<section class="login-page">
+<section class="login-page">
   <div class="login-panel">
     <img src="/logo-mar.svg" alt="MAR Metalúrgica" />
 
@@ -12,7 +12,7 @@
       </h1>
 
       <p>
-        Entre com seu CPF, senha e perfil de acesso.
+        Entre com seu CPF e senha. O perfil é definido pela sua conta.
       </p>
     </div>
 
@@ -31,18 +31,8 @@
       <input id="senha" type="password" [(ngModel)]="senha" name="senha" placeholder="Digite sua senha"
         autocomplete="current-password" required />
 
-      <label for="perfil">
-        Entrar como
-      </label>
-
-      <select id="perfil" [(ngModel)]="perfil" name="perfil" required>
-        @for (item of perfis; track item) {
-          <option [value]="item">{{ item }}</option>
-        }
-      </select>
-
       @if (erroLogin) {
-        <p class="login-error" aria-live="polite">`r`n          {{ mensagemErroLogin }}`r`n        </p>
+        <p class="login-error" aria-live="polite">          {{ mensagemErroLogin }}        </p>
       }
 
       <button class="btn btn-brand" type="submit" [disabled]="carregando">
@@ -64,9 +54,7 @@
             Entre em contato com o setor de TI:
           </p>
 
-          <a href="tel:+552100000000">
-            (21) 0000-0000
-          </a>
+          <span>Solicite suporte ao administrador do sistema.</span>
         </div>
       }
     </form>

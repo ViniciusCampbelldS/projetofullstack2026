@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { Epi } from '../epi.models';
 import { NotificacaoService } from '../../../services/notificacao';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 
 @Component({
 	selector: 'app-epi-status',
