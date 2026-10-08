@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-// EpiRequest é usado para cadastrar um único EPI.
-// EpiCreateRequest fica reservado para cadastro em lote.
-import { EpiRequest, EpiResponse, EpiUpdateRequest } from '../../../models/epi';
+// Importa os modelos utilizados no cadastro individual/em lote e na edição.
+import { EpiCreateRequest, EpiRequest, EpiResponse, EpiUpdateRequest, } from '../../../models/epi';
 import { EpiService } from '../../..//services/epi.service';
 import { Component, OnInit, effect, inject } from '@angular/core';
 import { NotificacaoService, EpiMonitorado } from '../../../services/notificacao';
@@ -142,50 +141,129 @@ export class BuscaEpi implements OnInit {
 		this.exportMessage = `Relatório .${formato} gerado localmente.`;
 	}
 
+	/*
+ * Cadastra um ou mais EPIs usando a API Java.
+ *
+ * O formulário possui um campo de quantidade.
+ * Por isso, utiliza POST /epis/bulk.
+ *
+ * A data do HTML chega em yyyy-MM-dd e é enviada
+ * diretamente no campo vencimento, esperado pelo Java.
+ */
 	salvarEpi(): void {
+
+		// Verifica se o usuário pode cadastrar EPIs.
 		if (!this.podeEditar) {
-			this.exportMessage = `Perfil ${this.perfilAtual} não possui permissão para cadastrar EPIs.`;
+			this.exportMessage =
+				`Perfil ${this.perfilAtual} não possui permissão para cadastrar EPIs.`;
 			return;
 		}
 
+		// Verifica os campos obrigatórios.
 		if (!this.podeSalvar) {
-			this.exportMessage = 'Preencha todos os campos obrigatórios antes de salvar.';
+			this.exportMessage =
+				'Preencha todos os campos obrigatórios antes de salvar.';
 			return;
 		}
 
-		// Monta o payload correspondente ao POST /epis.
-		const payload: EpiRequest = {
+		/*
+		 * Monta os dados de um único EPI.
+		 *
+		 * Atenção:
+		 * "validade" é o nome interno do campo no formulário.
+		 * A API Java espera a propriedade "vencimento".
+		 */
+		const epiBase: EpiRequest = {
+
+			// Nome informado no formulário.
 			nome: this.form.nome.trim(),
+
+			// Certificado de Aprovação.
 			ca: this.form.ca.trim(),
+
+			// Lote informado.
 			lote: this.form.lote.trim(),
-			// O Java espera o campo "vencimento".
+
+			// O input type="date" fornece yyyy-MM-dd.
+			// Não converter para dd/MM/yyyy.
 			vencimento: this.form.validade,
-			// Um EPI novo ainda não está substituído.
+
+			// Um EPI recém-cadastrado não está substituído.
 			substituido: false,
-			// A tela de busca não está vinculando funcionário durante o cadastro.
+
+			// Cadastra inicialmente sem associar funcionários.
 			funcionarioIds: [],
 		};
 
-		// Envia o EPI para o endpoint Java.
-		this.epiService.cadastrar(payload).subscribe({
-			// Executado quando o cadastro for concluído.
-			next: (response) => {
-				// Executado quando o cadastro for concluído.
-				this.epis = [
-					this.mapearEpiParaLinha(response),
-					...this.epis
-				];
-				// Reaplica os filtros.
-				this.aplicarFiltros();
-				// Mostra a confirmação.
-				this.exportMessage = `EPI ${response.nome} cadastrado com sucesso.`;
-			},
+		/*
+		 * Gera a quantidade de registros solicitada.
+		 *
+		 * No modelo atual, cada unidade criada será um registro
+		 * independente na tabela epis.
+		 */
+		const payload: EpiCreateRequest = {
+			epis: Array.from(
+				{ length: this.form.quantidade },
+				() => ({
+					...epiBase,
 
-			// Executado se a API retornar erro.
-			error: () => {
-				this.exportMessage = 'Não foi possível cadastrar o EPI.';
-			},
-		});
+					// Cada registro recebe sua própria lista de IDs.
+					funcionarioIds: [...epiBase.funcionarioIds],
+				})
+			),
+		};
+
+		// Envia os registros para POST /epis/bulk.
+		this.epiService
+			.cadastrarEmLote(payload)
+			.subscribe({
+
+				// Executado após o cadastro ser concluído.
+				next: (response) => {
+
+					// A resposta em lote contém a propriedade "items".
+					// Cada item é um EpiResponse individual.
+					const novosEpis =
+						response.items.map(
+							(epi) => this.mapearEpiParaLinha(epi)
+						);
+
+					// Insere os novos registros no início da lista.
+					this.epis = [
+						...novosEpis,
+						...this.epis,
+					];
+
+					// Recalcula os status de vencimento.
+					this.recalcularStatuses();
+
+					// Atualiza os resultados exibidos.
+					this.aplicarFiltros();
+
+					// Limpa o formulário após o sucesso.
+					this.limparCadastro();
+
+					// Informa quantos registros foram criados.
+					this.exportMessage =
+						`${response.items.length} EPI(s) cadastrado(s) com sucesso.`;
+				},
+
+				// Executado quando o backend rejeita a requisição.
+				error: (erro) => {
+
+					// Exibe os detalhes para facilitar o diagnóstico.
+					console.error(
+						'Erro ao cadastrar EPI:',
+						erro
+					);
+
+					// Usa a mensagem retornada pela API quando disponível.
+					this.exportMessage =
+						erro?.error?.detail ??
+						erro?.error?.message ??
+						'Não foi possível cadastrar o EPI. Verifique os dados e a data de validade.';
+				},
+			});
 	}
 
 	limpar(): void {
@@ -252,17 +330,21 @@ export class BuscaEpi implements OnInit {
 		}
 
 		// Monta o objeto completo exigido pelo PUT /epis/{id}.
+		// Monta todos os campos esperados pelo PUT /epis/{id}.
 		const payload: EpiUpdateRequest = {
+			// Nome atualizado.
 			nome: this.editForm.nome.trim(),
+			// Certificado de Aprovação.
 			ca: this.editForm.ca.trim(),
+			// Lote atualizado.
 			lote: this.editForm.lote.trim(),
-			// O backend Java utiliza "vencimento", não validade.
+			// O backend espera "vencimento", não "validade".
 			vencimento: this.editForm.validade,
-			// Mantém a situação de substituição.
+			// Mantém o estado de substituição.
 			substituido: this.editForm.substituido,
-			// Preserva os funcionários que já estavam vinculados.
+			// Preserva os vínculos existentes com funcionários.
 			funcionarioIds:
-				this.itemEditando.funcionarioIds ?? [],
+				this.itemEditando?.funcionarioIds ?? [],
 		};
 
 		this.epiService.atualizar(this.itemEditando.id, payload).subscribe({
@@ -427,18 +509,22 @@ export class BuscaEpi implements OnInit {
 		// Monta a linha usada pela interface.
 		return this.atualizarStatusDoItem({
 			id: epi.id,
-			// Mostra os funcionários vinculados.
+			// Apresenta os funcionários ou informa que não há vínculo.
 			funcionario:
 				nomesFuncionarios || 'Não vinculado',
 			// Guarda os IDs para futuras atualizações.
 			funcionarioIds:
-				epi.funcionarios?.map(funcionario => funcionario.id) ?? [],
+				epi.funcionarios?.map((funcionario) => funcionario.id) ?? [],
 			nome: epi.nome,
 			ca: epi.ca,
 			lote: epi.lote ?? '',
+			// A API devolve vencimento no formato ISO.
+			// A tabela transforma a data para exibição pt-BR.
 			vencimento:
-				this.formatarData(this.toDate(epi.vencimento)),
-			// Situação de substituição.
+				this.formatarData(
+					this.toDate(epi.vencimento)
+				),
+			// Estado de substituição.
 			substituido: epi.substituido ?? false,
 			// Valor inicial; será recalculado logo abaixo.
 			status:
