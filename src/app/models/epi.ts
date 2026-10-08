@@ -1,6 +1,5 @@
 import { FuncionarioResponse } from './funcionario';
 
-status: FuncionarioStatus;
 export interface Epi {
 	id: number;
 	nome: string;

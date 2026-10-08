@@ -1,17 +1,17 @@
 import {
-  withHttpTransferCache
-} from "./chunk-FQKYAR6S.js";
-import {
   CommonModule,
   PLATFORM_BROWSER_ID
-} from "./chunk-FHX2QWYL.js";
+} from "./chunk-KZMOQYI6.js";
+import {
+  withHttpTransferCache
+} from "./chunk-O3CQLXMP.js";
 import {
   DomAdapter,
   XhrFactory,
   getDOM,
   parseCookieValue,
   setRootDomAdapter
-} from "./chunk-WKB4XAK2.js";
+} from "./chunk-4VRW3CH7.js";
 import {
   APP_ID,
   ApplicationModule,
@@ -72,10 +72,11 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-HEEVLEZ4.js";
+} from "./chunk-7A6LIYEK.js";
 import {
+  __async,
   __spreadValues
-} from "./chunk-GJVV2SYQ.js";
+} from "./chunk-PSTBIIF2.js";
 
 // node_modules/@angular/platform-browser/fesm2022/_dom_renderer-chunk.mjs
 var EventManagerPlugin = class {
@@ -1011,20 +1012,24 @@ var KeyEventsPlugin = class _KeyEventsPlugin extends EventManagerPlugin {
     }]
   }], null);
 })();
-async function bootstrapApplication(rootComponent, options, context) {
-  const config = __spreadValues({
-    rootComponent
-  }, createProvidersConfig(options, context));
-  if (false) {
-    await resolveJitResources();
-  }
-  return internalCreateApplication(config);
+function bootstrapApplication(rootComponent, options, context) {
+  return __async(this, null, function* () {
+    const config = __spreadValues({
+      rootComponent
+    }, createProvidersConfig(options, context));
+    if (false) {
+      yield resolveJitResources();
+    }
+    return internalCreateApplication(config);
+  });
 }
-async function createApplication(options, context) {
-  if (false) {
-    await resolveJitResources();
-  }
-  return internalCreateApplication(createProvidersConfig(options, context));
+function createApplication(options, context) {
+  return __async(this, null, function* () {
+    if (false) {
+      yield resolveJitResources();
+    }
+    return internalCreateApplication(createProvidersConfig(options, context));
+  });
 }
 function createProvidersConfig(options, context) {
   return {
@@ -1750,4 +1755,4 @@ export {
   provideClientHydration,
   VERSION
 };
-//# sourceMappingURL=chunk-OOA36EAS.js.map
+//# sourceMappingURL=chunk-KMTQFAEM.js.map

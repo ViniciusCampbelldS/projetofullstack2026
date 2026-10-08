@@ -4,19 +4,15 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
-
 // Configura o HttpClient para permitir chamadas HTTP para a API Java.
 import {
   provideHttpClient,
   withInterceptors,
 } from '@angular/common/http';
-
 // Configura o sistema de rotas do Angular.
 import { provideRouter } from '@angular/router';
-
 // Importa as rotas principais da aplicação.
 import { routes } from './app.routes';
-
 // Importa o interceptor responsável por adicionar o JWT/token às requisições.
 import { authInterceptor } from './auth/auth-interceptor';
 
