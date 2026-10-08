@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EpiCreateRequest, EpiResponse, EpiUpdateRequest } from '../../../models/epi';
+// EpiRequest é usado para cadastrar um único EPI.
+// EpiCreateRequest fica reservado para cadastro em lote.
+import { EpiRequest, EpiResponse, EpiUpdateRequest } from '../../../models/epi';
 import { EpiService } from '../../..//services/epi.service';
 import { Component, OnInit, effect, inject } from '@angular/core';
 import { NotificacaoService, EpiMonitorado } from '../../../services/notificacao';
@@ -29,12 +31,17 @@ interface BuscaEpiEditForm {
 interface BuscaEpiRow {
 	id: number;
 	funcionario: string;
+	// IDs preservados para o PUT.
+	funcionarioIds?: number[];
 	nome: string;
 	ca: string;
+	// Data de vencimento formatada.
 	vencimento: string;
 	lote?: string;
 	substituido?: boolean;
+	// Situação calculada de vencimento, como "Vencido", "Próximo do vencimento" ou "Distante do vencimento".
 	status: string;
+	// Classe visual.
 	statusClass: StatusClass;
 }
 
@@ -146,21 +153,35 @@ export class BuscaEpi implements OnInit {
 			return;
 		}
 
-		const payload: EpiCreateRequest = {
+		// Monta o payload correspondente ao POST /epis.
+		const payload: EpiRequest = {
 			nome: this.form.nome.trim(),
 			ca: this.form.ca.trim(),
 			lote: this.form.lote.trim(),
-			validade: this.form.validade,
-			quantidade: this.form.quantidade,
+			// O Java espera o campo "vencimento".
+			vencimento: this.form.validade,
+			// Um EPI novo ainda não está substituído.
+			substituido: false,
+			// A tela de busca não está vinculando funcionário durante o cadastro.
+			funcionarioIds: [],
 		};
 
+		// Envia o EPI para o endpoint Java.
 		this.epiService.cadastrar(payload).subscribe({
+			// Executado quando o cadastro for concluído.
 			next: (response) => {
-				this.epis = [...response.epis.map((epi) => this.mapearEpiParaLinha(epi)), ...this.epis];
-				this.limparCadastro();
+				// Executado quando o cadastro for concluído.
+				this.epis = [
+					this.mapearEpiParaLinha(response),
+					...this.epis
+				];
+				// Reaplica os filtros.
 				this.aplicarFiltros();
-				this.exportMessage = `${response.quantidade} EPI(s) cadastrado(s) com sucesso.`;
+				// Mostra a confirmação.
+				this.exportMessage = `EPI ${response.nome} cadastrado com sucesso.`;
 			},
+
+			// Executado se a API retornar erro.
 			error: () => {
 				this.exportMessage = 'Não foi possível cadastrar o EPI.';
 			},
@@ -230,12 +251,18 @@ export class BuscaEpi implements OnInit {
 			return;
 		}
 
+		// Monta o objeto completo exigido pelo PUT /epis/{id}.
 		const payload: EpiUpdateRequest = {
 			nome: this.editForm.nome.trim(),
 			ca: this.editForm.ca.trim(),
 			lote: this.editForm.lote.trim(),
-			validade: this.editForm.validade,
+			// O backend Java utiliza "vencimento", não validade.
+			vencimento: this.editForm.validade,
+			// Mantém a situação de substituição.
 			substituido: this.editForm.substituido,
+			// Preserva os funcionários que já estavam vinculados.
+			funcionarioIds:
+				this.itemEditando.funcionarioIds ?? [],
 		};
 
 		this.epiService.atualizar(this.itemEditando.id, payload).subscribe({
@@ -391,16 +418,32 @@ export class BuscaEpi implements OnInit {
 	}
 
 	private mapearEpiParaLinha(epi: EpiResponse): BuscaEpiRow {
+
+		// Recupera os nomes dos funcionários vinculados.
+		const nomesFuncionarios =
+			epi.funcionarios
+				?.map(funcionario => funcionario.nome).join(', ');
+
+		// Monta a linha usada pela interface.
 		return this.atualizarStatusDoItem({
 			id: epi.id,
-			funcionario: epi.funcionario ?? 'Não vinculado',
+			// Mostra os funcionários vinculados.
+			funcionario:
+				nomesFuncionarios || 'Não vinculado',
+			// Guarda os IDs para futuras atualizações.
+			funcionarioIds:
+				epi.funcionarios?.map(funcionario => funcionario.id) ?? [],
 			nome: epi.nome,
 			ca: epi.ca,
 			lote: epi.lote ?? '',
-			vencimento: this.formatarData(this.toDate(epi.vencimento ?? epi.validade ?? null)),
+			vencimento:
+				this.formatarData(this.toDate(epi.vencimento)),
+			// Situação de substituição.
 			substituido: epi.substituido ?? false,
-			status: 'Distante do vencimento',
-			statusClass: 'status-good',
+			// Valor inicial; será recalculado logo abaixo.
+			status:
+				'Próximo do vencimento',
+			statusClass: 'status-warning',
 		});
 	}
 

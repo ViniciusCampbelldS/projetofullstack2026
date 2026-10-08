@@ -5,263 +5,280 @@ import { DeliveryItem, EpiOption } from '../epi.models';
 import { EpiService } from '../../../services/epi.service';
 import { ConfirmarEntregaModal } from '../../../modals/entrega-epi/confirmar-entrega-modal/confirmar-entrega-modal';
 import { DeliveryItemsReview } from '../../../modals/entrega-epi/delivery-items-review/delivery-items-review';
+import { FuncionarioStatus, FuncionarioStatusFiltro, } from '../../../models/funcionario';
 
 interface EmployeeOption {
-  nome: string;
-  cpf: string;
+	nome: string;
+	cpf: string;
+	status: FuncionarioStatus;
 }
 
 @Component({
-  selector: 'app-entrega-epi',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmarEntregaModal, DeliveryItemsReview],
-  templateUrl: './entrega-epi.html',
-  styleUrls: ['./entrega-epi.scss'],
+	selector: 'app-entrega-epi',
+	standalone: true,
+	imports: [CommonModule, FormsModule, ConfirmarEntregaModal, DeliveryItemsReview],
+	templateUrl: './entrega-epi.html',
+	styleUrls: ['./entrega-epi.scss'],
 })
 export class EntregaEpi {
-  readonly employeeOptions: EmployeeOption[] = [
-    { nome: 'João Pedro da Rocha', cpf: '123.456.789-10' },
-    { nome: 'Fernanda Beatriz', cpf: '987.654.321-00' },
-    { nome: 'Marcos Paulo Ferreira', cpf: '456.789.123-44' },
-  ];
+	readonly employeeOptions: EmployeeOption[] = [
+		{ nome: 'João Pedro da Rocha', cpf: '123.456.789-10', status: 'Afastado' },
+		{ nome: 'Fernanda Beatriz', cpf: '987.654.321-00', status: 'Inativo' },
+		{ nome: 'Marcos Paulo Ferreira', cpf: '456.789.123-44', status: 'Ativo' },
+	];
 
-  availableEpis: EpiOption[];
-  deliveryItems: DeliveryItem[];
-  showReplacedEpiSection = false;
-  showConfirmarEntregaModal = false;
-  showEmployeeSuggestions = false;
-  showEpiSuggestions = false;
-  showReplacedEpiSuggestions = false;
-  selectedEmployee = this.employeeLabel(this.employeeOptions[0]);
-  deliveryDate = this.getTodayDate();
-  employeeCpf = this.employeeOptions[0].cpf;
-  epiSearch = '';
-  replacedEpiSearch = '';
-  replacedEpiName = '';
-  replacedEpiCa = '';
-  replacedEpiValidity = '';
-  selectedFichaName = '';
-  fichaPreviewUrl = '';
-  deliverySaved = false;
+	availableEpis: EpiOption[];
+	deliveryItems: DeliveryItem[];
+	showReplacedEpiSection = false;
+	showConfirmarEntregaModal = false;
+	showEmployeeSuggestions = false;
+	showEpiSuggestions = false;
+	showReplacedEpiSuggestions = false;
+	selectedEmployee = this.employeeLabel(this.employeeOptions[0]);
+	deliveryDate = this.getTodayDate();
+	employeeCpf = this.employeeOptions[0].cpf;
+	epiSearch = '';
+	replacedEpiSearch = '';
+	replacedEpiName = '';
+	replacedEpiCa = '';
+	replacedEpiValidity = '';
+	selectedFichaName = '';
+	fichaPreviewUrl = '';
+	deliverySaved = false;
 
-  constructor(private readonly epiService: EpiService) {
-    this.availableEpis = this.epiService.getAvailableEpis();
-    this.deliveryItems = this.epiService.getDeliveryDraft().map((item) => ({
-      ...item,
-      quantity: 1,
-    }));
-    this.epiSearch = this.deliveryItemLabel(this.deliveryItems[0]);
-  }
+	constructor(private readonly epiService: EpiService) {
+		this.availableEpis = this.epiService.getAvailableEpis();
+		this.deliveryItems = this.epiService.getDeliveryDraft().map((item) => ({
+			...item,
+			quantity: 1,
+		}));
+		this.epiSearch = this.deliveryItemLabel(this.deliveryItems[0]);
+	}
 
-  get filteredEmployeeOptions(): EmployeeOption[] {
-    const termo = this.normalizeText(this.selectedEmployee);
-    return this.employeeOptions.filter((employee) => {
-      if (!termo) {
-        return true;
-      }
+	// Filtro de situação do funcionário.
+	// 'Todos' deixa qualquer funcionário aparecer.
+	// 'Ativos e Afastados' oculta apenas os inativos.
+	filtroStatusFuncionario: FuncionarioStatusFiltro =
+		'Ativos e Afastados';
 
-      return this.normalizeText(this.employeeLabel(employee)).includes(termo);
-    });
-  }
+	get filteredEmployeeOptions(): EmployeeOption[] {
+		const termo = this.normalizeText(this.selectedEmployee);
 
-  get filteredEpiOptions(): EpiOption[] {
-    return this.filterEpis(this.epiSearch);
-  }
+		return this.employeeOptions.filter((employee) => {
+			// 1. Verifica correspondência de texto (Nome ou CPF) de forma normalizada
+			const correspondeTexto = !termo ||
+				this.normalizeText(employee.nome).includes(termo) ||
+				this.normalizeText(employee.cpf).includes(termo);
 
-  get filteredReplacedEpiOptions(): EpiOption[] {
-    return this.filterEpis(this.replacedEpiSearch);
-  }
+			// 2. Verifica a situação selecionada (Filtro de Status)
+			const correspondeStatus =
+				this.filtroStatusFuncionario === 'Todos' ||
+				(this.filtroStatusFuncionario === 'Ativos e Afastados' && employee.status !== 'Inativo') ||
+				employee.status === this.filtroStatusFuncionario;
 
-  addDeliveryItem(): void {
-    const fallback = this.availableEpis[0];
-    this.deliveryItems.push({
-      epi: fallback.name,
-      ca: fallback.ca,
-      quantity: 1,
-      validity: fallback.validity,
-    });
-  }
+			// Retorna apenas se satisfazer ambas as condições
+			return correspondeTexto && correspondeStatus;
+		});
+	}
 
-  removeDeliveryItem(index: number): void {
-    if (this.deliveryItems.length === 1) {
-      return;
-    }
+	get filteredEpiOptions(): EpiOption[] {
+		return this.filterEpis(this.epiSearch);
+	}
 
-    if (!window.confirm('Deseja remover esse item?')) {
-      return;
-    }
+	get filteredReplacedEpiOptions(): EpiOption[] {
+		return this.filterEpis(this.replacedEpiSearch);
+	}
 
-    this.deliveryItems.splice(index, 1);
-  }
+	addDeliveryItem(): void {
+		const fallback = this.availableEpis[0];
+		this.deliveryItems.push({
+			epi: fallback.name,
+			ca: fallback.ca,
+			quantity: 1,
+			validity: fallback.validity,
+		});
+	}
 
-  onEmployeeFocus(): void {
-    this.showEmployeeSuggestions = true;
-  }
+	removeDeliveryItem(index: number): void {
+		if (this.deliveryItems.length === 1) {
+			return;
+		}
 
-  onEmployeeInput(): void {
-    this.showEmployeeSuggestions = true;
-    const exactMatch = this.employeeOptions.find(
-      (employee) => this.normalizeText(this.employeeLabel(employee)) === this.normalizeText(this.selectedEmployee),
-    );
+		if (!window.confirm('Deseja remover esse item?')) {
+			return;
+		}
 
-    if (exactMatch) {
-      this.employeeCpf = exactMatch.cpf;
-      this.selectedEmployee = this.employeeLabel(exactMatch);
-      return;
-    }
+		this.deliveryItems.splice(index, 1);
+	}
 
-    this.employeeCpf = '';
-  }
+	onEmployeeFocus(): void {
+		this.showEmployeeSuggestions = true;
+	}
 
-  selectEmployee(employee: EmployeeOption): void {
-    this.selectedEmployee = this.employeeLabel(employee);
-    this.employeeCpf = employee.cpf;
-    this.showEmployeeSuggestions = false;
-  }
+	onEmployeeInput(): void {
+		this.showEmployeeSuggestions = true;
+		const exactMatch = this.employeeOptions.find(
+			(employee) => this.normalizeText(this.employeeLabel(employee)) === this.normalizeText(this.selectedEmployee),
+		);
 
-  hideEmployeeSuggestions(): void {
-    this.showEmployeeSuggestions = false;
-  }
+		if (exactMatch) {
+			this.employeeCpf = exactMatch.cpf;
+			this.selectedEmployee = this.employeeLabel(exactMatch);
+			return;
+		}
 
-  onEpiFocus(): void {
-    this.showEpiSuggestions = true;
-  }
+		this.employeeCpf = '';
+	}
 
-  onEpiInput(): void {
-    this.showEpiSuggestions = true;
-    this.applyEpiSearch(this.epiSearch, false);
-  }
+	selectEmployee(employee: EmployeeOption): void {
+		this.selectedEmployee = this.employeeLabel(employee);
+		this.employeeCpf = employee.cpf;
+		this.showEmployeeSuggestions = false;
+	}
 
-  selectEpi(epi: EpiOption): void {
-    this.applyEpiSelection(epi);
-    this.showEpiSuggestions = false;
-  }
+	hideEmployeeSuggestions(): void {
+		this.showEmployeeSuggestions = false;
+	}
 
-  hideEpiSuggestions(): void {
-    this.showEpiSuggestions = false;
-  }
+	onEpiFocus(): void {
+		this.showEpiSuggestions = true;
+	}
 
-  onReplacedEpiFocus(): void {
-    this.showReplacedEpiSuggestions = true;
-  }
+	onEpiInput(): void {
+		this.showEpiSuggestions = true;
+		this.applyEpiSearch(this.epiSearch, false);
+	}
 
-  onReplacedEpiInput(): void {
-    this.showReplacedEpiSuggestions = true;
-    this.applyEpiSearch(this.replacedEpiSearch, true);
-  }
+	selectEpi(epi: EpiOption): void {
+		this.applyEpiSelection(epi);
+		this.showEpiSuggestions = false;
+	}
 
-  selectReplacedEpi(epi: EpiOption): void {
-    this.replacedEpiSearch = this.epiLabel(epi);
-    this.replacedEpiName = epi.name;
-    this.replacedEpiCa = epi.ca;
-    this.replacedEpiValidity = epi.validity;
-    this.showReplacedEpiSuggestions = false;
-  }
+	hideEpiSuggestions(): void {
+		this.showEpiSuggestions = false;
+	}
 
-  hideReplacedEpiSuggestions(): void {
-    this.showReplacedEpiSuggestions = false;
-  }
+	onReplacedEpiFocus(): void {
+		this.showReplacedEpiSuggestions = true;
+	}
 
-  onFichaUpload(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+	onReplacedEpiInput(): void {
+		this.showReplacedEpiSuggestions = true;
+		this.applyEpiSearch(this.replacedEpiSearch, true);
+	}
 
-    if (!file) {
-      return;
-    }
+	selectReplacedEpi(epi: EpiOption): void {
+		this.replacedEpiSearch = this.epiLabel(epi);
+		this.replacedEpiName = epi.name;
+		this.replacedEpiCa = epi.ca;
+		this.replacedEpiValidity = epi.validity;
+		this.showReplacedEpiSuggestions = false;
+	}
 
-    this.selectedFichaName = file.name;
-    this.fichaPreviewUrl = URL.createObjectURL(file);
-  }
+	hideReplacedEpiSuggestions(): void {
+		this.showReplacedEpiSuggestions = false;
+	}
 
-  revealReplacedEpiSection(): void {
-    this.showReplacedEpiSection = true;
-  }
+	onFichaUpload(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
 
-  registerDelivery(): void {
-    this.showConfirmarEntregaModal = true;
-  }
+		if (!file) {
+			return;
+		}
 
-  onConfirmDelivery(): void {
-    this.deliverySaved = true;
-    this.showConfirmarEntregaModal = false;
-  }
+		this.selectedFichaName = file.name;
+		this.fichaPreviewUrl = URL.createObjectURL(file);
+	}
 
-  @HostListener('document:pointerdown', ['$event'])
-  closeSuggestionsOnOutsideClick(event: PointerEvent): void {
-    const target = event.target as HTMLElement | null;
-    if (target?.closest('.employee-select')) {
-      return;
-    }
+	revealReplacedEpiSection(): void {
+		this.showReplacedEpiSection = true;
+	}
 
-    this.showEmployeeSuggestions = false;
-    this.showEpiSuggestions = false;
-    this.showReplacedEpiSuggestions = false;
-  }
+	registerDelivery(): void {
+		this.showConfirmarEntregaModal = true;
+	}
 
-  private applyEpiSearch(value: string, replaced: boolean): void {
-    const exactMatch = this.availableEpis.find(
-      (epi) => this.normalizeText(this.epiLabel(epi)) === this.normalizeText(value),
-    );
+	onConfirmDelivery(): void {
+		this.deliverySaved = true;
+		this.showConfirmarEntregaModal = false;
+	}
 
-    if (!exactMatch) {
-      return;
-    }
+	@HostListener('document:pointerdown', ['$event'])
+	closeSuggestionsOnOutsideClick(event: PointerEvent): void {
+		const target = event.target as HTMLElement | null;
+		if (target?.closest('.employee-select')) {
+			return;
+		}
 
-    if (replaced) {
-      this.selectReplacedEpi(exactMatch);
-      return;
-    }
+		this.showEmployeeSuggestions = false;
+		this.showEpiSuggestions = false;
+		this.showReplacedEpiSuggestions = false;
+	}
 
-    this.applyEpiSelection(exactMatch);
-  }
+	private applyEpiSearch(value: string, replaced: boolean): void {
+		const exactMatch = this.availableEpis.find(
+			(epi) => this.normalizeText(this.epiLabel(epi)) === this.normalizeText(value),
+		);
 
-  private applyEpiSelection(epi: EpiOption): void {
-    const item = this.deliveryItems[0];
-    item.epi = epi.name;
-    item.ca = epi.ca;
-    item.validity = epi.validity;
-    item.quantity = 1;
-    this.epiSearch = this.epiLabel(epi);
-  }
+		if (!exactMatch) {
+			return;
+		}
 
-  private filterEpis(value: string): EpiOption[] {
-    const termo = this.normalizeText(value);
-    return this.availableEpis.filter((epi) => {
-      if (!termo) {
-        return true;
-      }
+		if (replaced) {
+			this.selectReplacedEpi(exactMatch);
+			return;
+		}
 
-      return this.normalizeText(this.epiLabel(epi)).includes(termo);
-    });
-  }
+		this.applyEpiSelection(exactMatch);
+	}
 
-  private employeeLabel(employee: EmployeeOption): string {
-    return `${employee.nome} — ${employee.cpf}`;
-  }
+	private applyEpiSelection(epi: EpiOption): void {
+		const item = this.deliveryItems[0];
+		item.epi = epi.name;
+		item.ca = epi.ca;
+		item.validity = epi.validity;
+		item.quantity = 1;
+		this.epiSearch = this.epiLabel(epi);
+	}
 
-  private epiLabel(epi: Pick<EpiOption, 'name' | 'ca'>): string {
-    return `${epi.name} — ${epi.ca}`;
-  }
+	private filterEpis(value: string): EpiOption[] {
+		const termo = this.normalizeText(value);
+		return this.availableEpis.filter((epi) => {
+			if (!termo) {
+				return true;
+			}
 
-  private deliveryItemLabel(item: Pick<DeliveryItem, 'epi' | 'ca'>): string {
-    return `${item.epi} — ${item.ca}`;
-  }
+			return this.normalizeText(this.epiLabel(epi)).includes(termo);
+		});
+	}
 
-  private getTodayDate(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+	private employeeLabel(employee: EmployeeOption): string {
+		return `${employee.nome} — ${employee.cpf}`;
+	}
 
-    return `${year}-${month}-${day}`;
-  }
+	private epiLabel(epi: Pick<EpiOption, 'name' | 'ca'>): string {
+		return `${epi.name} — ${epi.ca}`;
+	}
 
-  private normalizeText(value: string): string {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
-  }
+	private deliveryItemLabel(item: Pick<DeliveryItem, 'epi' | 'ca'>): string {
+		return `${item.epi} — ${item.ca}`;
+	}
+
+	private getTodayDate(): string {
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = String(today.getMonth() + 1).padStart(2, '0');
+		const day = String(today.getDate()).padStart(2, '0');
+
+		return `${year}-${month}-${day}`;
+	}
+
+	private normalizeText(value: string): string {
+		return value
+			.normalize('NFD')
+			.replace(/[\u0300-\u036f]/g, '')
+			.toLowerCase()
+			.trim();
+	}
 }

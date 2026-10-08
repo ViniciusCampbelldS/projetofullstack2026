@@ -14,6 +14,27 @@
 			</button>
 		</div>
 
+		<!-- Exibe mensagem de erro retornada pela API ou gerada pelo formulário. -->
+		@if (erro) {
+		<div class="alert alert-danger" role="alert">
+			{{ erro }}
+		</div>
+		}
+
+		<!-- Exibe mensagem de sucesso após uma operação concluída. -->
+		@if (sucesso) {
+		<div class="alert alert-success" role="alert">
+			{{ sucesso }}
+		</div>
+		}
+
+		<!-- Informa ao usuário que os dados ainda estão sendo carregados. -->
+		@if (carregando) {
+		<div class="alert alert-info" role="status">
+			Carregando funcionários...
+		</div>
+		}
+
 		<div class="stats-grid">
 			<article class="stat-card">
 				<span class="stat-icon blue"><i class="bi bi-people-fill"></i></span>
@@ -87,13 +108,37 @@
 					</select>
 				</div>
 
+				<!-- Filtro de situação do funcionário. -->
 				<div class="col-lg-2 col-md-6">
-					<label class="form-label" for="status-funcionario">Status</label>
+
+					<!-- Identifica o campo para acessibilidade. -->
+					<label class="form-label" for="status-funcionario">
+						Status
+					</label>
+
+					<!-- Filtra a tabela pela situação escolhida. -->
 					<select id="status-funcionario" class="form-select" [(ngModel)]="filtroStatus">
-						<option value="">Todos os status</option>
-						@for (status of statusOptions; track status) {
-						<option [value]="status">{{ status }}</option>
-						}
+
+						<!-- Mostra funcionários de todas as situações. -->
+						<option value="Todos">
+							Todos
+						</option>
+
+						<!-- Mostra somente funcionários ativos. -->
+						<option value="Ativo">
+							Ativo
+						</option>
+
+						<!-- Mostra somente funcionários inativos. -->
+						<option value="Inativo">
+							Inativo
+						</option>
+
+						<!-- Mostra somente funcionários afastados. -->
+						<option value="Afastado">
+							Afastado
+						</option>
+
 					</select>
 				</div>
 			</div>
@@ -131,10 +176,14 @@
 							<td>{{ formatarCpfTabela(funcionario.cpf) }}</td>
 							<td>{{ funcionario.setor }}</td>
 							<td>{{ funcionario.cargo }}</td>
-							<td>{{ funcionario.perfil }}</td>
+							<td>
+								<!-- Converte a permissão interna para o texto amigável. -->
+								{{ permissaoParaPerfil(funcionario.permissoes) }}
+							</td>
 							<td>
 								<div class="nr-list">
-									@for (nr of funcionario.nrs; track nr) {
+									<!-- Percorre as NRs relacionadas ao funcionário. -->
+									@for (nr of funcionario.nRs; track nr) {
 									<span>{{ nr }}</span>
 									}
 									@empty {
@@ -143,9 +192,19 @@
 								</div>
 							</td>
 							<td>
-								<span class="status-badge" [class]="statusClass(funcionario.status)">
-									{{ funcionario.status }}
+
+								<!-- Converte o código At/Af/In para o texto exibido ao usuário. -->
+								<span class="status-badge" [class]="
+      statusClass(
+        statusParaTela(funcionario.status)
+      )
+    ">
+
+									<!-- Exibe Ativo, Inativo ou Afastado. -->
+									{{ statusParaTela(funcionario.status) }}
+
 								</span>
+
 							</td>
 							<td>
 								<div class="table-actions">
@@ -163,6 +222,19 @@
 										(click)="abrirModalStatus(funcionario)">
 										<i class="bi bi-sliders"></i>
 										Alterar situação
+									</button>
+									<!-- Permite excluir o funcionário através da API Java. -->
+									<button class="btn btn-sm btn-outline-danger" type="button"
+										[disabled]="!podeGerenciarFuncionarios || carregando" [title]="
+    !podeGerenciarFuncionarios
+      ? 'Perfil Funcionário possui apenas visualização'
+      : 'Excluir funcionário'
+  " (click)="excluirFuncionario(funcionario)">
+										<!-- Ícone visual de lixeira. -->
+										<i class="bi bi-trash-fill"></i>
+
+										<!-- Texto do botão. -->
+										Excluir
 									</button>
 								</div>
 							</td>
