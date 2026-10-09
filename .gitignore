@@ -1,5 +1,12 @@
 node_modules/
+*.DS_Store
 *.db-lock
 *.lck
 *.db.lck
-*.idea
+.angular/
+coverage/
+.env
+.env.*
+!.env.example
+.idea/
+*.iml
