@@ -21,14 +21,13 @@
 							<p class="section-caption">Selecione o Funcionário</p>
 						</div>
 
-						<div class="col-md-8">
+						<div class="col-md-6">
 							<label class="form-label" for="employee">Nome ou CPF</label>
 							<div class="employee-select">
 								<input class="form-control" id="employee" [(ngModel)]="selectedEmployee"
 									[ngModelOptions]="{ standalone: true }" (input)="onEmployeeInput()"
 									(focus)="onEmployeeFocus()" (blur)="hideEmployeeSuggestions()"
 									placeholder="Digite o nome ou CPF do funcionário" autocomplete="off" />
-
 								@if (showEmployeeSuggestions && filteredEmployeeOptions.length > 0) {
 								<div class="employee-suggestions">
 									@for (employee of filteredEmployeeOptions; track employee.cpf) {
@@ -42,7 +41,19 @@
 							</div>
 						</div>
 
-						<div class="col-md-4">
+						<div class="col-md-3">
+							<label class="form-label" for="employee-status">Status</label>
+							<select id="employee-status" class="form-select" [(ngModel)]="filtroStatusFuncionario"
+								[ngModelOptions]="{ standalone: true }">
+								<option value="Ativo">Ativo</option>
+								<option value="Inativo">Inativo</option>
+								<option value="Afastado">Afastado</option>
+								<option value="Ativos e Afastados">Ativos e Afastados</option>
+								<option value="Todos">Todos</option>
+							</select>
+						</div>
+
+						<div class="col-md-3">
 							<label class="form-label" for="delivery-date">Data da entrega</label>
 							<input class="form-control" id="delivery-date" type="date" [(ngModel)]="deliveryDate"
 								[ngModelOptions]="{ standalone: true }" />
@@ -81,6 +92,13 @@
 							</select>
 						</div>
 					</form>
+
+					@if (carregandoFuncionarios) {
+					<div class="alert alert-info mt-3" role="status">Carregando funcionários...</div>
+					}
+					@if (erroFuncionarios) {
+					<div class="alert alert-danger mt-3" role="alert">{{ erroFuncionarios }}</div>
+					}
 
 					<div class="section-divider">
 						<p class="section-caption">Selecione o EPI</p>

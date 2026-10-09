@@ -6,6 +6,13 @@
     </div>
   </div>
 
+  @if (carregandoFuncionarios) {
+    <div class="form-message" role="status">Carregando funcionários...</div>
+  }
+  @if (erroFuncionarios) {
+    <div class="form-message" role="alert">{{ erroFuncionarios }}</div>
+  }
+
   <div class="cards">
     <div class="stat-card">
       <div class="stat-icon">📚</div>

@@ -54,15 +54,25 @@ export class FuncionarioService {
 	}
 
 	// PUT /funcionarios/{id}
-	// Atualiza o funcionário completo utilizando PATCH.
-	// Este método será utilizado pelo CRUD principal.
+	// Substitui o funcionário completo.
 	atualizar(
+		id: number,
+		funcionario: Omit<Funcionario, 'id'>
+	): Observable<Funcionario> {
+		return this.http.put<Funcionario>(
+			this.apiFuncionarios + '/' + id,
+			funcionario
+		);
+	}
+
+	// PATCH /funcionarios/{id}
+	// Altera somente os campos enviados.
+	alterar(
 		id: number,
 		funcionario: Partial<Omit<Funcionario, 'id'>>
 	): Observable<Funcionario> {
-
 		return this.http.patch<Funcionario>(
-			`${this.apiFuncionarios}/${id}`,
+			this.apiFuncionarios + '/' + id,
 			funcionario
 		);
 	}

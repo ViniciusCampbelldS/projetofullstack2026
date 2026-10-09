@@ -118,27 +118,9 @@
 
 					<!-- Filtra a tabela pela situação escolhida. -->
 					<select id="status-funcionario" class="form-select" [(ngModel)]="filtroStatus">
-
-						<!-- Mostra funcionários de todas as situações. -->
-						<option value="Todos">
-							Todos
-						</option>
-
-						<!-- Mostra somente funcionários ativos. -->
-						<option value="Ativo">
-							Ativo
-						</option>
-
-						<!-- Mostra somente funcionários inativos. -->
-						<option value="Inativo">
-							Inativo
-						</option>
-
-						<!-- Mostra somente funcionários afastados. -->
-						<option value="Afastado">
-							Afastado
-						</option>
-
+						@for (status of statusFiltroOptions; track status) {
+						<option [value]="status">{{ status }}</option>
+						}
 					</select>
 				</div>
 			</div>

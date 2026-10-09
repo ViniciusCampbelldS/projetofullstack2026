@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth';
+import { FuncionarioStatus } from '../../../models/funcionario';
+import { FuncionarioService } from '../../../services/funcionario.service';
 import {
   EditarTreinamentoModal,
   SituacaoTreinamentoModal,
@@ -30,7 +32,7 @@ interface TreinamentoRegistro {
   templateUrl: './altera-treinamento.html',
   styleUrl: './altera-treinamento.scss'
 })
-export class AlteraTreinamento {
+export class AlteraTreinamento implements OnInit {
   isEditModalOpen = false;
   isEmployeeModalOpen = false;
   isSelectedEmployeesModalOpen = false;
@@ -40,14 +42,9 @@ export class AlteraTreinamento {
   formTreinamento: TreinamentoRegistroModal = this.criarTreinamentoVazio();
   selectedFuncionarioIds = new Set<number>();
 
-  readonly funcionarios: FuncionarioTreinamento[] = [
-    { id: 1, nome: 'Pedro Henrique', cpf: '354.287.696-10', cargo: 'Tecnico de Seguranca', area: 'Operacoes', status: 'Ativo' },
-    { id: 2, nome: 'Joao da Silva', cpf: '875.143.220-41', cargo: 'Eletricista', area: 'Manutencao', status: 'Afastado' },
-    { id: 3, nome: 'Carlos Oliveira', cpf: '192.334.870-55', cargo: 'Operador', area: 'Producao', status: 'Inativo' },
-    { id: 4, nome: 'Fernanda Lima', cpf: '621.904.118-83', cargo: 'Supervisora', area: 'Qualidade', status: 'Ativo' },
-    { id: 5, nome: 'Ana Costa', cpf: '448.072.561-09', cargo: 'Auxiliar', area: 'Logistica', status: 'Afastado' },
-    { id: 6, nome: 'Marcos Pereira', cpf: '903.655.412-77', cargo: 'Soldador', area: 'Metalurgia', status: 'Inativo' },
-  ];
+  funcionarios: FuncionarioTreinamento[] = [];
+  carregandoFuncionarios = false;
+  erroFuncionarios = '';
 
   treinamentos: TreinamentoRegistro[] = [
     {
@@ -81,7 +78,46 @@ export class AlteraTreinamento {
 
   readonly situacoes: SituacaoTreinamento[] = ['Em dia', 'Proximo do vencimento', 'Vencido'];
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly funcionarioService: FuncionarioService
+  ) {}
+
+  ngOnInit(): void {
+    this.carregandoFuncionarios = true;
+    this.erroFuncionarios = '';
+
+    this.funcionarioService.listar().subscribe({
+      next: (funcionarios) => {
+        this.funcionarios = funcionarios.map((funcionario) => ({
+          id: funcionario.id,
+          nome: funcionario.nome,
+          cpf: funcionario.cpf,
+          cargo: funcionario.cargo,
+          area: funcionario.setor,
+          status: this.statusParaTela(funcionario.status),
+        }));
+        this.carregandoFuncionarios = false;
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar funcionários para treinamentos:', erro);
+        this.funcionarios = [];
+        this.erroFuncionarios = 'Não foi possível carregar os funcionários.';
+        this.carregandoFuncionarios = false;
+      },
+    });
+  }
+
+  private statusParaTela(status: string): FuncionarioStatus {
+    switch (status) {
+      case 'Af':
+        return 'Afastado';
+      case 'In':
+        return 'Inativo';
+      default:
+        return 'Ativo';
+    }
+  }
 
   get podeEditarTreinamento(): boolean {
     return this.authService.podeEditarTreinamento();

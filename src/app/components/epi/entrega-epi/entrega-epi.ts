@@ -1,11 +1,12 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeliveryItem, EpiOption } from '../epi.models';
 import { EpiService } from '../../../services/epi.service';
 import { ConfirmarEntregaModal } from '../../../modals/entrega-epi/confirmar-entrega-modal/confirmar-entrega-modal';
 import { DeliveryItemsReview } from '../../../modals/entrega-epi/delivery-items-review/delivery-items-review';
-import { FuncionarioStatus, FuncionarioStatusFiltro, } from '../../../models/funcionario';
+import { FuncionarioStatus, FuncionarioStatusFiltro } from '../../../models/funcionario';
+import { FuncionarioService } from '../../../services/funcionario.service';
 
 interface EmployeeOption {
 	nome: string;
@@ -20,12 +21,10 @@ interface EmployeeOption {
 	templateUrl: './entrega-epi.html',
 	styleUrls: ['./entrega-epi.scss'],
 })
-export class EntregaEpi {
-	readonly employeeOptions: EmployeeOption[] = [
-		{ nome: 'João Pedro da Rocha', cpf: '123.456.789-10', status: 'Afastado' },
-		{ nome: 'Fernanda Beatriz', cpf: '987.654.321-00', status: 'Inativo' },
-		{ nome: 'Marcos Paulo Ferreira', cpf: '456.789.123-44', status: 'Ativo' },
-	];
+export class EntregaEpi implements OnInit {
+	employeeOptions: EmployeeOption[] = [];
+	carregandoFuncionarios = false;
+	erroFuncionarios = '';
 
 	availableEpis: EpiOption[];
 	deliveryItems: DeliveryItem[];
@@ -34,9 +33,9 @@ export class EntregaEpi {
 	showEmployeeSuggestions = false;
 	showEpiSuggestions = false;
 	showReplacedEpiSuggestions = false;
-	selectedEmployee = this.employeeLabel(this.employeeOptions[0]);
+	selectedEmployee = '';
 	deliveryDate = this.getTodayDate();
-	employeeCpf = this.employeeOptions[0].cpf;
+	employeeCpf = '';
 	epiSearch = '';
 	replacedEpiSearch = '';
 	replacedEpiName = '';
@@ -46,13 +45,61 @@ export class EntregaEpi {
 	fichaPreviewUrl = '';
 	deliverySaved = false;
 
-	constructor(private readonly epiService: EpiService) {
+	constructor(private readonly epiService: EpiService, private readonly funcionarioService: FuncionarioService) {
 		this.availableEpis = this.epiService.getAvailableEpis();
 		this.deliveryItems = this.epiService.getDeliveryDraft().map((item) => ({
 			...item,
 			quantity: 1,
 		}));
 		this.epiSearch = this.deliveryItemLabel(this.deliveryItems[0]);
+	}
+
+	ngOnInit(): void {
+		this.carregarFuncionarios();
+	}
+
+	private carregarFuncionarios(): void {
+		this.carregandoFuncionarios = true;
+		this.erroFuncionarios = '';
+
+		this.funcionarioService.listar().subscribe({
+			next: (funcionarios) => {
+				this.employeeOptions = funcionarios.map((funcionario) => ({
+					nome: funcionario.nome,
+					cpf: funcionario.cpf,
+					status: this.statusParaTela(funcionario.status),
+				}));
+
+				const funcionarioInicial =
+					this.employeeOptions.find((funcionario) => funcionario.status !== 'Inativo') ??
+					this.employeeOptions[0];
+
+				if (funcionarioInicial) {
+					this.selectEmployee(funcionarioInicial);
+				}
+
+				this.carregandoFuncionarios = false;
+			},
+			error: (erro) => {
+				console.error('Erro ao carregar funcionários para entrega de EPI:', erro);
+				this.employeeOptions = [];
+				this.selectedEmployee = '';
+				this.employeeCpf = '';
+				this.erroFuncionarios = 'Não foi possível carregar os funcionários.';
+				this.carregandoFuncionarios = false;
+			},
+		});
+	}
+
+	private statusParaTela(status: string): FuncionarioStatus {
+		switch (status) {
+			case 'Af':
+				return 'Afastado';
+			case 'In':
+				return 'Inativo';
+			default:
+				return 'Ativo';
+		}
 	}
 
 	// Filtro de situação do funcionário.

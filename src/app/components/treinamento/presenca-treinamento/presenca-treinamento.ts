@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EmployeeSelectorModal, FuncionarioTreinamento } from '../employee-selector-modal/employee-selector-modal';
 import { SelectedEmployeesModal } from '../selected-employees-modal/selected-employees-modal';
+import { FuncionarioStatus } from '../../../models/funcionario';
+import { FuncionarioService } from '../../../services/funcionario.service';
 
 interface TurmaTreinamento {
   id: number;
@@ -20,15 +22,9 @@ interface TurmaTreinamento {
   templateUrl: './presenca-treinamento.html',
   styleUrl: './presenca-treinamento.scss'
 })
-export class PresencaTreinamento {
-  readonly funcionarios: FuncionarioTreinamento[] = [
-    { id: 1, nome: 'Pedro Henrique', cpf: '354.287.696-10', cargo: 'Tecnico de Seguranca', area: 'Operacoes', status: 'Ativo' },
-    { id: 2, nome: 'Joao da Silva', cpf: '875.143.220-41', cargo: 'Eletricista', area: 'Manutencao', status: 'Afastado' },
-    { id: 3, nome: 'Carlos Oliveira', cpf: '192.334.870-55', cargo: 'Operador', area: 'Producao', status: 'Inativo' },
-    { id: 4, nome: 'Fernanda Lima', cpf: '621.904.118-83', cargo: 'Supervisora', area: 'Qualidade', status: 'Ativo' },
-    { id: 5, nome: 'Ana Costa', cpf: '448.072.561-09', cargo: 'Auxiliar', area: 'Logistica', status: 'Afastado' },
-    { id: 6, nome: 'Marcos Pereira', cpf: '903.655.412-77', cargo: 'Soldador', area: 'Metalurgia', status: 'Inativo' },
-  ];
+export class PresencaTreinamento implements OnInit {
+  funcionarios: FuncionarioTreinamento[] = [];
+  carregandoFuncionarios = false;
 
   treinamento = '';
   data = '';
@@ -42,7 +38,7 @@ export class PresencaTreinamento {
   turmaSelecionadaId: number | null = 1;
   isEmployeeModalOpen = false;
   isSelectedEmployeesModalOpen = false;
-  selectedFuncionarioIds = new Set<number>([1, 3]);
+  selectedFuncionarioIds = new Set<number>();
 
   turmas: TurmaTreinamento[] = [
     {
@@ -71,11 +67,54 @@ export class PresencaTreinamento {
     },
   ];
 
-  constructor() {
+  constructor(private readonly funcionarioService: FuncionarioService) {
     const turmaInicial = this.turmaSelecionada;
 
     if (turmaInicial) {
       this.selecionarTurma(turmaInicial);
+    }
+  }
+
+  ngOnInit(): void {
+    this.carregandoFuncionarios = true;
+
+    this.funcionarioService.listar().subscribe({
+      next: (funcionarios) => {
+        this.funcionarios = funcionarios.map((funcionario) => ({
+          id: funcionario.id,
+          nome: funcionario.nome,
+          cpf: funcionario.cpf,
+          cargo: funcionario.cargo,
+          area: funcionario.setor,
+          status: this.statusParaTela(funcionario.status),
+        }));
+
+        const turma = this.turmaSelecionada;
+        if (turma) {
+          this.selecionarTurma(turma);
+        }
+
+        this.carregandoFuncionarios = false;
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar funcionários para presença:', erro);
+        this.funcionarios = [];
+        this.selectedFuncionarioIds = new Set<number>();
+        this.participantes = [];
+        this.mensagem = 'Não foi possível carregar os funcionários.';
+        this.carregandoFuncionarios = false;
+      },
+    });
+  }
+
+  private statusParaTela(status: string): FuncionarioStatus {
+    switch (status) {
+      case 'Af':
+        return 'Afastado';
+      case 'In':
+        return 'Inativo';
+      default:
+        return 'Ativo';
     }
   }
 

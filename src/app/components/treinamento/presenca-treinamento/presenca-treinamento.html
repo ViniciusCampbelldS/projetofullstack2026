@@ -8,6 +8,10 @@
 			</div>
 		</div>
 
+				@if (carregandoFuncionarios) {
+		<div class="form-message" role="status">Carregando funcionários...</div>
+		}
+
 		<div class="content-grid">
 			<div class="panel">
 				<div class="panel-header">
@@ -49,7 +53,7 @@
 						<h2>Selecione os funcionarios</h2>
 						<p>Filtre a lista e marque quem esteve presente na sessao selecionada.</p>
 					</div>
-					<button class="btn btn-soft" type="button" (click)="abrirModalFuncionarios()">Adicionar
+					<button class="btn btn-soft" type="button" [disabled]="carregandoFuncionarios || funcionarios.length === 0" (click)="abrirModalFuncionarios()">Adicionar
 						funcionarios</button>
 				</div>
 
