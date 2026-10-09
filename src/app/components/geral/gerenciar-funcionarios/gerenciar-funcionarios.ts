@@ -13,6 +13,8 @@ import {
 	Funcionario,
 	FuncionarioRequest,
 } from '../../../models/funcionario';
+import { Nr, NrRequest } from '../../../models/nr';
+import { NrService } from '../../../services/nr.service';
 
 
 
@@ -60,6 +62,9 @@ export class GerenciarFuncionarios implements OnInit {
 	 */
 	private readonly funcionarioService =
 		inject(FuncionarioService);
+
+	private readonly nrService =
+		inject(NrService);
 
 	/*
 	 * Injeta o serviço de autenticação para verificar
@@ -110,48 +115,16 @@ export class GerenciarFuncionarios implements OnInit {
 	];
 
 	/*
-	 * Lista de NRs disponíveis.
+	 * NRs cadastradas na API Java.
 	 */
-	readonly nrOptions = [
-		'NR 01 - Disposições gerais',
-		'NR 02 - Inspeção prévia (Revogada)',
-		'NR 03 - Comissão Interna de Prevenção de Acidentes (CIPA)',
-		'NR 04 - Serviços Especializados em Engenharia de Segurança e em Medicina do Trabalho (SESMT)',
-		'NR 05 - Comissão Interna de Prevenção de Acidentes',
-		'NR 06 - Equipamentos de Proteção Individual (EPI)',
-		'NR 07 - Programa de Controle Médico de Saúde Ocupacional (PCMSO)',
-		'NR 08 - Edificações',
-		'NR 09 - Programa de Prevenção de Riscos Ambientais (PPRA)',
-		'NR 10 - Segurança em Instalações e Serviços em Eletricidade',
-		'NR 11 - Transporte, Movimentação, Armazenagem e Manuseio de Materiais',
-		'NR 12 - Segurança no Trabalho em Máquinas e Equipamentos',
-		'NR 13 - Caldeiras, Vasos de Pressão e Tubulações',
-		'NR 14 - Fornos',
-		'NR 15 - Atividades e Operações Insalubres',
-		'NR 16 - Atividades e Operações Perigosas',
-		'NR 17 - Ergonomia',
-		'NR 18 - Condições e Meio Ambiente de Trabalho na Indústria da Construção',
-		'NR 19 - Explosivos',
-		'NR 20 - Segurança e Saúde no Trabalho com Inflamáveis e Combustíveis',
-		'NR 21 - Trabalho a Céu Aberto',
-		'NR 22 - Mineração',
-		'NR 23 - Proteção Contra Incêndios',
-		'NR 24 - Condições Sanitárias e de Conforto nos Locais de Trabalho',
-		'NR 25 - Resíduos Industriais',
-		'NR 26 - Sinalização de Segurança',
-		'NR 27 - Registro Profissional do Técnico de Segurança (Revogada)',
-		'NR 28 - Fiscalização e Penalidades',
-		'NR 29 - Segurança e Saúde no Trabalho Portuário',
-		'NR 30 - Segurança e Saúde no Trabalho Aquaviário',
-		'NR 31 - Segurança e Saúde no Trabalho na Agricultura, Pecuária, Silvicultura, Exploração Florestal e Aquicultura',
-		'NR 32 - Segurança e Saúde no Trabalho em Serviços de Saúde',
-		'NR 33 - Segurança e Saúde no Trabalho em Espaços Confinados',
-		'NR 34 - Condições e Meio Ambiente de Trabalho na Indústria de Construção Naval',
-		'NR 35 - Trabalho em Altura',
-		'NR 36 - Segurança e Saúde no Trabalho em Empresas de Abate e Processamento de Carnes e Derivados',
-		'NR 37 - Plataformas de Petróleo',
-		'NR 38 - Limpeza Urbana e Manejo de Resíduos Sólidos',
-	];
+	nrs: Nr[] = [];
+	nrCarregando = false;
+	nrSalvando = false;
+	nrErroCarregamento = '';
+	nrErro = '';
+	nrSucesso = '';
+	nrEditandoId: number | null = null;
+	nrNomeForm = '';
 
 	/*
 	 * Funcionários carregados da API.
@@ -231,6 +204,30 @@ export class GerenciarFuncionarios implements OnInit {
 	 */
 	ngOnInit(): void {
 		this.carregarFuncionarios();
+		this.carregarNrs();
+	}
+
+	/*
+	 * Carrega o catálogo de NRs da API Java.
+	 */
+	carregarNrs(): void {
+		this.nrCarregando = true;
+		this.nrErroCarregamento = '';
+
+		this.nrService.listar().subscribe({
+			next: nrs => {
+				this.nrs = [...nrs].sort(
+					(a, b) => a.nome.localeCompare(b.nome, 'pt-BR')
+				);
+				this.nrCarregando = false;
+			},
+			error: erro => {
+				console.error('Erro ao carregar NRs:', erro);
+				this.nrErroCarregamento =
+					'Não foi possível carregar as NRs.';
+				this.nrCarregando = false;
+			},
+		});
 	}
 
 	/*
@@ -333,22 +330,22 @@ export class GerenciarFuncionarios implements OnInit {
 	/*
 	 * Filtra as NRs disponíveis no autocomplete.
 	 */
-	get nrOptionsFiltradas(): string[] {
+	get nrOptionsFiltradas(): Nr[] {
 
 		const busca =
 			this.nrBusca
 				.trim()
 				.toLowerCase();
 
-		return this.nrOptions.filter(
+		return this.nrs.filter(
 			nr => {
 
 				const naoSelecionada =
-					!this.form.nrs.includes(nr);
+					!this.form.nrs.includes(nr.nome);
 
 				const correspondeBusca =
 					!busca ||
-					nr.toLowerCase().includes(busca);
+					nr.nome.toLowerCase().includes(busca);
 
 				return (
 					naoSelecionada &&
@@ -789,18 +786,134 @@ this.filtroStatus = 'Ativos e Afastados';;
 	/*
 	 * Adiciona uma NR ao formulário.
 	 */
-	selecionarNr(nr: string): void {
+	selecionarNr(nr: Nr): void {
 
-		if (this.form.nrs.includes(nr)) {
+		if (this.form.nrs.includes(nr.nome)) {
 			return;
 		}
 
 		this.form.nrs = [
 			...this.form.nrs,
-			nr,
+			nr.nome,
 		];
 
 		this.nrBusca = '';
+	}
+
+	/*
+	 * Prepara uma NR existente para edição.
+	 */
+	editarNr(nr: Nr): void {
+		this.nrEditandoId = nr.id;
+		this.nrNomeForm = nr.nome;
+		this.nrErro = '';
+		this.nrSucesso = '';
+	}
+
+	cancelarEdicaoNr(): void {
+		this.nrEditandoId = null;
+		this.nrNomeForm = '';
+	}
+
+	/*
+	 * Cria ou atualiza uma NR no catálogo Java.
+	 */
+	salvarNr(): void {
+		const nome = this.nrNomeForm.trim();
+
+		if (!nome) {
+			this.nrErro = 'Informe o nome da NR.';
+			return;
+		}
+
+		if (nome.length > 250) {
+			this.nrErro = 'O nome deve possuir no máximo 250 caracteres.';
+			return;
+		}
+
+		const id = this.nrEditandoId;
+		const duplicada = this.nrs.some(
+			nr => nr.id !== id &&
+				nr.nome.trim().toLocaleLowerCase() === nome.toLocaleLowerCase()
+		);
+
+		if (duplicada) {
+			this.nrErro = 'Já existe uma NR com esse nome.';
+			return;
+		}
+
+		this.nrErro = '';
+		this.nrSucesso = '';
+		this.nrSalvando = true;
+
+		const request: NrRequest = { nome };
+		const operacao = id === null
+			? this.nrService.cadastrar(request)
+			: this.nrService.atualizar(id, request);
+
+		operacao.subscribe({
+			next: nrSalva => {
+				const nomeAnterior = this.nrs.find(
+					nr => nr.id === nrSalva.id
+				)?.nome;
+
+				this.nrs = [
+					...this.nrs.filter(nr => nr.id !== nrSalva.id),
+					nrSalva,
+				].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+				if (nomeAnterior) {
+					this.form.nrs = this.form.nrs.map(
+						nr => nr === nomeAnterior ? nrSalva.nome : nr
+					);
+				}
+
+				this.nrSucesso = id === null
+					? 'NR cadastrada com sucesso.'
+					: 'NR atualizada com sucesso.';
+				this.nrSalvando = false;
+				this.cancelarEdicaoNr();
+			},
+			error: erro => {
+				console.error('Erro ao salvar NR:', erro);
+				this.nrErro = erro?.error?.message ??
+					'Não foi possível salvar a NR.';
+				this.nrSalvando = false;
+			},
+		});
+	}
+
+	/*
+	 * Remove uma NR do catálogo Java.
+	 */
+	excluirNr(nr: Nr): void {
+		if (!window.confirm(`Deseja realmente excluir a NR "${nr.nome}"?`)) {
+			return;
+		}
+
+		this.nrErro = '';
+		this.nrSucesso = '';
+		this.nrSalvando = true;
+
+		this.nrService.excluir(nr.id).subscribe({
+			next: () => {
+				this.nrs = this.nrs.filter(item => item.id !== nr.id);
+				this.form.nrs = this.form.nrs.filter(nome => nome !== nr.nome);
+
+				if (this.nrEditandoId === nr.id) {
+					this.cancelarEdicaoNr();
+				}
+
+				this.nrSucesso = 'NR excluída com sucesso.';
+				this.nrSalvando = false;
+			},
+			error: erro => {
+				console.error('Erro ao excluir NR:', erro);
+				this.nrErro = erro?.error?.message ??
+					'Não foi possível excluir a NR.';
+				this.nrSalvando = false;
+			},
+		});
 	}
 
 	/*

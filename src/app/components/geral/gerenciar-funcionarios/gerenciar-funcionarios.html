@@ -312,6 +312,12 @@
 
 		<div class="nr-panel">
 			<strong>NRs necessárias para a função</strong>
+			@if (nrCarregando) {
+			<small role="status">Carregando catálogo de NRs...</small>
+			}
+			@if (nrErroCarregamento) {
+			<div class="alert alert-danger" role="alert">{{ nrErroCarregamento }}</div>
+			}
 
 			<div class="nr-search">
 				<input id="nr-busca" class="form-control" type="text" placeholder="Digite para buscar uma NR"
@@ -319,9 +325,9 @@
 
 				@if (nrOptionsFiltradas.length > 0) {
 				<div class="nr-suggestions">
-					@for (nr of nrOptionsFiltradas; track nr) {
+					@for (nr of nrOptionsFiltradas; track nr.id) {
 					<button class="nr-suggestion" type="button" (click)="selecionarNr(nr)">
-						{{ nr }}
+						{{ nr.nome }}
 					</button>
 					}
 				</div>
@@ -339,6 +345,64 @@
 				<small>Nenhuma NR selecionada.</small>
 				}
 			</div>
+
+			@if (podeGerenciarFuncionarios) {
+			<details class="nr-management">
+				<summary>Gerenciar catálogo de NRs ({{ nrs.length }})</summary>
+				<div class="d-grid gap-3 pt-3">
+					@if (nrErro) {
+					<div class="alert alert-danger" role="alert">{{ nrErro }}</div>
+					}
+					@if (nrSucesso) {
+					<div class="alert alert-success" role="status">{{ nrSucesso }}</div>
+					}
+
+					<div class="d-grid gap-2">
+						<label class="form-label" for="nr-nome">
+							{{ nrEditandoId === null ? 'Nova NR' : 'Editar NR' }}
+						</label>
+						<div class="d-flex flex-wrap align-items-end gap-2">
+							<input id="nr-nome" class="form-control flex-grow-1" type="text" maxlength="250"
+								placeholder="Nome da NR" [(ngModel)]="nrNomeForm" />
+							<button class="btn btn-brand" type="button" [disabled]="nrSalvando"
+								(click)="salvarNr()">
+								<i class="bi" [class.bi-plus-lg]="nrEditandoId === null"
+									[class.bi-check-lg]="nrEditandoId !== null"></i>
+								{{ nrEditandoId === null ? 'Adicionar' : 'Salvar' }}
+							</button>
+							@if (nrEditandoId !== null) {
+							<button class="btn btn-soft" type="button" [disabled]="nrSalvando"
+								(click)="cancelarEdicaoNr()">
+								Cancelar
+							</button>
+							}
+						</div>
+					</div>
+
+					<div class="d-grid overflow-auto" aria-label="NRs cadastradas">
+						@for (nr of nrs; track nr.id) {
+						<div class="d-flex align-items-center justify-content-between gap-2 py-1 border-bottom">
+							<span class="text-break flex-grow-1">{{ nr.nome }}</span>
+							<div class="d-flex flex-shrink-0 gap-1">
+								<button class="btn btn-soft btn-sm" type="button" [disabled]="nrSalvando"
+									[title]="'Editar ' + nr.nome" [attr.aria-label]="'Editar ' + nr.nome"
+									(click)="editarNr(nr)">
+									<i class="bi bi-pencil-fill"></i>
+								</button>
+								<button class="btn btn-outline-danger btn-sm" type="button" [disabled]="nrSalvando"
+									[title]="'Excluir ' + nr.nome" [attr.aria-label]="'Excluir ' + nr.nome"
+									(click)="excluirNr(nr)">
+									<i class="bi bi-trash-fill"></i>
+								</button>
+							</div>
+						</div>
+						} @empty {
+						<small>Nenhuma NR cadastrada.</small>
+						}
+					</div>
+				</div>
+			</details>
+			}
 		</div>
 	</div>
 

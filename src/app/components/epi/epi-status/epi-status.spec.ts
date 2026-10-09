@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { EpiService } from '../epi-status';
+import { EpiService } from './epi-status';
 
 describe('EpiService', () => {
   let service: EpiService;
