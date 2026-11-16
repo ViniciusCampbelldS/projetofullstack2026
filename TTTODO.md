@@ -1,3 +1,118 @@
+# TODO consolidado — revisão de 16/11/2026
+
+Status verificado por leitura do código nas revisões backend b4644751aa6c392aa853c86381ab028eff949fb9 e frontend af7db6dd55b42e1cca9678d1d5159a91089830dc. Não houve teste de execução nesta revisão. As estruturas do Supabase foram consultadas anteriormente. Este documento substitui as propostas anteriores de cas e de tabela única de notificações.
+
+## NR — arquivos já implementados
+
+- [x] Model: src/main/java/br/com/tst/model/NR.java.
+- [x] Repository: src/main/java/br/com/tst/repository/NRRepository.java.
+- [x] Request: src/main/java/br/com/tst/dto/NRRequest.java.
+- [x] Response: src/main/java/br/com/tst/dto/NRResponse.java.
+- [x] IniciaisConfig: src/main/java/br/com/tst/config/NRIniciaisConfig.java.
+- [x] ApiController: src/main/java/br/com/tst/api/NRApiController.java; GET lista/ID, POST, PUT e DELETE.
+- [ ] Garantir ID manual igual ao número da NR: retirar geração automática e adaptar Request, controller e carga inicial.
+- [ ] Reconciliar cadastro id=40 / NR 00 - Teste antes de migrar as referências.
+- [ ] Garantir unicidade do cadastro na API e banco, além da PK.
+- [ ] Alinhar funcionarios_nrs: banco já usa nr_id FK, mas Java ainda usa coleção de textos.
+
+## Notificações — decisão definitiva do usuário
+
+- [ ] Separar em dias_notificacao_epis: id PK gerado, ca INTEGER NOT NULL UNIQUE, dias_aviso INTEGER NOT NULL CHECK > 0.
+- [ ] Separar em dias_notificacao_treinamentos: id PK gerado, nr INTEGER NOT NULL UNIQUE FK nrs(id), dias_aviso INTEGER NOT NULL CHECK > 0. nr guarda a PK da NR; alinhar tipo com nrs.id antes da FK.
+- [ ] Remover is_norma e ca_ou_nr do contrato definitivo, tanto no banco quanto na API e Angular.
+- [ ] Não criar tabela cas. O ca da configuração não precisa de FK para epis.ca: vários objetos podem compartilhar o mesmo CA.
+- [ ] Aplicar a mesma antecedência a todos os objetos do mesmo CA, respeitando o vencimento individual.
+- [ ] Migrar as 25 regras de dias_notificacao_epi para as duas tabelas. Mapear as 21 regras textuais NR-xx para IDs reais; resolver NR-00 explicitamente, sem presumir que o ID é zero.
+- [ ] Atualizar entidades, repositórios, requests/responses, services, controllers e telas para os nomes ca/nr/diasAviso. O Java revisado ainda aponta para dias_notificacao, diferente da tabela real dias_notificacao_epi.
+- [ ] Definir comportamento padrão quando não existir configuração.
+- [ ] Remover tabela antiga somente depois de validar migração e atualizar consumidores.
+
+## Exportar arquivos — parcial
+
+- [x] Botões de exportação de EPI e download local implementados.
+- [x] Gerador de XML estruturado implementado em busca-epi.ts; validar abertura/conteúdo antes de considerar concluído.
+- [ ] Gerar PDF verdadeiro: atualmente é texto simples salvo com extensão .pdf.
+- [ ] Gerar XLSX verdadeiro: atualmente é texto simples salvo com extensão .xlsx.
+- [ ] Gerar ODF no formato escolhido: atualmente é texto simples salvo com extensão .odf.
+- [ ] Usar MIME types corretos; respeitar filtros, cabeçalhos, datas e acentos.
+- [ ] Verificar arquivo abrindo em leitor PDF e aplicativo de planilha.
+- [ ] Definir e implementar exportações equivalentes para funcionários/treinamentos conforme necessidade.
+
+## Padronizar frontend de criação — pendente
+
+- [ ] Usar o mesmo padrão nos cadastros EPI, treinamento e funcionário: cabeçalho, largura, espaçamento, campos, ações Salvar/Cancelar, obrigatoriedade, validações e mensagens.
+- [ ] Separar claramente filtros de busca e campos de criação: o formulário de EPI atual mistura os dois.
+- [ ] Uniformizar comportamento de abertura/fechamento e confirmação entre criação e edição.
+- [ ] Garantir estados de carregamento, falha e sucesso e responsividade.
+- [ ] Conferir visualmente as três telas após implementação. A revisão atual é apenas do código; classes comuns existentes não comprovam padronização completa.
+
+## Cargo e setor sem opções fixas — pendente
+
+- [ ] Remover arrays readonly cargos e setores de gerenciar-funcionarios.ts.
+- [ ] Permitir digitar novo cargo/setor no cadastro e edição.
+- [ ] Sugerir valores já cadastrados, sem restringir a seleção à lista.
+- [ ] Alimentar os filtros com valores reais dos funcionários, sem lista fixa.
+- [ ] Começar campos vazios: Ex.: Compras e Ex.: Metalúrgico I devem ser placeholders, não valores enviados ao banco.
+- [ ] Manter limites do backend (40 caracteres) e normalizar espaços.
+
+## Autocomplete de CA — pendente
+
+- [ ] Ao digitar CA, buscar CAs/nome dos EPIs cadastrados; sugerir correspondências parciais sem repetir CA/nome por objeto físico.
+- [ ] Ao selecionar sugestão, preencher CA e nome automaticamente; manter IDs dos objetos independentes.
+- [ ] Permitir nome manual se não houver resultado.
+- [ ] Implementar busca limitada no backend e debounce/cancelamento no Angular; seleção por teclado, carregamento e mensagens de erro/vazio.
+
+## Entregas e objetos físicos — pendente
+
+- [ ] Cada epis.id representa um objeto; manter substituido no EPI. Não permitir dois funcionários simultâneos.
+- [ ] Adotar entregas_epi + entrega_epi_itens como fonte oficial. Migrar o registro de entregas_epis e reconciliar os 2 vínculos epi_funcionarios antes de retirar estruturas redundantes.
+- [ ] Acrescentar responsável e chave do arquivo da ficha ao cabeçalho; hoje há nome/tipo, sem caminho ou conteúdo.
+- [ ] Acrescentar encerramento/motivo e item anterior aos itens; índice único parcial em epi_id para entregas abertas.
+- [ ] Salvar entrega, substituição e descarte em transações; confirmar sucesso na tela somente após retorno da API.
+- [ ] Selecionar funcionario.id e epi.id reais; remover catálogos e entregas mockados.
+- [ ] Bloquear entrega de objeto já entregue, descartado ou substituído.
+- [ ] Não inventar datas/responsáveis ausentes nos registros legados.
+
+## Estrutura final das demais tabelas
+
+| Tabela | Estrutura / ajuste |
+| --- | --- |
+| funcionarios | Manter id,nome,cpf,cargo,setor,permissoes,status; auditar e criar UNIQUE(cpf). |
+| nrs | id numérico manual como número da NR; nome. |
+| funcionarios_nrs | Manter id,funcionario_id FK,nr_id FK obrigatório; UNIQUE(funcionario_id,nr_id). |
+| epis | id por objeto; ca INTEGER obrigatório, sem UNIQUE nem FK de CA; nome,lote,vencimento,substituido; acrescentar descarte e motivo opcionais. |
+| entregas_epi | id,funcionario_id FK,data_entrega,criada_em,ficha_nome,ficha_tipo_conteudo; acrescentar responsável FK e chave de arquivo. |
+| entrega_epi_itens | id,entrega_id FK,epi_id FK; UNIQUE(entrega_id,epi_id); acrescentar encerramento/motivo,item_anterior_id opcional FK e unicidade de objeto em entrega aberta. |
+| dias_notificacao_epis | id PK,ca INTEGER UNIQUE obrigatório,dias_aviso INTEGER positivo obrigatório. |
+| dias_notificacao_treinamentos | id PK,nr INTEGER UNIQUE obrigatório FK nrs.id,dias_aviso INTEGER positivo obrigatório. |
+| treinamentos | id,nome,nr_id FK,validade_meses positiva; migrar dados individuais para turma/participação antes de retirar colunas antigas. |
+| turmas_treinamento | Manter id,data,horario,nome e dados de documento; acrescentar treinamento_id FK, substituir nr textual pelo relacionamento e manter vencimento padrão se necessário. Preservar documento_conteudo BYTEA ao migrar anexos. |
+| presencas_treinamento | Manter id,turma_id FK,funcionario_id FK,presente,atualizado_em e UNIQUE existente; acrescentar conclusão e vencimento individuais. |
+| relatos_epi | Manter id,situacao,comentario,criado_em; ligar ao item da entrega para registrar posse; migrar anexos além de nomes_arquivos. |
+| documentos (proposta) | id,nome_original,chave_arquivo,mime_type,tamanho_bytes,enviado_por FK,criado_em e vínculo com entrega/turma/relato. |
+| historico_alteracoes (proposta) | id,autor_id FK opcional,data,entidade,registro_id,acao,antes/depois JSONB. |
+| usuarios (proposta) | id,funcionario_id FK UNIQUE,senha_hash,ativo, se mantida autenticação própria. |
+
+Tabelas a retirar apenas após migração validada: entregas_epis, epi_funcionarios e dias_notificacao_epi. Não criar cas.
+
+## Demais integrações e correções
+
+- [ ] Conectar treinamentos, turmas, presenças, relatos, históricos, portal e dashboard aos dados reais; reaproveitar tabelas existentes no Supabase.
+- [ ] Implementar upload persistido e associação de documentos.
+- [ ] Implementar autenticação e autorização no backend; retirar login fixo e perfil simulado.
+- [ ] Corrigir rota /epi/cadastro e conferir rotas de treinamento.
+- [ ] Corrigir fetch dos funcionários em EpiRepository.findAll(Sort) e limite transacional de conversão para DTO.
+- [ ] Remover EpiService duplicado em epi-status.ts.
+- [ ] Remover senha padrão do application.properties e trocar credencial exposta.
+- [ ] Criar migrações versionadas, conferir dados não numéricos e não depender de ddl-auto=update.
+- [ ] Revisar RLS/privilégios da Data API: as 13 tabelas públicas estavam sem RLS na inspeção anterior.
+- [ ] Verificar persistência após recarga, migração das regras, CA compartilhado, CA/NR de mesmo número, concorrência de entrega, substituição e exportações reais.
+
+
+## Checklist anterior para referência
+
+O status consolidado acima prevalece sobre as marcações históricas abaixo.
+
 # Site Development TODO
 ## TODO - Migração completa para Java/PostgreSQL
 
