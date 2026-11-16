@@ -2,6 +2,19 @@
 
 Status verificado por leitura do código nas revisões backend b4644751aa6c392aa853c86381ab028eff949fb9 e frontend af7db6dd55b42e1cca9678d1d5159a91089830dc. Não houve teste de execução nesta revisão. As estruturas do Supabase foram consultadas anteriormente. Este documento substitui as propostas anteriores de cas e de tabela única de notificações.
 
+
+## Implementações confirmadas — status das caixas
+
+Marcação de implementação por inspeção do código; testes integrados continuam pendentes.
+
+- [x] PATCH de funcionário implementado na API.
+- [x] Catálogo de NRs carregado pela API na gestão de funcionários, sem lista fixa nrOptions.
+- [x] Pesquisa de NR pela descrição implementada no frontend.
+- [x] Seleção de funcionários em entregas e treinamentos consulta a API.
+- [x] CRUD de EPI e cadastro em lote implementados na API; formulário atual chama POST /epis/bulk.
+- [x] Filtros locais de Busca EPI ligados aos campos da tela.
+- [x] Download de relatório e gerador XML implementados; validar arquivos e concluir formatos PDF/XLSX/ODF permanece pendente.
+
 ## NR — arquivos já implementados
 
 - [x] Model: src/main/java/br/com/tst/model/NR.java.
@@ -199,7 +212,7 @@ O status consolidado acima prevalece sobre as marcações históricas abaixo.
 ## TODO - Migração completa para Java/PostgreSQL
 
 ### Funcionários
-- [ ] Implementar PATCH `/funcionarios/{id}` na API Java.
+- [x] Implementar PATCH `/funcionarios/{id}` na API Java.
 - [ ] Confirmar que GET/POST/PUT/PATCH/DELETE usam o mesmo contrato:
   `permissoes`, `nRs` e `status`.
 - [ ] Remover definitivamente qualquer lista mockada de funcionários.
@@ -207,15 +220,15 @@ O status consolidado acima prevalece sobre as marcações históricas abaixo.
 - [ ] Centralizar a conversão dos status `At`, `Af` e `In` no frontend.
 
 ### NRs
-- [ ] Criar entidade Java `Nr`.
-- [ ] Criar tabela PostgreSQL de NRs.
-- [ ] Criar GET `/nrs`.
-- [ ] Criar POST `/nrs`.
-- [ ] Carregar as NRs existentes do banco no Angular.
-- [ ] Remover a lista fixa `nrOptions` de `gerenciar-funcionarios.ts`.
+- [x] Criar entidade Java `Nr`.
+- [x] Criar tabela PostgreSQL de NRs.
+- [x] Criar GET `/nrs`.
+- [x] Criar POST `/nrs`.
+- [x] Carregar as NRs existentes do banco no Angular.
+- [x] Remover a lista fixa `nrOptions` de `gerenciar-funcionarios.ts`.
 - [ ] Permitir pesquisar NR por número parcial:
       `7` → `07`, `17`, `27`, `37`.
-- [ ] Permitir pesquisar NR pela descrição.
+- [x] Permitir pesquisar NR pela descrição.
 - [ ] Criar nova NR com confirmação.
 - [ ] Impedir número de NR duplicado.
 - [ ] Impedir descrição completa idêntica.
@@ -245,7 +258,7 @@ O status consolidado acima prevalece sobre as marcações históricas abaixo.
 - [ ] Implementar vínculo treinamento ↔ funcionário.
 - [ ] Implementar presença no banco.
 - [ ] Implementar histórico de alterações de treinamento.
-- [ ] Implementar busca de funcionários usando dados do banco.
+- [x] Implementar busca de funcionários usando dados do banco.
 - [ ] Remover todos os dados hardcoded das telas de treinamento.
 
 ### Portal do Funcionário
