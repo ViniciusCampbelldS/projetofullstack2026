@@ -1,3 +1,5 @@
+import {Subject, timer, of, switchMap, catchError, distinctUntilChanged, finalize} from 'rxjs';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 // EpiRequest é usado para cadastrar um único EPI.
@@ -5,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 // Importa os modelos utilizados no cadastro individual/em lote e na edição.
 import { EpiCreateRequest, EpiRequest, EpiResponse, EpiUpdateRequest } from '../../../models/epi';
 import { EpiService } from '../../..//services/epi.service';
-import { Component, OnInit, effect, inject } from '@angular/core';
+import { Component, OnInit, effect, inject, Input, DestroyRef } from '@angular/core';
 import { NotificacaoService, EpiMonitorado } from '../../../services/notificacao';
 import { AuthService } from '../../../services/auth/auth';
 
@@ -54,6 +56,35 @@ interface BuscaEpiRow {
   styleUrl: './busca-epi.scss',
 })
 export class BuscaEpi implements OnInit {
+  @Input() modoCadastro=false;
+  salvando=false;
+  carregando=false;
+  sugestoesCa:Array<{ca:number;nome:string}>=[];
+  carregandoSugestoes=false;
+  erroSugestoes='';
+  indiceSugestao=-1;
+  private caSelecionado='';
+  private readonly caBusca=new Subject<string>();
+  private readonly destroyRef=inject(DestroyRef);
+  constructor(){
+    this.caBusca.pipe(distinctUntilChanged(),switchMap(ca=>{
+      this.sugestoesCa=[];this.indiceSugestao=-1;this.erroSugestoes='';
+      if(!this.modoCadastro || !/^\d+$/.test(ca)){this.carregandoSugestoes=false;return of([]);}
+      this.carregandoSugestoes=true;
+      return timer(250).pipe(switchMap(()=>this.epiService.sugestoes(ca)),catchError(()=>{this.erroSugestoes='Não foi possível buscar o CA. Você pode preencher o nome manualmente.';return of([]);}),finalize(()=>this.carregandoSugestoes=false));
+    }),takeUntilDestroyed(this.destroyRef)).subscribe(items=>this.sugestoesCa=items);
+  }
+  alterarCa(){
+    if(this.caSelecionado && this.caSelecionado!==this.form.ca){this.form.nome='';this.caSelecionado='';}
+    this.caBusca.next(this.form.ca.trim());if(!this.modoCadastro)this.aplicarFiltros();
+  }
+  selecionarSugestao(s:{ca:number;nome:string}){this.caBusca.next('');this.form.ca=String(s.ca);this.form.nome=s.nome;this.caSelecionado=this.form.ca;this.sugestoesCa=[];this.indiceSugestao=-1;}
+  navegarSugestoes(e:KeyboardEvent){
+    if(e.key==='Escape'){this.caBusca.next('');return;}
+    if(!this.sugestoesCa.length)return;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const d=e.key==='ArrowDown'?1:-1;this.indiceSugestao=(this.indiceSugestao+d+this.sugestoesCa.length)%this.sugestoesCa.length;}
+    if(e.key==='Enter'&&this.indiceSugestao>=0){e.preventDefault();this.selecionarSugestao(this.sugestoesCa[this.indiceSugestao]);}
+  }
   private readonly epiService = inject(EpiService);
   private notificacaoService = inject(NotificacaoService);
   private authService = inject(AuthService);
@@ -93,12 +124,13 @@ export class BuscaEpi implements OnInit {
       this.form.lote.trim() &&
       this.form.validade &&
       Number.isInteger(this.form.quantidade) &&
-      this.form.quantidade > 0,
+      this.form.quantidade > 0 && this.form.quantidade <= 1000,
     );
   }
 
   carregarEpis(): void {
-    this.epiService.listar().subscribe({
+    this.carregando=true;this.erro="";
+    this.epiService.listar().pipe(finalize(()=>this.carregando=false)).subscribe({
       next: (epis) => {
         this.epis = this.extrairListaEpis(epis).map((epi) => this.mapearEpiParaLinha(epi));
         this.recalcularStatuses();
@@ -111,7 +143,6 @@ export class BuscaEpi implements OnInit {
   }
 
   ngOnInit(): void {
-    this.carregarFallbackLocal();
     this.carregarEpis();
   }
 
@@ -153,6 +184,7 @@ export class BuscaEpi implements OnInit {
    */
   salvarEpi(): void {
     // Verifica se o usuário pode cadastrar EPIs.
+    if (this.salvando)return;
     if (!this.podeEditar) {
       this.exportMessage = `Perfil ${this.perfilAtual} não possui permissão para cadastrar EPIs.`;
       return;
@@ -201,7 +233,8 @@ export class BuscaEpi implements OnInit {
     };
 
     // Envia os registros para POST /epis/bulk.
-    this.epiService.cadastrarEmLote(payload).subscribe({
+    this.salvando=true;
+    this.epiService.cadastrarEmLote(payload).pipe(finalize(()=>this.salvando=false)).subscribe({
       // Executado quando o cadastro for concluído.
       next: (response) => {// A resposta em lote contém a propriedade "items".
         // Cada item é um EpiResponse individual.
@@ -255,6 +288,7 @@ export class BuscaEpi implements OnInit {
 	}
 
   aplicarFiltros(): void {
+    if(this.modoCadastro){this.resultados=[...this.epis];return;}
     const nomeFiltro = this.normalizarTexto(this.form.nome);
     const caFiltro = this.normalizarTexto(this.form.ca);
     const validadeFiltro = this.normalizarTexto(this.form.validade);
@@ -612,6 +646,7 @@ export class BuscaEpi implements OnInit {
   }
 
   private limparCadastro(): void {
+    this.caBusca.next('');this.caSelecionado='';
     this.form = {
       ...this.form,
       nome: '',

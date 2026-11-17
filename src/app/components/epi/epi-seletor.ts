@@ -23,14 +23,14 @@ export class EpiSeletor implements OnInit {
   ngOnInit(): void {
     this.route.data.subscribe((data) => {
       const view = data['view'] as SstView | undefined;
-      if (view === 'busca' || view === 'entrega' || view === 'historico') {
+      if (view === 'cadastro' || view === 'busca' || view === 'entrega' || view === 'historico') {
         this.activeSstView = view;
       }
     });
 
     this.route.queryParams.subscribe((params) => {
       const view = params['view'] as SstView | undefined;
-      if (view === 'busca' || view === 'entrega' || view === 'historico') {
+      if (view === 'cadastro' || view === 'busca' || view === 'entrega' || view === 'historico') {
         this.activeSstView = view;
       }
     });

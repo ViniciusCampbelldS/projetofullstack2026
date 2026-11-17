@@ -46,6 +46,8 @@ export const routes: Routes = [
     canActivate: [tstGuard]
   },
 
+  { path: 'epi/cadastro', component: EpiSeletor, data: { view: 'cadastro' }, canActivate: [tstGuard] },
+
   // treinamento
   {
     path: 'treinamento',
