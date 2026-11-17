@@ -6,6 +6,7 @@ import { Homepage } from './components/geral/homepage/homepage';
 import { authGuard, tstGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
+ {path:'redefinir-senha',loadComponent:()=>import('./components/geral/login/redefinir-senha').then(m=>m.RedefinirSenha)},
 
   // login que e a unica pagina liberada sem autenticação
   {

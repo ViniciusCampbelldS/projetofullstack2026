@@ -59,72 +59,9 @@ export class Homepage {
 	// DADOS DO FUNCIONARIO
 	// =====================================================
 
-	readonly funcionario = {
-		nome: 'Joao Pedro da Rocha',
-		matricula: '1001',
-		setor: 'Operacoes',
-		cargo: 'Operador',
-	};
-
-
-	readonly resumoFuncionario = [
-		{
-			rotulo: 'EPIs ativos',
-			valor: '3',
-			detalhe: 'Todos vinculados ao cadastro',
-			icone: 'bi-shield-check',
-			classe: 'good',
-		},
-		{
-			rotulo: 'Treinamentos',
-			valor: '3',
-			detalhe: 'NR 06, NR 10 e NR 35',
-			icone: 'bi-journal-check',
-			classe: 'good',
-		},
-		{
-			rotulo: 'Proximo vencimento',
-			valor: '20/08',
-			detalhe: 'NR 35 vence em breve',
-			icone: 'bi-exclamation-triangle',
-			classe: 'warning',
-		},
-		{
-			rotulo: 'Pendencias',
-			valor: '1',
-			detalhe: 'Requer acompanhamento',
-			icone: 'bi-clipboard-pulse',
-			classe: 'warning',
-		},
-	];
-
-
-	readonly pendenciasFuncionario = [
-		{
-			titulo: 'NR 35 - Trabalho em Altura',
-			detalhe: 'Validade ate 20/08/2026.',
-			status: 'Proximo',
-			classe: 'status-warning',
-			icone: 'bi-cone-striped',
-		},
-		{
-			titulo: 'Ficha de entrega de EPI',
-			detalhe:
-				'Documentos de EPI disponiveis para consulta.',
-			status: 'Em dia',
-			classe: 'status-good',
-			icone: 'bi-file-earmark-check',
-		},
-		{
-			titulo: 'Relato de estado dos EPIs',
-			detalhe:
-				'Nenhum relato pendente no momento.',
-			status: 'Em dia',
-			classe: 'status-good',
-			icone: 'bi-clipboard2-check',
-		},
-	];
-
+    get funcionario(){const u=this.authService.usuario;return {nome:u?.nome??'',matricula:String(u?.id??''),setor:u?.setor??'',cargo:u?.cargo??''};}
+    get resumoFuncionario(){return [{rotulo:'EPIs vinculados',valor:String(this.notificacaoService.totalEpis),detalhe:'Dados do seu cadastro',icone:'bi-shield-check',classe:'good'}];}
+    readonly pendenciasFuncionario: Array<{titulo:string;detalhe:string;status:string;classe:string;icone:string}>=[];
 
 	// =====================================================
 	// SAUDACAO

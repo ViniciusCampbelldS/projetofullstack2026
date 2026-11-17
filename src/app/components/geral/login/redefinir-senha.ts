@@ -1,0 +1,6 @@
+import {Component,inject} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {ActivatedRoute,RouterLink} from '@angular/router';
+import {AuthService} from '../../../services/auth/auth';
+@Component({standalone:true,imports:[FormsModule,RouterLink],template:`<section><h1>Redefinir senha</h1><form (ngSubmit)="salvar()"><label>Nova senha (8 a 72 caracteres)<input name="senha" type="password" [(ngModel)]="senha" minlength="8" maxlength="72" required autocomplete="new-password"/></label><label>Confirmar senha<input name="confirmacao" type="password" [(ngModel)]="confirmacao" required autocomplete="new-password"/></label><button [disabled]="salvando">Salvar</button></form><p role="status">{{mensagem}}</p><a routerLink="/login">Voltar ao login</a></section>`})
+export class RedefinirSenha {senha='';confirmacao='';mensagem='';salvando=false;private route=inject(ActivatedRoute);private auth=inject(AuthService);salvar(){if(this.senha!==this.confirmacao){this.mensagem='As senhas não conferem.';return;}this.salvando=true;this.auth.redefinir(this.route.snapshot.queryParamMap.get('token')??'',this.senha).subscribe({next:()=>{this.salvando=false;this.mensagem='Senha redefinida. Entre novamente.';},error:()=>{this.salvando=false;this.mensagem='Link inválido, expirado ou indisponível.';}});}}

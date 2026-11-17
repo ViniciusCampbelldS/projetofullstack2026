@@ -1,5 +1,19 @@
 # TODO consolidado — revisão de 16/11/2026
 
+## Etapas 1–2 implementadas — 16/11/2026
+
+- [x] Migração transacional de CA inteiro, regras separadas, NR manual e associação por nr_id, preservando dados legados.
+- [x] Campos de e-mail fictício e credenciais na própria funcionarios, sem tabela usuarios.
+- [x] Login por CPF/e-mail, senha com BCrypt, sessão expirada/revogável e perfil vindo do banco.
+- [x] Matriz autorizada: TST EPI/NR/treinamentos; RH funcionários; ADMIN/Gerência tudo; Operário próprios dados/relatos.
+- [x] API e interface de definição de senha por ADMIN/Gerência, sem senha padrão no código.
+- [x] Recuperação DEMONSTRATIVA sem envio conforme decisão do usuário; mecanismo de token temporário/uso único verificado com e-mail simulado.
+- [x] Portal e identidade deixam de usar exemplos fixos; dados próprios e notificações são consultados pela sessão.
+- [x] Verificação Java 24, testes de autenticação, migração PostgreSQL local e build de produção Angular.
+- [ ] Concluir upload de anexos, CRUD persistido de treinamentos e consolidação dos modelos de entrega nas próximas etapas.
+
+Detalhes, execução e limites em IMPLEMENTACAO-1-2.md no backend. A recuperação real por e-mail está fora do escopo por solicitação expressa do usuário.
+
 Status verificado por leitura do código nas revisões backend b4644751aa6c392aa853c86381ab028eff949fb9 e frontend af7db6dd55b42e1cca9678d1d5159a91089830dc. Não houve teste de execução nesta revisão. As estruturas do Supabase foram consultadas anteriormente. Este documento substitui as propostas anteriores de cas e de tabela única de notificações.
 
 

@@ -31,6 +31,8 @@ export class FuncionarioService {
 	 *
 	 * Lista todos os funcionários.
 	 */
+ definirSenha(id:number,senha:string){return this.http.post<void>(`${environment.apiUrl}/funcionarios/${id}/senha`,{senha});}
+
 	listar(): Observable<Funcionario[]> {
 		return this.http.get<Funcionario[]>(this.apiFuncionarios);
 	}

@@ -186,7 +186,7 @@
             </button>
 
             <div class="notification-rules">
-              @for (regra of regrasAviso; track regra.id) {
+              @for (regra of regrasAviso; track (regra.isNorma ? "nr-" : "ca-") + regra.id) {
                 <div class="notification-rule">
                   <span><strong>{{ regra.isNorma ? 'NR' : 'CA' }} {{ regra.caOuNr }}</strong> · {{ regra.diasAviso }} dias</span>
                   <button type="button" (click)="editarRegraAviso(regra)">Editar</button>

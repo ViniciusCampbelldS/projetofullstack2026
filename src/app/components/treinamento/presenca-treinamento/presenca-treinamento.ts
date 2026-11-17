@@ -1,3 +1,4 @@
+import {AuthService} from '../../../services/auth/auth';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -67,7 +68,7 @@ export class PresencaTreinamento implements OnInit {
     },
   ];
 
-  constructor(private readonly funcionarioService: FuncionarioService) {
+  constructor(private readonly funcionarioService: FuncionarioService,private readonly auth:AuthService) {
     const turmaInicial = this.turmaSelecionada;
 
     if (turmaInicial) {
@@ -119,7 +120,7 @@ export class PresencaTreinamento implements OnInit {
   }
 
   get podeCriar(): boolean {
-    return Boolean(this.treinamento && this.data && this.horario && this.participantes.length > 0);
+    return this.auth.podeEditarTreinamento() && Boolean(this.treinamento && this.data && this.horario && this.participantes.length > 0);
   }
 
   get filteredTurmas(): TurmaTreinamento[] {

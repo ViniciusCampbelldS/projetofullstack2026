@@ -22,6 +22,9 @@ export class EpiService {
 	// Endpoint principal dos EPIs.
 	private readonly apiEpis = `${environment.apiUrl}/epis`;
 
+ meusEpis(){return this.http.get<Array<{id:number;ca:number;nome:string;vencimento:string;substituido:boolean}>>(`${environment.apiUrl}/portal/epis`);}
+ relatar(epiId:number,situacao:string,comentario:string){return this.http.post<void>(`${environment.apiUrl}/portal/relatos`,{epiId,situacao,comentario});}
+
 	// GET /epis
 	//
 	// Lista todos os EPIs.

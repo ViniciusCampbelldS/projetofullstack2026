@@ -137,7 +137,7 @@
           <i class="bi bi-search"></i>
           Filtrar
         </button>
-        <button class="btn btn-brand" type="button" (click)="adicionarNovoTreinamento()">Novo treinamento/Abrir Turma</button>
+        <button class="btn btn-brand" type="button" [disabled]="!podeEditarTreinamento" (click)="adicionarNovoTreinamento()">Novo treinamento/Abrir Turma</button>
       </div>
     </div>
 	<div class="selected-panel">

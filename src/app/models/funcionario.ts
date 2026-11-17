@@ -3,6 +3,7 @@ export interface Funcionario {
 
 	id: number;
 	nome: string;
+ email?: string | null;
 	cpf: string;
 	cargo: string;
 	setor: string;
@@ -41,6 +42,7 @@ export type FuncionarioStatusFiltro =
 // Payload enviado pelo Angular para POST e PUT ( para cadastro / alteração.)
 export interface FuncionarioRequest {
 	nome: string;
+ email?: string | null;
 	cargo: string;
 	cpf: string;
 	setor: string;
@@ -53,6 +55,7 @@ export interface FuncionarioRequest {
 export interface FuncionarioResponse {
 	id: number;
 	nome: string;
+ email?: string | null;
 	cargo: string;
 	cpf: string;
 	setor: string;

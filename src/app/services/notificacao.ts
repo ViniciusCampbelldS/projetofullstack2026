@@ -1,6 +1,7 @@
+import {AuthService} from './auth/auth';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, forkJoin, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface EpiMonitorado {
@@ -25,6 +26,8 @@ export class NotificacaoService {
 
   private readonly http = inject(HttpClient);
   private readonly apiAvisos = `${environment.apiUrl}/dias-notificacao`;
+  private endpoint(norma:boolean){return this.apiAvisos+(norma?'-treinamentos':'-epis');}
+  private converter(r:{id:number;ca?:number;nr?:number;diasAviso:number},isNorma:boolean):RegraAviso{return {id:r.id,caOuNr:String(isNorma?r.nr:r.ca),diasAviso:r.diasAviso,isNorma};}
   private readonly regrasAvisoState = signal<RegraAviso[]>([]);
   readonly regrasAviso = this.regrasAvisoState.asReadonly();
   private readonly diasPadrao = 30;
@@ -34,41 +37,19 @@ export class NotificacaoService {
      EPIs MONITORADOS
   ========================================= */
 
-  readonly episMonitorados: EpiMonitorado[] = [
-    {
-      id: 1,
-      ca: '18695',
-      nome: 'Capacete em Termoplástico de Bombeiro Visor de 6" Modelo LTX Amarelo Bullard',
-      funcionario: 'João Pedro da Rocha de Alcântara',
-      vencimento: '2026-12-20',
-    },
-
-    {
-      id: 2,
-      ca: '34456',
-      nome: 'Luva Anticorte Cut Oil Volk',
-      funcionario: 'Fernanda Beatriz de Lima Barreto',
-      vencimento: '2026-08-20',
-    },
-
-    {
-      id: 3,
-      ca: '51403',
-      nome: 'Bota de Segurança Gogowear KW2024 100% Couro Marrom Eletricista',
-      funcionario: 'Marcos Paulo Ferreira Pereira Filho',
-      vencimento: '2026-08-01',
-    },
-  ];
+  episMonitorados:EpiMonitorado[]=[];
+  private avisosProprios=new Map<string,number>();
+  private readonly auth=inject(AuthService);
+  carregarEpis(){const url=this.auth.podeVerAdministracao()?`${environment.apiUrl}/epis`:`${environment.apiUrl}/portal/epis`;return this.http.get<any[]>(url).pipe(tap(items=>{this.avisosProprios=new Map(items.map(e=>[String(e.ca),e.diasAviso??30]));this.episMonitorados=items.map(e=>({id:e.id,ca:String(e.ca),nome:e.nome,funcionario:e.funcionarios?.map((f:any)=>f.nome).join(', ')??'',vencimento:e.vencimento}));}));}
 
 
   carregarRegrasAviso(): Observable<RegraAviso[]> {
-    return this.http.get<RegraAviso[]>(this.apiAvisos).pipe(
-      tap((regras) => this.regrasAvisoState.set(regras)),
-    );
+    return forkJoin([this.http.get<any[]>(this.endpoint(false)),this.http.get<any[]>(this.endpoint(true))]).pipe(map(([epis,nrs])=>[...epis.map(r=>this.converter(r,false)),...nrs.map(r=>this.converter(r,true))]),tap(regras=>this.regrasAvisoState.set(regras)));
   }
 
   obterDiasAviso(caOuNr: string, isNorma: boolean): number {
     const chave = this.normalizarCaOuNr(caOuNr);
+    if(!this.auth.podeVerAdministracao())return this.avisosProprios.get(chave)??30;
     return this.regrasAvisoState().find(
       (regra) => regra.isNorma === isNorma && this.normalizarCaOuNr(regra.caOuNr) === chave,
     )?.diasAviso ?? this.diasPadrao;
@@ -79,21 +60,23 @@ export class NotificacaoService {
     const existente = this.regrasAvisoState().find(
       (item) => item.isNorma === regra.isNorma && this.normalizarCaOuNr(item.caOuNr) === chave,
     );
+    const payload = regra.isNorma?{nr:Number(regra.caOuNr),diasAviso:regra.diasAviso}:{ca:Number(regra.caOuNr),diasAviso:regra.diasAviso};
     const request = existente
-      ? this.http.put<RegraAviso>(`${this.apiAvisos}/${existente.id}`, regra)
-      : this.http.post<RegraAviso>(this.apiAvisos, regra);
+      ? this.http.put<RegraAviso>(`${this.endpoint(regra.isNorma)}/${existente.id}`, payload)
+      : this.http.post<RegraAviso>(this.endpoint(regra.isNorma), payload);
 
     return request.pipe(
+      map(r=>this.converter(r,regra.isNorma)),
       tap((salva) => this.regrasAvisoState.update((regras) => [
-        ...regras.filter((item) => item.id !== salva.id && !(item.isNorma === salva.isNorma && this.normalizarCaOuNr(item.caOuNr) === chave)),
+        ...regras.filter((item) => !(item.id === salva.id && item.isNorma === salva.isNorma) && !(item.isNorma === salva.isNorma && this.normalizarCaOuNr(item.caOuNr) === chave)),
         salva,
       ])),
     );
   }
 
-  excluirRegraAviso(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiAvisos}/${id}`).pipe(
-      tap(() => this.regrasAvisoState.update((regras) => regras.filter((item) => item.id !== id))),
+  excluirRegraAviso(id: number, isNorma: boolean): Observable<void> {
+    return this.http.delete<void>(`${this.endpoint(isNorma)}/${id}`).pipe(
+      tap(() => this.regrasAvisoState.update((regras) => regras.filter((item) => !(item.id === id && item.isNorma === isNorma)))),
     );
   }
 

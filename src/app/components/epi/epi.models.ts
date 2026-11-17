@@ -21,6 +21,7 @@ export interface EpiRecord {
 }
 
 export interface EmployeeEpi {
+ objectKey?:string;
   ca: string;
   name: string;
   deliveredAt: string;

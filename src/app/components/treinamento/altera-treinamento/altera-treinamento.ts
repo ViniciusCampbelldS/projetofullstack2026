@@ -156,7 +156,7 @@ export class AlteraTreinamento implements OnInit {
   }
 
   salvarEdicaoTreinamento(): void {
-    if (!this.treinamentoEditando) {
+    if (!this.podeEditarTreinamento || !this.treinamentoEditando) {
       return;
     }
 
@@ -198,6 +198,7 @@ export class AlteraTreinamento implements OnInit {
   }
 
   adicionarNovoTreinamento(): void {
+ if(!this.podeEditarTreinamento)return;
     const funcionarios = this.funcionariosSelecionadosNomes || 'Funcionarios nao vinculados';
     const proximoId = Math.max(...this.treinamentos.map((treinamento) => treinamento.id), 0) + 1;
 

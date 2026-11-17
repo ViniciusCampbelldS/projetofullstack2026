@@ -89,7 +89,7 @@ export class BuscaEpi implements OnInit {
   get podeSalvar(): boolean {
     return Boolean(
       this.form.nome.trim() &&
-      this.form.ca.trim() &&
+      /^\d+$/.test(this.form.ca.trim()) && Number(this.form.ca)>0 && Number(this.form.ca)<=2147483647 &&
       this.form.lote.trim() &&
       this.form.validade &&
       Number.isInteger(this.form.quantidade) &&
@@ -172,7 +172,7 @@ export class BuscaEpi implements OnInit {
      */
     const epiBase: EpiRequest = {
       nome: this.form.nome.trim(),
-      ca: this.form.ca.trim(),
+      ca: Number(this.form.ca),
       lote: this.form.lote.trim(),
       // O input type="date" fornece yyyy-MM-dd.
       // Não converter para dd/MM/yyyy.
@@ -314,7 +314,7 @@ export class BuscaEpi implements OnInit {
     // Monta o objeto completo (todos os campos) exigido pelo PUT /epis/{id}.
     const payload: EpiUpdateRequest = {
       nome: this.editForm.nome.trim(),
-      ca: this.editForm.ca.trim(),
+      ca: Number(this.editForm.ca),
       lote: this.editForm.lote.trim(),
       // O backend Java utiliza "vencimento", não validade.
       vencimento: this.editForm.validade,
@@ -467,7 +467,7 @@ export class BuscaEpi implements OnInit {
       id: epi.id,
       funcionario: epi.funcionario,
       nome: epi.nome,
-      ca: epi.ca,
+      ca: String(epi.ca),
       vencimento: this.formatarData(this.toDate(epi.vencimento)),
       substituido: false,
       status: 'Distante do vencimento',
@@ -487,7 +487,7 @@ export class BuscaEpi implements OnInit {
       // Guarda os IDs para futuras atualizações.
       funcionarioIds: epi.funcionarios?.map((funcionario) => funcionario.id) ?? [],
       nome: epi.nome,
-      ca: epi.ca,
+      ca: String(epi.ca),
       lote: epi.lote ?? '',
       vencimento: this.formatarData(this.toDate(epi.vencimento)),
       // Situação de substituição.

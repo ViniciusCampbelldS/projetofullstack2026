@@ -21,7 +21,7 @@ export const tstGuard: CanActivateFn = () => {
     return router.createUrlTree(['/login']);
   }
 
-  if (authService.obterPerfil() === 'Técnico de Segurança do Trabalho') {
+  if (authService.podeVerAdministracao()) {
     return true;
   }
 

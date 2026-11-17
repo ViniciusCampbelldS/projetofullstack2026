@@ -1,3 +1,4 @@
+<button class="btn btn-soft" type="button" [disabled]="!podeGerenciarNrs" (click)="abrirCatalogoNr()">Catálogo de NRs</button>
 <section class="funcionarios-page">
 	<div class="page-shell">
 		<div class="header-area">
@@ -260,7 +261,8 @@
 			</div>
 
 			<div class="col-md-4">
-				<label class="form-label" for="cpf">CPF</label>
+				<label class="form-label" for="email">E-mail</label><input id="email" class="form-control" type="email" [(ngModel)]="form.email" />
+<label class="form-label" for="cpf">CPF</label>
 				<input id="cpf" class="form-control" type="text" [(ngModel)]="form.cpf" />
 			</div>
 
@@ -284,7 +286,7 @@
 
 			<div class="col-md-4">
 				<label class="form-label" for="perfil">Perfil de acesso</label>
-				<select id="perfil" class="form-select" [(ngModel)]="form.perfil">
+				<select id="perfil" [disabled]="!podeGerenciarPerfis" class="form-select" [(ngModel)]="form.perfil">
 					@for (perfil of perfis; track perfil) {
 					<option [value]="perfil">{{ perfil }}</option>
 					}
@@ -328,7 +330,7 @@
 				}
 			</div>
 
-			@if (podeGerenciarFuncionarios) {
+			@if (podeGerenciarNrs) {
 			<details class="nr-management">
 				<summary>Gerenciar catálogo de NRs ({{ nrs.length }})</summary>
 				<div class="d-grid gap-3 pt-3">
@@ -388,7 +390,8 @@
 		</div>
 	</div>
 
-	<div class="modal-footer">
+	@if(podeGerenciarPerfis && funcionarioEditandoId!==null){<section><label for="senha-inicial">Definir senha (8 a 72 caracteres)</label><input id="senha-inicial" type="password" [(ngModel)]="senhaInicial" minlength="8" maxlength="72" autocomplete="new-password"/><button type="button" (click)="definirSenha()" [disabled]="senhaInicial.length<8">Definir senha</button><p role="status">{{erroSenha}}</p></section>}
+<div class="modal-footer">
 		<button class="btn btn-soft" type="button" (click)="fecharModal()">
 			Cancelar
 		</button>

@@ -3,7 +3,7 @@ import { FuncionarioResponse } from './funcionario';
 export interface Epi {
 	id: number;
 	nome: string;
-	ca: string;
+	ca: number;
 	lote: string;
 	vencimento: string;
 	substituido: boolean;
@@ -14,7 +14,7 @@ export interface Epi {
 // Dados utilizados pelo POST /epis.
 export interface EpiRequest {
 	nome: string;
-	ca: string;
+	ca: number;
 	lote: string;
 	vencimento: string;
 	substituido: boolean;
@@ -41,7 +41,7 @@ export interface EpiBulkCreateResponse {
 export interface EpiResponse {
 	id: number;
 	nome: string;
-	ca: string;
+	ca: number;
 	lote: string;
 	vencimento: string;
 	substituido: boolean;

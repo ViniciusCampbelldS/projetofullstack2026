@@ -2,6 +2,7 @@
 import { FormsModule } from '@angular/forms';
 import {
   Router,
+  NavigationEnd,
   RouterLink,
   RouterLinkActive,
   RouterOutlet,
@@ -49,12 +50,16 @@ export class App {
     private readonly notificacaoService: NotificacaoService,
     private readonly authService: AuthService,
   ) {
-    this.notificacaoService.carregarRegrasAviso().subscribe({
+    if (this.authService.podeVerAdministracao()) this.notificacaoService.carregarRegrasAviso().subscribe({
       error: () => {
         this.erroConfiguracaoAviso = 'Não foi possível carregar as regras de aviso.';
       },
     });
 
+    this.router.events.subscribe(event=>{if(event instanceof NavigationEnd && this.authService.isAuthenticated()){
+      this.notificacaoService.carregarEpis().subscribe({error:()=>{}});
+      if(this.authService.podeVerAdministracao())this.notificacaoService.carregarRegrasAviso().subscribe({error:()=>{}});
+    }});
     this.atualizarPosicaoScroll();
   }
 
@@ -67,7 +72,7 @@ export class App {
   }
 
   get isTst(): boolean {
-    return this.authService.obterPerfil() === 'Técnico de Segurança do Trabalho';
+    return this.authService.podeVerAdministracao();
   }
 
   get isOperario(): boolean {
@@ -156,6 +161,7 @@ export class App {
   ========================================= */
 
   alternarConfiguracao(event?: MouseEvent): void {
+ if(!this.authService.podeEditarEpi())return;
     event?.stopPropagation();
 
     this.configuracaoAberta =
@@ -179,10 +185,11 @@ export class App {
   }
 
   salvarRegraAviso(event?: MouseEvent): void {
+ if(!this.authService.podeEditarEpi())return;
     event?.stopPropagation();
 
     const caOuNr = this.regraCaOuNr.trim();
-    if (!caOuNr || caOuNr.length > 15 || !Number.isInteger(this.diasAviso) || this.diasAviso <= 0) {
+    if (!/^\d+$/.test(caOuNr) || Number(caOuNr)>2147483647 || Number(caOuNr)<(this.isNorma?0:1) || !Number.isInteger(this.diasAviso) || this.diasAviso <= 0) {
       this.erroConfiguracaoAviso = 'Informe CA/NR com até 15 caracteres e dias de aviso inteiro maior que zero.';
       return;
     }
@@ -203,8 +210,9 @@ export class App {
   }
 
   excluirRegraAviso(regra: RegraAviso, event?: MouseEvent): void {
+ if(!this.authService.podeEditarEpi())return;
     event?.stopPropagation();
-    this.notificacaoService.excluirRegraAviso(regra.id).subscribe({
+    this.notificacaoService.excluirRegraAviso(regra.id, regra.isNorma).subscribe({
       error: () => {
         this.erroConfiguracaoAviso = 'Não foi possível excluir a regra de aviso.';
       },

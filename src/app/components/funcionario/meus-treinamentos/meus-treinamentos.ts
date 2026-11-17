@@ -1,8 +1,11 @@
+import {HttpClient} from '@angular/common/http';
+import {environment} from '../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 
 interface EmployeeTraining {
   id: number;
+ diasAviso?:number;
   nr: string;
   trainingDate: string;
   dueDate: string;
@@ -16,32 +19,16 @@ interface EmployeeTraining {
   styleUrl: './meus-treinamentos.scss',
 })
 export class MeusTreinamentos {
-  readonly employeeTrainings: EmployeeTraining[] = [
-    {
-      id: 1,
-      nr: 'NR 06',
-      trainingDate: '05/08/2026',
-      dueDate: '05/08/2027',
-    },
-    {
-      id: 2,
-      nr: 'NR 10',
-      trainingDate: '11/04/2026',
-      dueDate: '11/04/2028',
-    },
-    {
-      id: 3,
-      nr: 'NR 35',
-      trainingDate: '20/08/2025',
-      dueDate: '20/08/2026',
-    },
-  ];
+  employeeTrainings:EmployeeTraining[]=[];
+  erro='';
+  constructor(http:HttpClient){http.get<Array<{id:number;nr:string;data:string;vencimento:string;diasAviso:number}>>(`${environment.apiUrl}/portal/treinamentos`).subscribe({next:items=>{const br=(value:string)=>value?value.split('-').reverse().join('/'):'';this.employeeTrainings=items.map(t=>({id:t.id,nr:t.nr,trainingDate:br(t.data),dueDate:br(t.vencimento),diasAviso:t.diasAviso}));},error:()=>{this.erro='Não foi possível carregar seus treinamentos.';}});}
 
   situacaoTreinamento(treinamento: EmployeeTraining): string {
     const vencimento = this.dataBrParaDate(treinamento.dueDate);
+    if(Number.isNaN(vencimento.getTime()))return "Sem vencimento informado";
     const hoje = this.inicioDoDia(new Date());
     const limite = new Date(hoje);
-    limite.setDate(limite.getDate() + 30);
+    limite.setDate(limite.getDate() + (treinamento.diasAviso??30));
 
     if (vencimento < hoje) {
       return 'Vencido';

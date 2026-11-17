@@ -1,6 +1,9 @@
+import { AuthService } from './services/auth/auth';
+import { firstValueFrom, catchError, of } from 'rxjs';
 // Importa as configurações necessárias para inicializar a aplicação Angular.
 import {
   ApplicationConfig,
+  inject, provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
@@ -18,6 +21,7 @@ import { authInterceptor } from './auth/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideAppInitializer(()=>{const auth=inject(AuthService);return firstValueFrom(auth.inicializar().pipe(catchError(()=>{auth.limpar();return of(null);})));}),
 
     // Captura erros globais da aplicação Angular.
     provideBrowserGlobalErrorListeners(),

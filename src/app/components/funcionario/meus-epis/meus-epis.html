@@ -1,3 +1,5 @@
+<p>Envio de anexos ainda indisponível. Relatos em texto podem ser enviados.</p>
+<p role="alert">{{erro}}</p>
 <section class="portal-dashboard">
   <div class="portal-heading">
     <div>
@@ -25,7 +27,7 @@
       </div>
 
       <div class="epi-list">
-        @for (epi of employeeEpis; track epi.ca) {
+        @for (epi of employeeEpis; track epi.objectKey) {
           <article class="epi-card">
             <div class="epi-icon" aria-hidden="true">
               <i class="bi" [class]="'bi ' + iconeEpi(epi)"></i>
@@ -164,7 +166,7 @@
           <label for="report-images">Anexar imagens</label>
           <input
             id="report-images"
-            type="file"
+            type="file" disabled
             multiple
             accept="image/*"
             (change)="onReportImages($event)"

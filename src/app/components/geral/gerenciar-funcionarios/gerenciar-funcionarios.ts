@@ -16,11 +16,12 @@ import { NrService } from '../../../services/nr.service';
  * O banco gerar o ID sozinho.
  */
 interface FuncionarioForm {
+ email: string;
   nome: string;
   cpf: string;
   setor: string;
   cargo: string;
-  perfil: 'Funcionário' | 'Técnico de Segurança do Trabalho';
+  perfil: 'Funcionário' | 'Técnico de Segurança do Trabalho' | 'RH' | 'Gerência' | 'Administrador';
   nrs: string[];
 }
 
@@ -83,6 +84,7 @@ export class GerenciarFuncionarios implements OnInit {
    * Perfis apresentados para o usuário.
    */
   readonly perfis: FuncionarioForm['perfil'][] = [
+ 'RH','Gerência','Administrador',
     'Funcionário',
     'Técnico de Segurança do Trabalho',
   ];
@@ -110,6 +112,9 @@ export class GerenciarFuncionarios implements OnInit {
   nrErro = '';
   nrSucesso = '';
   nrEditandoId: number | null = null;
+  senhaInicial="";
+  erroSenha="";
+  definirSenha(){if(!this.podeGerenciarPerfis||this.funcionarioEditandoId===null)return;this.funcionarioService.definirSenha(this.funcionarioEditandoId,this.senhaInicial).subscribe({next:()=>{this.senhaInicial="";this.erroSenha="Senha definida; sessões anteriores encerradas.";},error:()=>{this.erroSenha="Não foi possível definir a senha.";}});}
   nrNomeForm = '';
 
   /*
@@ -223,6 +228,10 @@ export class GerenciarFuncionarios implements OnInit {
   /*
    * Retorna o perfil atual do usuário.
    */
+  get podeGerenciarNrs(){return this.authService.podeEditarTreinamento();}
+  get podeGerenciarPerfis(){return ["Administrador","Gerência"].includes(this.authService.obterPerfil());}
+  abrirCatalogoNr(){this.form=this.criarFormVazio();this.modalAberto=true;}
+
   get perfilAtual(): string {
     return this.authService.obterPerfil();
   }
@@ -357,6 +366,7 @@ export class GerenciarFuncionarios implements OnInit {
     this.funcionarioEditandoId = funcionario.id;
 
     this.form = {
+ email: funcionario.email ?? "",
       nome: funcionario.nome,
 
       cpf: funcionario.cpf,
@@ -614,6 +624,7 @@ export class GerenciarFuncionarios implements OnInit {
 	 * Prepara uma NR existente para edição.
 	 */
 	editarNr(nr: Nr): void {
+ if(!this.podeGerenciarNrs)return;
 		this.nrEditandoId = nr.id;
 		this.nrNomeForm = nr.nome;
 		this.nrErro = '';
@@ -629,6 +640,7 @@ export class GerenciarFuncionarios implements OnInit {
 	 * Cria ou atualiza uma NR no catálogo Java.
 	 */
 	salvarNr(): void {
+ if(!this.podeGerenciarNrs)return;
 		const nome = this.nrNomeForm.trim();
 
 		if (!nome) {
@@ -656,7 +668,9 @@ export class GerenciarFuncionarios implements OnInit {
 		this.nrSucesso = '';
 		this.nrSalvando = true;
 
-		const request: NrRequest = { nome };
+		if(!/NR[\s-]*\d+/i.test(nome)){this.nrErro="Informe o número no nome, por exemplo NR 35 - Trabalho em altura.";this.nrSalvando=false;return;}
+		const request: NrRequest = {
+ id: this.nrEditandoId ?? Number(nome.match(/NR[\s-]*(\d+)/i)?.[1]), nome };
 		const operacao = id === null
 			? this.nrService.cadastrar(request)
 			: this.nrService.atualizar(id, request);
@@ -697,6 +711,7 @@ export class GerenciarFuncionarios implements OnInit {
 	 * Remove uma NR do catálogo Java.
 	 */
 	excluirNr(nr: Nr): void {
+ if(!this.podeGerenciarNrs)return;
 		if (!window.confirm(`Deseja realmente excluir a NR "${nr.nome}"?`)) {
 			return;
 		}
@@ -774,25 +789,13 @@ export class GerenciarFuncionarios implements OnInit {
    * Converte o perfil visual para a permissão
    * esperada pela API Java.
    */
-  perfilParaPermissao(perfil: FuncionarioForm['perfil']): string {
-    if (perfil === 'Técnico de Segurança do Trabalho') {
-      return 'tst';
-    }
-
-    return 'field';
-  }
+  perfilParaPermissao(perfil: FuncionarioForm['perfil']):string {return ({'Técnico de Segurança do Trabalho':'tst','Funcionário':'field','RH':'rh','Gerência':'gerencia','Administrador':'ADM'} as Record<string,string>)[perfil]??'field';}
 
   /*
    * Converte a permissão do Java para o texto
    * mostrado no formulário.
    */
-  permissaoParaPerfil(permissao: string): FuncionarioForm['perfil'] {
-    if (permissao === 'tst') {
-      return 'Técnico de Segurança do Trabalho';
-    }
-
-    return 'Funcionário';
-  }
+  permissaoParaPerfil(permissao:string):FuncionarioForm['perfil'] {return ({tst:'Técnico de Segurança do Trabalho',field:'Funcionário',rh:'RH',gerencia:'Gerência',ADM:'Administrador'} as Record<string,FuncionarioForm['perfil']>)[permissao]??'Funcionário';}
 
   /*
    * Converte o texto do status para o código
@@ -821,6 +824,7 @@ export class GerenciarFuncionarios implements OnInit {
   ): FuncionarioRequest {
     return {
       nome: this.form.nome.trim(),
+ email: this.form.email.trim() || null,
 
       cpf: this.form.cpf.replace(/\D/g, ''),
 
@@ -867,6 +871,7 @@ export class GerenciarFuncionarios implements OnInit {
    */
   private criarFormVazio(): FuncionarioForm {
     return {
+      email: "",
       nome: '',
 
       cpf: '',

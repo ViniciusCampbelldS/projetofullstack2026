@@ -4,5 +4,6 @@ export interface Nr {
 }
 
 export interface NrRequest {
+ id: number;
 	nome: string;
 }

@@ -18,7 +18,9 @@ interface EpiDocument {
   styleUrl: './meus-epis.scss',
 })
 export class MeusEpis {
-  employeeEpis: EmployeeEpi[];
+  employeeEpis: EmployeeEpi[] = [];
+  private readonly ids = new Map<string,number>();
+  erro = "";
   selectedEpi: EmployeeEpi | null = null;
   reportState = 'Distante do vencimento';
   selectedReportImages: string[] = [];
@@ -26,21 +28,10 @@ export class MeusEpis {
   reportComment = '';
   reportSent = false;
 
-  readonly documents: EpiDocument[] = [
-    {
-      id: 1,
-      name: 'Ficha de entrega de EPI - Agosto 2026',
-      date: '06/08/2026',
-    },
-    {
-      id: 2,
-      name: 'Termo de responsabilidade de EPI',
-      date: '06/08/2026',
-    },
-  ];
+  readonly documents: EpiDocument[] = [];
 
   constructor(private readonly epiService: EpiService) {
-    this.employeeEpis = this.epiService.getEmployeeEpis();
+    this.epiService.meusEpis().subscribe({next:items=>{this.employeeEpis=items.map(e=>{const key=String(e.id);this.ids.set(key,e.id);return {ca:String(e.ca),name:e.nome,deliveredAt:'',status:e.substituido?'Substituído':'Em uso',objectKey:key};});},error:()=>{this.erro='Não foi possível carregar seus EPIs.';}});
   }
 
   abrirModal(epi: EmployeeEpi): void {
@@ -82,26 +73,8 @@ export class MeusEpis {
       return;
     }
 
-    const reports = this.readStoredReports();
-
-    reports.push({
-      epi: this.selectedEpi.name,
-      ca: this.selectedEpi.ca,
-      state: this.reportState,
-      comment: this.reportComment.trim(),
-      files: [...this.selectedReportFileNames],
-      sentAt: new Date().toISOString(),
-    });
-
-    try {
-      localStorage.setItem('mar-employee-epi-reports', JSON.stringify(reports));
-    } catch {
-      // Mantém o fluxo mesmo se o navegador bloquear localStorage.
-    }
-
-    this.fecharModal();
-    this.reportComment = '';
-    this.reportSent = true;
+    const selected=this.selectedEpi as EmployeeEpi & {objectKey:string};
+    this.epiService.relatar(this.ids.get(selected.objectKey)!,this.reportState,this.reportComment.trim()).subscribe({next:()=>{this.fecharModal();this.reportSent=true;},error:()=>{this.erro='Não foi possível enviar o relato.';}});
   }
 
   visualizarFicha(documento: EpiDocument): void {
