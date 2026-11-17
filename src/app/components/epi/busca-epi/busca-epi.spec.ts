@@ -29,4 +29,19 @@ describe('Cadastro e autocomplete EPI',()=>{
   const request=http.expectOne(base+'/epis/bulk');expect(request.request.method).toBe('POST');expect(request.request.body.epis).toHaveLength(2);expect(request.request.body.epis[0].ca).toBe(12345);expect(request.request.body.epis[0].funcionarioIds).toEqual([]);
   request.flush({items:[]});expect(component.salvando).toBe(false);
  });
+
+ it('substitui pelo ID físico disponível preservando o vínculo no backend e bloqueando clique duplo',()=>{
+  const old={id:11,nome:'Capacete',ca:'12345',funcionario:'Funcionário',funcionarioIds:[7],vencimento:'01/01/2030',status:'Em uso',statusClass:'status-good' as const,substituido:false};
+  component.abrirSubstituicao(old);http.expectOne(base+'/epis/disponiveis').flush([{id:12,ca:12345,nome:'Capacete',lote:'L1',vencimento:'2030-01-01',substituido:false}]);
+  component.novoEpiId=12;component.motivoSubstituicao='Desgaste';component.confirmarSubstituicao();component.confirmarSubstituicao();
+  const req=http.expectOne(base+'/epis/11/substituicao');expect(req.request.method).toBe('POST');expect(req.request.body.novoEpiId).toBe(12);expect(req.request.body.motivo).toBe('Desgaste');expect(req.request.body.funcionarioId).toBeUndefined();req.flush(null);
+  http.expectOne(base+'/epis').flush([]);expect(component.modalSubstituicaoAberto).toBe(false);expect(component.enviandoAcao).toBe(false);
+ });
+ it('registra descarte com motivo e data por POST sem excluir o objeto',()=>{
+  const old={id:11,nome:'Capacete',ca:'12345',funcionario:'Funcionário',funcionarioIds:[7],vencimento:'01/01/2030',status:'Em uso',statusClass:'status-good' as const,substituido:false};
+  component.abrirDescarte(old);component.confirmarDescarte();http.expectNone(base+'/epis/11/descarte');
+  component.motivoDescarte='Danificado';component.confirmarDescarte();const req=http.expectOne(base+'/epis/11/descarte');expect(req.request.method).toBe('POST');expect(req.request.body.motivo).toBe('Danificado');expect(req.request.body.data).toMatch(/^\d{4}-\d{2}-\d{2}$/);req.flush(null);
+  http.expectOne(base+'/epis').flush([{id:11,nome:'Capacete',ca:12345,lote:'L1',vencimento:'2030-01-01',substituido:false,funcionarios:[],descartadoEm:'2026-11-17T00:00:00Z',dataDescarte:'2026-11-16',motivoDescarte:'Danificado',responsavelDescarteId:7}]);
+  expect(component.epis[0].status).toBe('Descartado');expect(component.epis[0].id).toBe(11);expect(component.modalDescarteAberto).toBe(false);
+ });
 });

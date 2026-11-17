@@ -12,13 +12,13 @@
 }
 </div>
 <div class="col-md-6"><label for="epi-nome">Nome do EPI</label><input id="epi-nome" class="form-control" [(ngModel)]="form.nome" (ngModelChange)="aplicarFiltros()" maxlength="600"/></div>
-<div class="col-md-6"><label for="epi-lote">Lote</label><input id="epi-lote" class="form-control" [(ngModel)]="form.lote" maxlength="20"/></div>
+<div class="col-md-6"><label for="epi-lote">Lote</label><input id="epi-lote" class="form-control" [(ngModel)]="form.lote" (ngModelChange)="aplicarFiltros()" maxlength="20"/></div>
 <div class="col-md-6"><label for="epi-validade">Validade</label><input id="epi-validade" class="form-control" type="date" [(ngModel)]="form.validade" (ngModelChange)="aplicarFiltros()"/></div>
 @if(modoCadastro){<div class="col-md-6"><label for="epi-quantidade">Quantidade recebida</label><input id="epi-quantidade" class="form-control" type="number" min="1" max="1000" step="1" [(ngModel)]="form.quantidade"/><small>Cada unidade recebe seu próprio ID.</small></div>}
 @else {
 <div class="col-md-6"><label for="filter-funcionario">Funcionário</label><input id="filter-funcionario" class="form-control" [(ngModel)]="form.funcionario" (ngModelChange)="aplicarFiltros()"/></div>
 <div class="col-md-6"><label for="filter-situacao">Situação</label><input id="filter-situacao" class="form-control" [(ngModel)]="form.situacao" (ngModelChange)="aplicarFiltros()"/></div>
-<label><input type="checkbox" [(ngModel)]="incluirSubstituidos" (ngModelChange)="aplicarFiltros()"/> Incluir substituídos</label>
+<label><input type="checkbox" [(ngModel)]="incluirSubstituidos" (ngModelChange)="aplicarFiltros()"/> Incluir substituídos</label><label><input type="checkbox" [(ngModel)]="incluirDescartados" (ngModelChange)="aplicarFiltros()"/> Incluir descartados</label>
 }
 <div class="col-12 table-actions"><button class="btn btn-soft" type="button" (click)="limpar()" [disabled]="salvando">Limpar</button>@if(modoCadastro){<button class="btn btn-brand" type="button" [disabled]="!podeSalvar||!podeEditar||salvando" (click)="salvarEpi()">{{salvando?'Salvando...':'Salvar EPI'}}</button>}</div>
 </div></div>
@@ -26,7 +26,7 @@
 <article class="list-card"><h2>{{modoCadastro?'Unidades cadastradas':'Resultados'}}</h2>
 <div class="export-actions">@for(formato of ['pdf','xlsx','xml','odf'];track formato){<button class="btn btn-sm btn-outline-brand" type="button" (click)="exportarRelatorio($any(formato))">{{formato.toUpperCase()}}</button>}</div>
 <div class="table-responsive"><table class="table table-hover align-middle epi-table"><thead><tr><th>ID</th><th>Funcionário</th><th>EPI</th><th>CA</th><th>Validade</th><th>Situação</th><th>Ações</th></tr></thead><tbody>
-@for(item of resultados;track item.id){<tr><td>{{item.id}}</td><td>{{item.funcionario}}</td><td>{{item.nome}}</td><td>{{item.ca}}</td><td>{{item.vencimento}}</td><td>{{item.status}} @if(item.substituido){<span>Substituído</span>}</td><td><div class="table-actions"><button type="button" class="btn btn-sm btn-outline-brand" [disabled]="!podeEditar" (click)="abrirEdicao(item)">Editar</button><button type="button" class="btn btn-sm btn-danger-brand" [disabled]="!podeEditar" (click)="abrirDescarte(item)">Exclusão</button></div></td></tr>}
+@for(item of resultados;track item.id){<tr><td>{{item.id}}</td><td>{{item.funcionario}}</td><td>{{item.nome}}</td><td>{{item.ca}}</td><td>{{item.vencimento}}</td><td>{{item.status}} @if(item.descartadoEm){<small> · {{item.dataDescarte | date:'dd/MM/yyyy'}} — {{item.motivoDescarte}} · Responsável #{{item.responsavelDescarteId}}</small>}</td><td><div class="table-actions"><button type="button" class="btn btn-sm btn-outline-brand" [disabled]="!podeEditar||!!item.descartadoEm||!!item.substituido" (click)="abrirEdicao(item)">Editar</button><button type="button" class="btn btn-sm btn-outline-brand" [disabled]="!podeEditar||!!item.descartadoEm||!!item.substituido||!item.funcionarioIds?.length" (click)="abrirSubstituicao(item)">Substituir</button><button type="button" class="btn btn-sm btn-danger-brand" [disabled]="!podeEditar||!!item.descartadoEm" (click)="abrirDescarte(item)">Descartar</button></div></td></tr>}
 @empty{<tr><td colspan="7">Nenhum EPI encontrado.</td></tr>}
 </tbody></table></div></article>
 </div></section>
@@ -72,18 +72,14 @@
 							<input id="edit-epi-validade" class="form-control" type="date" required [(ngModel)]="editForm.validade" />
 						</label>
 					</div>
-					<div class="epi-detail-grid-full">
-						<label class="checkbox-field" for="edit-epi-substituido">
-							<input id="edit-epi-substituido" type="checkbox" [(ngModel)]="editForm.substituido" />
-							<span>Marcar EPI como substituído</span>
-						</label>
-					</div>
+
 				</div>
 			</section>
 
+            @if(erroAcao){<p role="alert">{{erroAcao}}</p>}
 			<footer class="modal-actions">
-				<button class="btn btn-soft" type="button" (click)="fecharModais()">Cancelar</button>
-				<button class="btn btn-brand" type="button" (click)="salvarEdicao()">Salvar edição</button>
+				<button class="btn btn-soft" type="button" [disabled]="enviandoAcao" (click)="fecharModais()">Cancelar</button>
+				<button class="btn btn-brand" type="button" [disabled]="enviandoAcao||!podeEditar" (click)="salvarEdicao()">{{enviandoAcao?'Salvando...':'Salvar edição'}}</button>
 			</footer>
 		</section>
 	</div>
@@ -103,14 +99,26 @@
 			</header>
 
 			<label class="modal-field" for="motivo-descarte">
-				Motivo da exclusão
-				<textarea id="motivo-descarte" class="form-control" rows="4" [(ngModel)]="motivoDescarte" placeholder="Ex.: Registro errado"></textarea>
+				Motivo do descarte
+				<textarea id="motivo-descarte" class="form-control" rows="4" [(ngModel)]="motivoDescarte" placeholder="Ex.: Equipamento danificado sem possibilidade de uso" maxlength="1000"></textarea>
 			</label>
 
+            <label class="modal-field" for="descarte-data">Data do descarte<input id="descarte-data" type="date" class="form-control" [(ngModel)]="dataDescarte" [disabled]="enviandoAcao"/></label>
+            <p>O descarte encerra a posse e preserva o cadastro do objeto.</p>
+            @if(erroAcao){<p role="alert">{{erroAcao}}</p>}
 			<footer class="modal-actions">
-				<button class="btn btn-soft" type="button" (click)="fecharModais()">Cancelar</button>
-				<button class="btn btn-danger-brand" type="button" (click)="confirmarDescarte()">Confirmar exclusão</button>
+				<button class="btn btn-soft" type="button" [disabled]="enviandoAcao" (click)="fecharModais()">Cancelar</button>
+				<button class="btn btn-danger-brand" type="button" [disabled]="!podeDescartar" (click)="confirmarDescarte()">{{enviandoAcao?'Registrando...':'Confirmar descarte'}}</button>
 			</footer>
 		</section>
 	</div>
 }
+
+@if(modalSubstituicaoAberto&&itemSubstituindo){<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="substituicao-title" (click)="fecharModais()"><section class="epi-modal" (click)="$event.stopPropagation()"><header class="modal-header"><h2 id="substituicao-title">Substituir EPI físico #{{itemSubstituindo.id}}</h2><button type="button" aria-label="Fechar" [disabled]="enviandoAcao" (click)="fecharModais()">×</button></header>
+<p>{{itemSubstituindo.nome}} — CA {{itemSubstituindo.ca}} — {{itemSubstituindo.funcionario}}</p><p>O novo objeto será entregue ao mesmo funcionário e o anterior será marcado como substituído.</p>
+@if(carregandoAlternativas){<p role="status">Carregando objetos disponíveis...</p>}
+<label class="modal-field" for="substituicao-novo">Novo objeto físico<select id="substituicao-novo" class="form-select" [(ngModel)]="novoEpiId" [disabled]="carregandoAlternativas||enviandoAcao"><option [ngValue]="null">Selecione uma unidade disponível</option>@for(e of alternativas;track e.id){<option [ngValue]="e.id">#{{e.id}} — {{e.nome}} — CA {{e.ca}} — Lote {{e.lote}}</option>}</select></label>
+@if(!carregandoAlternativas&&!alternativas.length){<p>Nenhum objeto disponível para substituir este EPI.</p>}
+<label class="modal-field" for="substituicao-motivo">Motivo<textarea id="substituicao-motivo" class="form-control" rows="3" maxlength="1000" [(ngModel)]="motivoSubstituicao" [disabled]="enviandoAcao"></textarea></label><label class="modal-field" for="substituicao-data">Data<input id="substituicao-data" class="form-control" type="date" [(ngModel)]="dataSubstituicao" [disabled]="enviandoAcao"/></label>
+@if(erroAcao){<p role="alert">{{erroAcao}}</p>}
+<footer class="modal-actions"><button class="btn btn-soft" type="button" [disabled]="enviandoAcao" (click)="fecharModais()">Cancelar</button><button class="btn btn-brand" type="button" [disabled]="!podeSubstituir" (click)="confirmarSubstituicao()">{{enviandoAcao?'Registrando...':'Confirmar substituição'}}</button></footer></section></div>}

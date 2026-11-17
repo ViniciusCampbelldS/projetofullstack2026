@@ -7,6 +7,10 @@ export interface Epi {
 	lote: string;
 	vencimento: string;
 	substituido: boolean;
+ descartadoEm?:string|null;
+ dataDescarte?:string|null;
+ motivoDescarte?:string|null;
+ responsavelDescarteId?:number|null;
 	// Funcionários vinculados a esse EPI.
 	funcionarios: FuncionarioResponse[];
 }
@@ -45,6 +49,10 @@ export interface EpiResponse {
 	lote: string;
 	vencimento: string;
 	substituido: boolean;
+ descartadoEm?:string|null;
+ dataDescarte?:string|null;
+ motivoDescarte?:string|null;
+ responsavelDescarteId?:number|null;
 	funcionarios: FuncionarioResponse[];
 }
 

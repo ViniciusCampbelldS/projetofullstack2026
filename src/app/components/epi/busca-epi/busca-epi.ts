@@ -42,6 +42,10 @@ interface BuscaEpiRow {
   vencimento: string;
   lote?: string;
   substituido?: boolean;
+  descartadoEm?:string|null;
+  dataDescarte?:string|null;
+  motivoDescarte?:string|null;
+  responsavelDescarteId?:number|null;
   // Situação calculada de vencimento, como "Vencido", "Próximo do vencimento" ou "Distante do vencimento".
   status: string;
   // Classe visual.
@@ -97,6 +101,14 @@ export class BuscaEpi implements OnInit {
   itemSelecionado: BuscaEpiRow | null = null;
   itemEditando: BuscaEpiRow | null = null;
   motivoDescarte = '';
+  dataDescarte=this.hoje();
+  incluirDescartados=false;
+  modalSubstituicaoAberto=false;
+  itemSubstituindo:BuscaEpiRow|null=null;
+  alternativas:EpiResponse[]=[];
+  novoEpiId:number|null=null;
+  motivoSubstituicao='';dataSubstituicao=this.hoje();
+  carregandoAlternativas=false;enviandoAcao=false;erroAcao='';
   incluirSubstituidos = false;
   form: BuscaEpiForm = this.criarFormVazio();
   editForm: BuscaEpiEditForm = this.criarEditFormVazio();
@@ -129,7 +141,7 @@ export class BuscaEpi implements OnInit {
   }
 
   carregarEpis(): void {
-    this.carregando=true;this.erro="";
+    this.carregando=true;this.erro="";this.epis=[];this.resultados=[];
     this.epiService.listar().pipe(finalize(()=>this.carregando=false)).subscribe({
       next: (epis) => {
         this.epis = this.extrairListaEpis(epis).map((epi) => this.mapearEpiParaLinha(epi));
@@ -291,6 +303,7 @@ export class BuscaEpi implements OnInit {
     if(this.modoCadastro){this.resultados=[...this.epis];return;}
     const nomeFiltro = this.normalizarTexto(this.form.nome);
     const caFiltro = this.normalizarTexto(this.form.ca);
+    const loteFiltro=this.normalizarTexto(this.form.lote);
     const validadeFiltro = this.normalizarTexto(this.form.validade);
     const funcionarioFiltro = this.normalizarTexto(this.form.funcionario);
     const situacaoFiltro = this.normalizarTexto(this.form.situacao);
@@ -305,10 +318,11 @@ export class BuscaEpi implements OnInit {
       return (
         (!nomeFiltro || nome.includes(nomeFiltro)) &&
         (!caFiltro || ca.includes(caFiltro)) &&
+        (!loteFiltro || this.normalizarTexto(item.lote).includes(loteFiltro)) &&
         (!validadeFiltro || vencimento.includes(validadeFiltro)) &&
         (!funcionarioFiltro || funcionario.includes(funcionarioFiltro)) &&
         (!situacaoFiltro || situacao.includes(situacaoFiltro)) &&
-        (this.incluirSubstituidos || item.substituido === false)
+        (this.incluirSubstituidos || item.substituido === false) && (this.incluirDescartados || !item.descartadoEm)
       );
     });
   }
@@ -319,6 +333,7 @@ export class BuscaEpi implements OnInit {
       return;
     }
 
+    this.erroAcao='';
     this.itemEditando = item;
     this.editForm = {
       nome: item.nome,
@@ -331,13 +346,13 @@ export class BuscaEpi implements OnInit {
   }
 
   salvarEdicao(): void {
-    if (!this.itemEditando) {
+    if (!this.podeEditar || !this.itemEditando || this.enviandoAcao) {
       return;
     }
 
     if (
       !this.editForm.nome.trim() ||
-      !this.editForm.ca.trim() ||
+      !/^\d+$/.test(this.editForm.ca.trim()) || Number(this.editForm.ca)<=0 || Number(this.editForm.ca)>2147483647 ||
       !this.editForm.lote.trim() ||
       !this.editForm.validade
     ) {
@@ -358,7 +373,8 @@ export class BuscaEpi implements OnInit {
       funcionarioIds: this.itemEditando.funcionarioIds ?? [],
     };
 
-    this.epiService.atualizar(this.itemEditando.id, payload).subscribe({
+    this.enviandoAcao=true;
+    this.epiService.atualizar(this.itemEditando.id, payload).pipe(finalize(()=>this.enviandoAcao=false)).subscribe({
       next: (epi) => {
         this.epis = this.epis.map((item) =>
           item.id === epi.id ? this.mapearEpiParaLinha(epi) : item,
@@ -366,10 +382,10 @@ export class BuscaEpi implements OnInit {
         this.recalcularStatuses();
         this.aplicarFiltros();
         this.exportMessage = `EPI ${epi.nome} atualizado com sucesso.`;
-        this.fecharModais();
+        this.fecharModais(true);
       },
       error: () => {
-        this.exportMessage = 'Não foi possível atualizar o EPI.';
+        this.erroAcao = 'Não foi possível atualizar o EPI.';
       },
     });
   }
@@ -381,30 +397,36 @@ export class BuscaEpi implements OnInit {
     }
 
     this.itemSelecionado = item;
-    this.motivoDescarte = '';
+    if(item.descartadoEm)return;
+    this.motivoDescarte = '';this.dataDescarte=this.hoje();this.erroAcao='';
     this.modalDescarteAberto = true;
   }
 
-  confirmarDescarte(): void {
-    if (!this.itemSelecionado) {
-      return;
-    }
-
-    const item = this.itemSelecionado;
-    this.epiService.excluir(item.id).subscribe({
-      next: () => {
-        this.epis = this.epis.filter((epi) => epi.id !== item.id);
-        this.aplicarFiltros();
-        this.exportMessage = `EPI ${item.nome} excluído com sucesso${this.motivoDescarte ? ': ' + this.motivoDescarte : '.'}`;
-        this.fecharModais();
-      },
-      error: () => {
-        this.exportMessage = 'Não foi possível excluir o EPI.';
-      },
-    });
+  get podeDescartar(){return this.podeEditar&&!this.enviandoAcao&&!!this.itemSelecionado&&!this.itemSelecionado.descartadoEm&&this.motivoDescarte.trim().length>0&&this.dataValida(this.dataDescarte);}
+  confirmarDescarte():void{
+    if(!this.podeDescartar)return;const item=this.itemSelecionado!;this.enviandoAcao=true;this.erroAcao='';
+    this.epiService.descartar(item.id,this.motivoDescarte.trim(),this.dataDescarte).pipe(finalize(()=>this.enviandoAcao=false),takeUntilDestroyed(this.destroyRef)).subscribe({next:()=>{
+      this.exportMessage=`Descarte do EPI físico #${item.id} registrado. O cadastro foi preservado.`;this.fecharModais(true);this.carregarEpis();
+    },error:e=>this.erroAcao=e?.error?.detail??e?.error?.message??'Não foi possível registrar o descarte.'});
   }
+  abrirSubstituicao(item:BuscaEpiRow){
+    if(!this.podeEditar||item.substituido||item.descartadoEm||!item.funcionarioIds?.length)return;
+    this.itemSubstituindo=item;this.novoEpiId=null;this.motivoSubstituicao='';this.dataSubstituicao=this.hoje();this.erroAcao='';this.alternativas=[];this.modalSubstituicaoAberto=true;this.carregandoAlternativas=true;
+    this.epiService.listarDisponiveis().pipe(finalize(()=>this.carregandoAlternativas=false),takeUntilDestroyed(this.destroyRef)).subscribe({next:items=>this.alternativas=items.filter(e=>e.id!==item.id&&!e.substituido&&!e.descartadoEm),error:()=>this.erroAcao='Não foi possível carregar os objetos disponíveis.'});
+  }
+  get podeSubstituir(){return this.podeEditar&&!this.enviandoAcao&&!this.carregandoAlternativas&&!!this.itemSubstituindo&&this.alternativas.some(e=>e.id===this.novoEpiId)&&this.motivoSubstituicao.trim().length>0&&this.dataValida(this.dataSubstituicao);}
+  confirmarSubstituicao(){
+    if(!this.podeSubstituir)return;const item=this.itemSubstituindo!;this.enviandoAcao=true;this.erroAcao='';
+    this.epiService.substituir(item.id,this.novoEpiId!,this.motivoSubstituicao.trim(),this.dataSubstituicao).pipe(finalize(()=>this.enviandoAcao=false),takeUntilDestroyed(this.destroyRef)).subscribe({next:()=>{
+      this.exportMessage=`EPI físico #${item.id} substituído pelo #${this.novoEpiId}, mantendo o funcionário responsável.`;this.fecharModais(true);this.carregarEpis();
+    },error:e=>this.erroAcao=e?.error?.detail??e?.error?.message??'Não foi possível registrar a substituição.'});
+  }
+  private hoje(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  private dataValida(data:string){return /^\d{4}-\d{2}-\d{2}$/.test(data)&&data<=this.hoje();}
 
-  fecharModais(): void {
+  fecharModais(force=false): void {
+    if(this.enviandoAcao&&!force)return;
+    this.modalSubstituicaoAberto=false;this.itemSubstituindo=null;this.novoEpiId=null;this.erroAcao='';
     this.modalDescarteAberto = false;
     this.modalEdicaoAberto = false;
     this.itemSelecionado = null;
@@ -417,6 +439,8 @@ export class BuscaEpi implements OnInit {
   }
 
   private atualizarStatusDoItem(item: BuscaEpiRow): BuscaEpiRow {
+    if(item.descartadoEm)return {...item,status:'Descartado',statusClass:'status-expired'};
+    if(item.substituido)return {...item,status:'Substituído',statusClass:'status-warning'};
     const statusInfo = this.calcularStatus(
       this.toDate(item.vencimento),
       this.notificacaoService.obterDiasAviso(item.ca, false),
@@ -528,6 +552,7 @@ export class BuscaEpi implements OnInit {
       // A API devolve vencimento no formato ISO.
       // A tabela transforma a data para exibição pt-BR.
       substituido: epi.substituido ?? false,
+      descartadoEm:epi.descartadoEm,dataDescarte:epi.dataDescarte,motivoDescarte:epi.motivoDescarte,responsavelDescarteId:epi.responsavelDescarteId,
       // Valor inicial; será recalculado logo abaixo.
       status: 'Próximo do vencimento',
       statusClass: 'status-warning',

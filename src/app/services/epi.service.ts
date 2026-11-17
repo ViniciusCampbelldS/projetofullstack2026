@@ -31,6 +31,9 @@ export class EpiService {
  entregar(request:EntregaEpiRequest){return this.http.post<EntregaEpiResponse>(`${environment.apiUrl}/entregas-epis`,request);}
  listarEntregas(funcionarioId:number){return this.http.get<EntregaEpiResponse[]>(`${environment.apiUrl}/entregas-epis`,{params:{funcionarioId}});}
 
+ substituir(id:number,novoEpiId:number,motivo:string,data:string){return this.http.post<void>(`${this.apiEpis}/${id}/substituicao`,{novoEpiId,motivo,data});}
+ descartar(id:number,motivo:string,data:string){return this.http.post<void>(`${this.apiEpis}/${id}/descarte`,{motivo,data});}
+
 	// GET /epis
 	//
 	// Lista todos os EPIs.
