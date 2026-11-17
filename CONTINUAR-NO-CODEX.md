@@ -52,6 +52,8 @@ Abra http://localhost:4200. O ambiente de desenvolvimento usa a API local; confi
 
 ## Estado da entrega
 
+Publicação deste ciclo conferida: migração002 aplicada ao Supabase, backend dc6c9a6 no Render e frontend 2ba43c4 na Vercel. Os próximos commits de documentação não alteram o código publicado.
+
 Etapas1–2 anteriores: login real e sessão revogável, papéis, notificações separadas, banco alinhado e site publicado. Esta continuação implementa cadastro/recebimento e autocompleteCA, entregas canônicas e substituição/descarte com trilha de data/motivo/responsável. Consulte commits por funcionalidade e TODO para o estado final e evidências de testes. Anexos continuam pendentes, sem upload demonstrativo que aparente persistir arquivos.
 
 Não é preciso migrar arquivos temporários da nuvem. Os fontes, migrações, contexto e instruções estão no GitHub; novas sessões não herdam automaticamente o histórico deste chat nem suas conexões.

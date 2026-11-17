@@ -12,9 +12,10 @@ Este bloco registra a implementação mais recente e prevalece sobre os checklis
 - [x] Substituição fecha item anterior, registra vínculo com novo item e mantém substituido no objeto antigo.
 - [x] Descarte lógico registra data, motivo e responsável; fecha posse e bloqueia DELETE físico.
 - [x] Testes HTTP locais de lote, autocomplete, posse, concorrência, rollback, substituição, descarte e bloqueio por perfil; build Java24 e 5 testes de autenticação.
-- [x] Build Angular de produção e 6 testes em 2 specs.
+- [x] Build Angular de produção e 6 testes em 2 specs. Correção complementar das larguras das sete colunas da tabela, com novo build aprovado.
+- [x] API publicada: 19 verificações HTTP aprovadas (401 sem sessão, ADMIN real, consulta de EPIs disponíveis/sugestões/entregas e logout com revogação). Navegador: cadastro, preenchimento por CA e consulta de entregas. Operações que alteram posse foram exercitadas apenas no PostgreSQL local descartável.
 - [x] Preparação Codex: AGENTS.md, CONTINUAR-NO-CODEX.md e PROMPT-CODEX.md nos dois repositórios.
-- [ ] Verificar publicação da migração002 e dos commits deste ciclo nos serviços reais (atualizar após release).
+- [x] Migração002 aplicada ao Supabase; backend dc6c9a6 publicado no Render (dep-dbtrqe5bedkc73emtpr0, live) e frontend 2ba43c4 publicado na Vercel (dpl_B7zXFgfHeNLNQuhCYrnneBjMdU4J, READY). Contagens reconciliadas: 2 cabeçalhos/3 itens; legados 1 entrega/2 vínculos preservados; nenhuma posse duplicada.
 - [ ] Upload persistido de ficha/imagens/documentos e download autorizado.
 - [ ] Histórico completo de edições de EPI e treinamento; os eventos de posse não cobrem todas as alterações.
 - [ ] Gestão persistida de treinamentos na página unificada; relatórios reais e revisão visual final.
