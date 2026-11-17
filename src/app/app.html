@@ -238,10 +238,10 @@
   </div>
 
   @if (estaNoTopo) {
-    <a class="logout-link" routerLink="/login" aria-label="Logout">
+    <button type="button" class="logout-link" (click)="sair()" aria-label="Sair">
       <i class="bi bi-person-fill-x"></i>
       Logout
-    </a>
+    </button>
   } @else {
     <button class="back-to-top-button" type="button" (click)="voltarAoTopo()" aria-label="Voltar ao topo">
       <i class="bi bi-chevron-up"></i>

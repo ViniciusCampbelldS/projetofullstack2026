@@ -27,6 +27,7 @@ import { AuthService } from './services/auth/auth';
   styleUrl: './app.scss',
 })
 export class App {
+  sair(): void { this.authService.logout(); }
 	protected readonly title = signal('tst-gestao');
   readonly rotaMeusEpis = ['/funcionario/meus-epis'];
   readonly rotaMeusTreinamentos = ['/funcionario/meus-treinamentos'];
