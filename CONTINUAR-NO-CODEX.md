@@ -1,0 +1,57 @@
+# Continuar o projeto no Codex do computador
+
+O prompt completo para colar no novo chat está em [PROMPT-CODEX.md](PROMPT-CODEX.md). Preencha os caminhos locais; os links e as regras já estão incluídos.
+
+## Abrir os projetos
+
+Instale Git, Node24, Java24 (JDK) e Maven3.9+. No PowerShell, escolha uma pasta de projetos e execute:
+
+```powershell
+git clone https://github.com/ViniciusCampbelldS/tst-java-db-access-api.git
+git clone https://github.com/ViniciusCampbelldS/projetofullstack2026.git
+```
+
+No aplicativo Codex, adicione cada pasta como um projeto separado. Abra um novo chat na pasta correspondente e peça: "Leia AGENTS.md, CONTINUAR-NO-CODEX.md e o TODO e continue a próxima pendência". Para trabalho nos dois lados, forneça os caminhos das duas pastas; mantenha seus .git independentes.
+
+A conta GitHub conectada deve ter acesso aos repositórios de ViniciusCampbelldS. Render/Vercel/Supabase são conexões distintas; autorizar GitHub não concede acesso aos outros serviços. Se for usar esses conectores no novo chat, reconfirme a conta/espaço correto antes de publicar. Não copiar tokens da conversa anterior.
+
+## Rodar backend
+
+Na pasta tst-java-db-access-api, configure as variáveis localmente (substitua os placeholders sem salvar segredos em arquivos versionados):
+
+```powershell
+$env:SPRING_DATASOURCE_URL="jdbc:postgresql://HOST:5432/BASE?sslmode=require"
+$env:SPRING_DATASOURCE_USERNAME="USUARIO"
+$env:SPRING_DATASOURCE_PASSWORD="SENHA_LOCAL"
+mvn test
+mvn spring-boot:run
+```
+
+A API usa8080 por padrão. Use preferencialmente banco de desenvolvimento. Não apontar testes destrutivos ao Supabase publicado. ddl-auto=validate não executa migrações automaticamente. db/migrations001 e002 são arquivos de release: não reaplicar001 no banco compartilhado nem importar db/tests/legacy_fixture.sql na produção.
+
+Os testes de autenticação usam H2 isolado; scripts/smoke_epi_local.py usa exclusivamente localhost18082 com fixture PostgreSQL descartável e credenciais fictícias de teste. Docker é opcional para o aplicativo, mas útil para esses testes de integração.
+
+## Rodar frontend
+
+Na pasta projetofullstack2026:
+
+```powershell
+npm ci
+npm start
+```
+
+Abra http://localhost:4200. O ambiente de desenvolvimento usa a API local; confira src/environments/environment.development.ts. npm run build gera dist/frontend/browser. Na produção, environment.ts aponta para Render e vercel.json cuida das rotas Angular.
+
+## Publicação existente
+
+- Frontend: https://projetofullstack2026-chi.vercel.app/login (Vercel do Vinicius).
+- Backend: https://tst-java-db-access-api.onrender.com (Render do Vinicius).
+- Banco: Supabase projeto aabhyazfeeiwegchfxrl; só metadados aqui, nenhuma credencial.
+- CORS permite localhost4200 e os domínios autorizados do frontend. Não liberar todos os domínios para resolver erro.
+- O ADMIN inicial é o funcionário ID7. A senha não está documentada/versionada; solicitar acesso ao responsável. ADMIN/Gerência define senhas dos demais funcionários.
+
+## Estado da entrega
+
+Etapas1–2 anteriores: login real e sessão revogável, papéis, notificações separadas, banco alinhado e site publicado. Esta continuação implementa cadastro/recebimento e autocompleteCA, entregas canônicas e substituição/descarte com trilha de data/motivo/responsável. Consulte commits por funcionalidade e TODO para o estado final e evidências de testes. Anexos continuam pendentes, sem upload demonstrativo que aparente persistir arquivos.
+
+Não é preciso migrar arquivos temporários da nuvem. Os fontes, migrações, contexto e instruções estão no GitHub; novas sessões não herdam automaticamente o histórico deste chat nem suas conexões.

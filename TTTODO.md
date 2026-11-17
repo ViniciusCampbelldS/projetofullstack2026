@@ -1,5 +1,26 @@
 # TODO consolidado — revisão de 16/11/2026
 
+## Cadastro, entregas e baixa de EPI — continuação de 16/11/2026
+
+Este bloco registra a implementação mais recente e prevalece sobre os checklists históricos abaixo.
+
+- [x] Rota /epi/cadastro com criação separada da busca, API de lote e objetos físicos com IDs distintos.
+- [x] Autocomplete CA → nome com busca limitada, debounce/cancelamento, teclado e nome manual.
+- [x] Entrega real por funcionarioId e epiIds, listagem de cabeçalhos/itens e confirmação após resposta da API.
+- [x] Fonte de posse única: entregas_epi + entrega_epi_itens; migração002 reconcilia legados sem inventar datas/autores e torna as tabelas antigas somente leitura.
+- [x] Impedir dupla posse com transações, locks e índice único parcial por objeto aberto.
+- [x] Substituição fecha item anterior, registra vínculo com novo item e mantém substituido no objeto antigo.
+- [x] Descarte lógico registra data, motivo e responsável; fecha posse e bloqueia DELETE físico.
+- [x] Testes HTTP locais de lote, autocomplete, posse, concorrência, rollback, substituição, descarte e bloqueio por perfil; build Java24 e 5 testes de autenticação.
+- [x] Build Angular de produção e 6 testes em 2 specs.
+- [x] Preparação Codex: AGENTS.md, CONTINUAR-NO-CODEX.md e PROMPT-CODEX.md nos dois repositórios.
+- [ ] Verificar publicação da migração002 e dos commits deste ciclo nos serviços reais (atualizar após release).
+- [ ] Upload persistido de ficha/imagens/documentos e download autorizado.
+- [ ] Histórico completo de edições de EPI e treinamento; os eventos de posse não cobrem todas as alterações.
+- [ ] Gestão persistida de treinamentos na página unificada; relatórios reais e revisão visual final.
+
+Estrutura de entrega atual: entregas_epi(id,funcionario_id,data_entrega opcional apenas para legado sem data,criada_em,ficha_nome,ficha_tipo_conteudo,responsavel_id,origem_legado_id,origem_juncao); entrega_epi_itens(id,entrega_id,epi_id,encerrado_em,motivo_encerramento,encerrado_por_id,item_anterior_id), com unicidade de epi_id quando aberto. epis mantém os dados físicos e acrescenta descartado_em,data_descarte,motivo_descarte,responsavel_descarte_id. Chave/conteúdo do arquivo da ficha ainda pendente. entregas_epis e epi_funcionarios ficam preservadas, sem novas escritas.
+
 ## Etapas 1–2 implementadas — 16/11/2026
 
 - [x] Migração transacional de CA inteiro, regras separadas, NR manual e associação por nr_id, preservando dados legados.
