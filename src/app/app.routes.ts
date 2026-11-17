@@ -57,25 +57,9 @@ export const routes: Routes = [
     canActivate: [tstGuard]
   },
 
-  // treinamento - editar
-  {
-    path: 'treinamento/editar',
-    loadComponent: () =>
-      import('./components/treinamento/gerenciar-treinamento')
-        .then((m) => m.GerenciarTreinamento),
-    data: { view: 'presenca' },
-    canActivate: [tstGuard]
-  },
-
-  // treinamento - presenca
-  {
-    path: 'treinamento/presenca',
-    loadComponent: () =>
-      import('./components/treinamento/gerenciar-treinamento')
-        .then((m) => m.GerenciarTreinamento),
-    data: { view: 'abrir-turma' },
-    canActivate: [tstGuard]
-  },
+  // Endereços antigos permanecem apenas para não quebrar favoritos.
+  { path: 'treinamento/editar', pathMatch: 'full', redirectTo: 'treinamento' },
+  { path: 'treinamento/presenca', pathMatch: 'full', redirectTo: 'treinamento' },
 
   // treinamento - historico
   {

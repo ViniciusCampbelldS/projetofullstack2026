@@ -18,7 +18,7 @@ Este bloco registra a implementação mais recente e prevalece sobre os checklis
 - [x] Migração002 aplicada ao Supabase; backend dc6c9a6 publicado no Render (dep-dbtrqe5bedkc73emtpr0, live) e frontend 2ba43c4 publicado na Vercel (dpl_B7zXFgfHeNLNQuhCYrnneBjMdU4J, READY). Contagens reconciliadas: 2 cabeçalhos/3 itens; legados 1 entrega/2 vínculos preservados; nenhuma posse duplicada.
 - [x] Ficha de entrega opcional em PDF (até 5 MB), persistida na mesma transação da entrega. Download autenticado para o funcionário titular, TST, ADMIN e Gerência.
 - [x] Validado em PostgreSQL descartável: migração 003, upload, listagem em nova sessão, download com bytes idênticos, bloqueio de acesso por outro funcionário e rejeição de arquivo inválido ou acima do limite. Build Angular, 16 testes Angular e 5 testes Java aprovados.
-- [ ] Aplicar a migração 003 antes do deploy da API. Validar o fluxo na interface publicada após o deploy.
+- [x] Migração 003 aplicada ao Supabase antes do deploy da API; resta validar o fluxo de ficha na interface publicada.
 - [ ] Upload e download autorizado de imagens de relatos e documentos de treinamento.
 - [ ] Histórico completo de edições de EPI e treinamento; os eventos de posse não cobrem todas as alterações.
 - [x] Gestão persistida de treinamentos na página unificada: catálogo por NR, turmas com participantes por ID e presença persistida.
@@ -38,7 +38,7 @@ Estrutura de entrega atual: entregas_epi(id,funcionario_id,data_entrega opcional
 - [x] Recuperação DEMONSTRATIVA sem envio conforme decisão do usuário; mecanismo de token temporário/uso único verificado com e-mail simulado.
 - [x] Portal e identidade deixam de usar exemplos fixos; dados próprios e notificações são consultados pela sessão.
 - [x] Verificação Java 24, testes de autenticação, migração PostgreSQL local e build de produção Angular.
-- [ ] Concluir upload de anexos, CRUD persistido de treinamentos e consolidação dos modelos de entrega nas próximas etapas.
+- [ ] Concluir upload de anexos, histórico de treinamentos e consolidação dos modelos de entrega nas próximas etapas.
 
 Detalhes, execução e limites em IMPLEMENTACAO-1-2.md no backend. A recuperação real por e-mail está fora do escopo por solicitação expressa do usuário.
 
@@ -212,16 +212,15 @@ Revisão estática de 16/11/2026. Os itens abaixo distinguem interface implement
 
 ### Treinamentos em uma página — mudança de escopo
 
-- [ ] Não criar páginas separadas Agendar e Abrir Turma. Concentrar o fluxo necessário na página de gestão de treinamentos.
-- [ ] Retirar links, rotas/views e textos antigos que exponham esses fluxos como páginas separadas; manter/redirecionar acesso à presença se necessário dentro do fluxo unificado.
-- [ ] A retirada das páginas não elimina a persistência de turmas, participantes e presença. Reaproveitar as tabelas existentes.
+- [x] Fluxo de criar treinamento, abrir turma e confirmar presença concentrado na página de gestão de treinamentos.
+- [x] Rotas antigas de editar/presença redirecionam para a página unificada; não há views separadas expostas.
+- [x] A persistência de turmas, participantes e presença reaproveita as tabelas existentes.
 - [x] Seleção de funcionários já consulta GET /funcionarios.
-- [x] Novo treinamento e edição têm lógica local em arrays; ainda não persistem no backend.
-- [ ] Conectar novo/editar à API e salvar participantes por ID, preservando alterações após recarga.
-- [ ] Conectar filtros de treinamento à listagem: inputs atuais não estão vinculados ao estado de filtro.
-- [ ] Implementar ação real do botão Visualizar, que está sem handler.
-- [ ] Integrar criação de turma, presença e anexos no fluxo unificado; a implementação atual de criarTurma() altera apenas array local e o upload gera apenas prévia.
-- [ ] Selecionar funcionários existentes por ID; caso haja cadastro de funcionário dentro desse fluxo, usar a API de funcionários, não nomes locais.
+- [x] Novo treinamento e edição usam a API e preservam alterações após recarga.
+- [x] Filtros de treinamento estão vinculados à listagem carregada da API.
+- [x] Visualizar abre os participantes e permite confirmar presença persistida.
+- [x] Criação de turma e presença estão integradas ao fluxo unificado; anexos de treinamento seguem pendentes.
+- [x] Seleção de funcionários existentes usa IDs retornados pela API.
 
 ### Relatórios/exportação — já previsto; validar conclusão
 
