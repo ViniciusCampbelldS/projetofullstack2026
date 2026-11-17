@@ -21,7 +21,10 @@ Este bloco registra a implementação mais recente e prevalece sobre os checklis
 - [ ] Aplicar a migração 003 antes do deploy da API. Validar o fluxo na interface publicada após o deploy.
 - [ ] Upload e download autorizado de imagens de relatos e documentos de treinamento.
 - [ ] Histórico completo de edições de EPI e treinamento; os eventos de posse não cobrem todas as alterações.
-- [ ] Gestão persistida de treinamentos na página unificada; relatórios reais e revisão visual final.
+- [x] Gestão persistida de treinamentos na página unificada: catálogo por NR, turmas com participantes por ID e presença persistida.
+- [x] Build Angular e testes existentes executados. Migração 004 validada em PostgreSQL descartável com criação de curso, turma, participante e presença.
+- [ ] Aplicar a migração 004 no Supabase e validar os endpoints publicados após o deploy.
+- [ ] Relatórios reais e revisão visual final.
 
 Estrutura de entrega atual: entregas_epi(id,funcionario_id,data_entrega opcional apenas para legado sem data,criada_em,ficha_nome,ficha_tipo_conteudo,responsavel_id,origem_legado_id,origem_juncao); entrega_epi_itens(id,entrega_id,epi_id,encerrado_em,motivo_encerramento,encerrado_por_id,item_anterior_id), com unicidade de epi_id quando aberto. epis mantém os dados físicos e acrescenta descartado_em,data_descarte,motivo_descarte,responsavel_descarte_id. Chave/conteúdo do arquivo da ficha ainda pendente. entregas_epis e epi_funcionarios ficam preservadas, sem novas escritas.
 

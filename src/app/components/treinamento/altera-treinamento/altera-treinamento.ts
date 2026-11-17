@@ -12,17 +12,20 @@ import {
 } from '../editar-treinamento-modal/editar-treinamento-modal';
 import { EmployeeSelectorModal, FuncionarioTreinamento } from '../employee-selector-modal/employee-selector-modal';
 import { SelectedEmployeesModal } from '../selected-employees-modal/selected-employees-modal';
+import { CursoTreinamento, ParticipacaoTreinamento, TreinamentoService } from '../../../services/treinamento.service';
 
 type SituacaoTreinamento = SituacaoTreinamentoModal;
 
 interface TreinamentoRegistro {
   id: number;
+  cursoId: number;
   nr: string;
   treinamento: string;
   funcionario: string;
   aplicacao: string;
   vencimento: string;
   situacao: SituacaoTreinamento;
+  participantes: ParticipacaoTreinamento[];
 }
 
 @Component({
@@ -46,44 +49,34 @@ export class AlteraTreinamento implements OnInit {
   carregandoFuncionarios = false;
   erroFuncionarios = '';
 
-  treinamentos: TreinamentoRegistro[] = [
-    {
-      id: 1,
-      nr: 'NR-35',
-      treinamento: 'Trabalho em Altura',
-      funcionario: 'Pedro Henrique',
-      aplicacao: '2026-08-20',
-      vencimento: '2027-08-20',
-      situacao: 'Em dia',
-    },
-    {
-      id: 2,
-      nr: 'NR-10',
-      treinamento: 'Seguranca em Eletricidade',
-      funcionario: 'Joao da Silva',
-      aplicacao: '2026-08-10',
-      vencimento: '2026-09-10',
-      situacao: 'Proximo do vencimento',
-    },
-    {
-      id: 3,
-      nr: 'NR-12',
-      treinamento: 'Seguranca em Maquinas',
-      funcionario: 'Carlos Oliveira',
-      aplicacao: '2025-05-05',
-      vencimento: '2026-05-05',
-      situacao: 'Vencido',
-    },
-  ];
+  treinamentos: TreinamentoRegistro[] = [];
+  cursos: CursoTreinamento[] = [];
+  cursoSelecionadoId: number | null = null;
+  novoNrId: number | null = null;
+  novoNome = '';
+  novaValidadeMeses = 12;
+  novaData = new Date().toISOString().slice(0, 10);
+  novoHorario = '08:00';
+  salvandoTurma = false;
+  carregandoTreinamentos = false;
+  erroTreinamentos = '';
+  filtroId = '';
+  filtroNome = '';
+  filtroData = '';
+  filtroNr = '';
+  filtroSituacao = '';
 
   readonly situacoes: SituacaoTreinamento[] = ['Em dia', 'Proximo do vencimento', 'Vencido'];
 
   constructor(
     private readonly authService: AuthService,
-    private readonly funcionarioService: FuncionarioService
+    private readonly funcionarioService: FuncionarioService,
+    private readonly treinamentoService: TreinamentoService
   ) {}
 
   ngOnInit(): void {
+    this.carregarTreinamentos();
+    this.carregarCursos();
     this.carregandoFuncionarios = true;
     this.erroFuncionarios = '';
 
@@ -105,6 +98,43 @@ export class AlteraTreinamento implements OnInit {
         this.erroFuncionarios = 'Não foi possível carregar os funcionários.';
         this.carregandoFuncionarios = false;
       },
+    });
+  }
+
+  carregarCursos(): void {
+    this.treinamentoService.listar().subscribe({
+      next: (cursos) => this.cursos = cursos,
+      error: () => this.erroTreinamentos = 'Não foi possível carregar o catálogo de treinamentos.',
+    });
+  }
+
+  get treinamentosFiltrados(): TreinamentoRegistro[] {
+    const nome = this.filtroNome.trim().toLocaleLowerCase('pt-BR');
+    return this.treinamentos.filter((item) =>
+      (!this.filtroId || String(item.id).includes(this.filtroId)) &&
+      (!nome || item.treinamento.toLocaleLowerCase('pt-BR').includes(nome)) &&
+      (!this.filtroData || item.aplicacao === this.filtroData) &&
+      (!this.filtroNr || item.nr === this.filtroNr) &&
+      (!this.filtroSituacao || item.situacao === this.filtroSituacao));
+  }
+
+  carregarTreinamentos(): void {
+    this.carregandoTreinamentos = true;
+    this.erroTreinamentos = '';
+    this.treinamentoService.turmas().subscribe({
+      next: (registros) => {
+        const grupos = new Map<number, ParticipacaoTreinamento[]>();
+        for (const registro of registros) grupos.set(registro.id, [...(grupos.get(registro.id) ?? []), registro]);
+        this.treinamentos = [...grupos.entries()].map(([id, itens]) => {
+          const primeira = itens[0];
+          const vencimento = primeira.presente ? this.somarMeses(primeira.data, primeira.validadeMeses) : '';
+          return { id, cursoId: primeira.treinamentoId, nr: `NR-${String(primeira.nrId).padStart(2, '0')}`, treinamento: primeira.treinamento,
+            funcionario: itens.map((item) => item.funcionario).join(', '), aplicacao: primeira.data,
+            vencimento, situacao: this.situacao(vencimento), participantes: itens };
+        });
+        this.carregandoTreinamentos = false;
+      },
+      error: () => { this.erroTreinamentos = 'Não foi possível carregar os treinamentos.'; this.carregandoTreinamentos = false; },
     });
   }
 
@@ -160,14 +190,10 @@ export class AlteraTreinamento implements OnInit {
       return;
     }
 
-    this.treinamentos = this.treinamentos.map((treinamento) =>
-      treinamento.id === this.treinamentoEditando?.id
-        ? { ...this.formTreinamento }
-        : treinamento
-    );
-
-    this.mensagem = 'Treinamento atualizado localmente no frontend.';
-    this.fecharEdicaoTreinamento();
+    const nrId = Number(this.formTreinamento.nr.replace(/\D/g, ''));
+    this.treinamentoService.atualizar(this.treinamentoEditando.cursoId, {
+      nrId, nome: this.formTreinamento.treinamento, validadeMeses: this.mesesEntre(this.formTreinamento.aplicacao, this.formTreinamento.vencimento),
+    }).subscribe({next:()=>{this.mensagem='Treinamento atualizado.';this.fecharEdicaoTreinamento();this.carregarTreinamentos();},error:()=>this.mensagem='Não foi possível salvar o treinamento.'});
   }
 
   abrirModalFuncionarios(): void {
@@ -198,24 +224,45 @@ export class AlteraTreinamento implements OnInit {
   }
 
   adicionarNovoTreinamento(): void {
- if(!this.podeEditarTreinamento)return;
-    const funcionarios = this.funcionariosSelecionadosNomes || 'Funcionarios nao vinculados';
-    const proximoId = Math.max(...this.treinamentos.map((treinamento) => treinamento.id), 0) + 1;
-
-    this.treinamentos = [
-      {
-        id: proximoId,
-        nr: 'NR-00',
-        treinamento: 'Nova turma aberta',
-        funcionario: funcionarios,
-        aplicacao: '2026-08-14',
-        vencimento: '2027-08-14',
-        situacao: 'Em dia',
+    if (!this.podeEditarTreinamento || this.salvandoTurma) return;
+    if (this.selectedFuncionarioIds.size === 0 || !this.novaData || !this.novoHorario) {
+      this.mensagem = 'Selecione funcionários, data e horário para criar a turma.';
+      return;
+    }
+    this.salvandoTurma = true;
+    const criarTurma = (cursoId: number) => this.treinamentoService.criarTurma({
+      treinamentoId: cursoId, data: this.novaData, horario: this.novoHorario, funcionarioIds: [...this.selectedFuncionarioIds],
+    }).subscribe({
+      next: () => {
+        this.mensagem = 'Turma criada e participantes registrados.';
+        this.selectedFuncionarioIds = new Set();
+        this.cursoSelecionadoId = cursoId;
+        this.salvandoTurma = false;
+        this.carregarCursos();
+        this.carregarTreinamentos();
       },
-      ...this.treinamentos,
-    ];
+      error: () => { this.mensagem = 'Não foi possível criar a turma.'; this.salvandoTurma = false; },
+    });
 
-    this.mensagem = 'Novo treinamento/turma adicionado localmente a tabela.';
+    if (this.cursoSelecionadoId) {
+      criarTurma(this.cursoSelecionadoId);
+      return;
+    }
+    if (!this.novoNrId || !this.novoNome.trim() || this.novaValidadeMeses < 1) {
+      this.mensagem = 'Escolha um curso existente ou informe NR, nome e validade para criar um novo.';
+      this.salvandoTurma = false;
+      return;
+    }
+    this.treinamentoService.criar({ nrId: this.novoNrId, nome: this.novoNome.trim(), validadeMeses: this.novaValidadeMeses })
+      .subscribe({ next: (curso) => criarTurma(curso.id), error: () => { this.mensagem = 'Não foi possível criar o treinamento.'; this.salvandoTurma = false; } });
+  }
+
+  atualizarPresenca(turma: TreinamentoRegistro, participante: ParticipacaoTreinamento, presente: boolean): void {
+    if (!this.podeEditarTreinamento) return;
+    this.treinamentoService.atualizarPresenca(turma.id, participante.funcionarioId, presente).subscribe({
+      next: () => this.carregarTreinamentos(),
+      error: () => this.mensagem = 'Não foi possível atualizar a presença.',
+    });
   }
 
   situacaoClass(situacao: SituacaoTreinamento): string {
@@ -241,4 +288,8 @@ export class AlteraTreinamento implements OnInit {
       situacao: 'Em dia',
     };
   }
+
+  private somarMeses(data: string, meses: number): string { const d=new Date(`${data}T12:00:00`);d.setMonth(d.getMonth()+meses);return d.toISOString().slice(0,10); }
+  private mesesEntre(inicio:string,fim:string):number { const a=new Date(`${inicio}T12:00:00`),b=new Date(`${fim}T12:00:00`);return Math.max(1,(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth()); }
+  private situacao(vencimento:string):SituacaoTreinamento { if(!vencimento)return 'Vencido';const dias=(new Date(`${vencimento}T12:00:00`).getTime()-Date.now())/86400000;return dias<0?'Vencido':dias<30?'Proximo do vencimento':'Em dia'; }
 }

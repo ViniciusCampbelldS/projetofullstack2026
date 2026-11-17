@@ -55,17 +55,17 @@
     <div class="filters">
       <div class="field">
         <label>ID</label>
-        <input type="text" class="form-control" placeholder="Digite o ID" />
+        <input type="text" class="form-control" placeholder="Digite o ID" [(ngModel)]="filtroId" />
       </div>
 
       <div class="field">
         <label>Treinamento</label>
-        <input type="text" class="form-control" placeholder="Digite o treinamento" />
+        <input type="text" class="form-control" placeholder="Digite o treinamento" [(ngModel)]="filtroNome" />
       </div>
 
       <div class="field">
         <label>Data</label>
-        <input type="date" class="form-control" />
+        <input type="date" class="form-control" [(ngModel)]="filtroData" />
       </div>
 
       <div class="field">
@@ -75,8 +75,8 @@
 
       <div class="field">
         <label>Codigo da NR</label>
-        <select class="form-select">
-          <option>Todos</option>
+        <select class="form-select" [(ngModel)]="filtroNr">
+          <option value="">Todos</option>
           <option>NR-01</option>
           <option>NR-02 (Revogada)</option>
           <option>NR-03</option>
@@ -120,8 +120,8 @@
 
       <div class="field">
         <label>Situacao</label>
-        <select class="form-select">
-          <option>Todos</option>
+        <select class="form-select" [(ngModel)]="filtroSituacao">
+          <option value="">Todos</option>
           <option>Em dia</option>
           <option>Proximo do vencimento</option>
           <option>Vencido</option>
@@ -133,11 +133,43 @@
           <i class="bi bi-people"></i>
           Adicionar funcionarios
         </button>
-        <button class="btn btn-soft" type="button">
+        <button class="btn btn-soft" type="button" (click)="carregarTreinamentos()">
           <i class="bi bi-search"></i>
           Filtrar
         </button>
-        <button class="btn btn-brand" type="button" [disabled]="!podeEditarTreinamento" (click)="adicionarNovoTreinamento()">Novo treinamento/Abrir Turma</button>
+        <button class="btn btn-brand" type="button" [disabled]="!podeEditarTreinamento || salvandoTurma" (click)="adicionarNovoTreinamento()">{{ salvandoTurma ? 'Salvando...' : 'Criar turma' }}</button>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1" [hidden]="!podeEditarTreinamento">
+      <div class="col-md-4">
+        <label for="curso-turma">Treinamento cadastrado</label>
+        <select id="curso-turma" class="form-select" [(ngModel)]="cursoSelecionadoId">
+          <option [ngValue]="null">Criar novo treinamento</option>
+          @for (curso of cursos; track curso.id) {
+            <option [ngValue]="curso.id">NR {{ curso.nrId }} — {{ curso.nome }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="curso-nr">NR do novo</label>
+        <input id="curso-nr" class="form-control" type="number" min="1" [(ngModel)]="novoNrId" [disabled]="cursoSelecionadoId !== null" />
+      </div>
+      <div class="col-md-3">
+        <label for="curso-nome">Nome do novo</label>
+        <input id="curso-nome" class="form-control" [(ngModel)]="novoNome" [disabled]="cursoSelecionadoId !== null" />
+      </div>
+      <div class="col-md-3">
+        <label for="curso-validade">Validade em meses</label>
+        <input id="curso-validade" class="form-control" type="number" min="1" [(ngModel)]="novaValidadeMeses" [disabled]="cursoSelecionadoId !== null" />
+      </div>
+      <div class="col-md-3">
+        <label for="turma-data">Data da turma</label>
+        <input id="turma-data" class="form-control" type="date" [(ngModel)]="novaData" />
+      </div>
+      <div class="col-md-3">
+        <label for="turma-horario">Horário</label>
+        <input id="turma-horario" class="form-control" type="time" [(ngModel)]="novoHorario" />
       </div>
     </div>
 	<div class="selected-panel">
@@ -183,6 +215,12 @@
         {{ mensagem }}
       </div>
     }
+    @if (carregandoTreinamentos) {
+      <div class="form-message" role="status">Carregando treinamentos...</div>
+    }
+    @if (erroTreinamentos) {
+      <div class="form-message" role="alert">{{ erroTreinamentos }}</div>
+    }
 
     <div class="table-container">
       <table>
@@ -200,12 +238,20 @@
           </tr>
         </thead>
         <tbody>
-          @for (treinamento of treinamentos; track treinamento.id) {
+          @for (treinamento of treinamentosFiltrados; track treinamento.id) {
             <tr>
               <td><strong>{{ treinamento.id }}</strong></td>
               <td><strong>{{ treinamento.nr }}</strong></td>
               <td>{{ treinamento.treinamento }}</td>
-              <td>{{ treinamento.funcionario }}</td>
+              <td>
+                @for (participante of treinamento.participantes; track participante.funcionarioId) {
+                  <label class="d-block">
+                    <input type="checkbox" [checked]="participante.presente" [disabled]="!podeEditarTreinamento"
+                      (change)="atualizarPresenca(treinamento, participante, $any($event.target).checked)" />
+                    {{ participante.funcionario }}
+                  </label>
+                }
+              </td>
               <td>{{ treinamento.aplicacao | date: 'dd/MM/yyyy' }}</td>
               <td>{{ treinamento.vencimento | date: 'dd/MM/yyyy' }}</td>
               <td><span class="status-badge" [class]="'status-badge ' + situacaoClass(treinamento.situacao)">{{ treinamento.situacao }}</span></td>
