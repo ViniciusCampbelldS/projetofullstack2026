@@ -7,7 +7,7 @@ import {
 	EpiCreateRequest,
 	EpiRequest,
 	EpiResponse,
-	EpiUpdateRequest
+	EpiUpdateRequest, EntregaEpiRequest, EntregaEpiResponse
 } from '../models/epi';
 import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, HistoryEntry, PreviousEpi } from '../components/epi/epi.models';
 
@@ -26,6 +26,10 @@ export class EpiService {
  relatar(epiId:number,situacao:string,comentario:string){return this.http.post<void>(`${environment.apiUrl}/portal/relatos`,{epiId,situacao,comentario});}
 
  sugestoes(ca:string){return this.http.get<Array<{ca:number;nome:string}>>(`${this.apiEpis}/sugestoes`,{params:{ca}});}
+
+ listarDisponiveis(){return this.http.get<EpiResponse[]>(`${this.apiEpis}/disponiveis`);}
+ entregar(request:EntregaEpiRequest){return this.http.post<EntregaEpiResponse>(`${environment.apiUrl}/entregas-epis`,request);}
+ listarEntregas(funcionarioId:number){return this.http.get<EntregaEpiResponse[]>(`${environment.apiUrl}/entregas-epis`,{params:{funcionarioId}});}
 
 	// GET /epis
 	//

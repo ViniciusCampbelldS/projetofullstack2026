@@ -47,3 +47,13 @@ export interface EpiResponse {
 	substituido: boolean;
 	funcionarios: FuncionarioResponse[];
 }
+
+export interface EntregaEpiItem {
+ id:number; epiId:number; ca:number; nome:string; vencimento:string;
+ encerradoEm:string|null; motivoEncerramento:string|null;
+}
+export interface EntregaEpiResponse {
+ id:number; funcionarioId:number; funcionarioNome:string; dataEntrega:string; responsavelId:number;
+ itens:EntregaEpiItem[];
+}
+export interface EntregaEpiRequest {funcionarioId:number;dataEntrega:string;epiIds:number[];}
