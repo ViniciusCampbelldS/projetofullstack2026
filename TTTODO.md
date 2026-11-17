@@ -16,7 +16,10 @@ Este bloco registra a implementação mais recente e prevalece sobre os checklis
 - [x] API publicada: 19 verificações HTTP aprovadas (401 sem sessão, ADMIN real, consulta de EPIs disponíveis/sugestões/entregas e logout com revogação). Navegador: cadastro, preenchimento por CA e consulta de entregas. Operações que alteram posse foram exercitadas apenas no PostgreSQL local descartável.
 - [x] Preparação Codex: AGENTS.md, CONTINUAR-NO-CODEX.md e PROMPT-CODEX.md nos dois repositórios.
 - [x] Migração002 aplicada ao Supabase; backend dc6c9a6 publicado no Render (dep-dbtrqe5bedkc73emtpr0, live) e frontend 2ba43c4 publicado na Vercel (dpl_B7zXFgfHeNLNQuhCYrnneBjMdU4J, READY). Contagens reconciliadas: 2 cabeçalhos/3 itens; legados 1 entrega/2 vínculos preservados; nenhuma posse duplicada.
-- [ ] Upload persistido de ficha/imagens/documentos e download autorizado.
+- [x] Ficha de entrega opcional em PDF (até 5 MB), persistida na mesma transação da entrega. Download autenticado para o funcionário titular, TST, ADMIN e Gerência.
+- [x] Validado em PostgreSQL descartável: migração 003, upload, listagem em nova sessão, download com bytes idênticos, bloqueio de acesso por outro funcionário e rejeição de arquivo inválido ou acima do limite. Build Angular, 16 testes Angular e 5 testes Java aprovados.
+- [ ] Aplicar a migração 003 antes do deploy da API. Validar o fluxo na interface publicada após o deploy.
+- [ ] Upload e download autorizado de imagens de relatos e documentos de treinamento.
 - [ ] Histórico completo de edições de EPI e treinamento; os eventos de posse não cobrem todas as alterações.
 - [ ] Gestão persistida de treinamentos na página unificada; relatórios reais e revisão visual final.
 

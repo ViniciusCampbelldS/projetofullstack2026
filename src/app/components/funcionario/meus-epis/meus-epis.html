@@ -84,9 +84,20 @@
     <div class="section-header">
       <div>
         <h3>Fichas de EPI</h3>
-        <p class="section-description">Abra uma ficha em uma nova guia ou baixe uma cópia.</p>
+        <p class="section-description">Baixe os PDFs vinculados às suas entregas.</p>
       </div>
     </div>
+
+    @if (carregandoFichas) {
+      <p role="status">Carregando fichas...</p>
+    } @else if (erroFichas) {
+      <p role="alert">{{ erroFichas }}</p>
+    } @else if (!documents.length) {
+      <p>Nenhuma ficha disponível.</p>
+    }
+    @if (erroDownload) {
+      <p role="alert">{{ erroDownload }}</p>
+    }
 
     <div class="document-list">
       @for (documento of documents; track documento.id) {
@@ -94,23 +105,12 @@
           <div class="document-icon"><i class="bi bi-file-earmark-text"></i></div>
 
           <div class="document-info">
-            <strong>{{ documento.name }}</strong>
-            <span>Emitida em {{ documento.date }}</span>
+            <strong>{{ documento.nome }}</strong>
+            <span>Entrega em {{ documento.dataEntrega | date:'dd/MM/yyyy' }}</span>
           </div>
 
           <div class="document-actions">
-            <button
-              type="button"
-              title="Abrir em nova guia"
-              aria-label="Abrir ficha em nova guia"
-              (click)="visualizarFicha(documento)"
-              class="btn btn-outline-brand"
-            >
-              <i class="bi bi-box-arrow-up-right"></i>
-              Abrir
-            </button>
-
-            <button
+<button
               type="button"
               title="Baixar"
               aria-label="Baixar ficha"

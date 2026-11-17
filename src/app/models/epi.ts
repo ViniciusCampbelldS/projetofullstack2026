@@ -63,5 +63,8 @@ export interface EntregaEpiItem {
 export interface EntregaEpiResponse {
  id:number; funcionarioId:number; funcionarioNome:string; dataEntrega:string; responsavelId:number;
  itens:EntregaEpiItem[];
+ fichaNome?:string|null;
 }
 export interface EntregaEpiRequest {funcionarioId:number;dataEntrega:string;epiIds:number[];}
+
+export interface FichaEntrega { id:number; nome:string; dataEntrega:string|null; }

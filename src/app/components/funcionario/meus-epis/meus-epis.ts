@@ -4,11 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { EmployeeEpi } from '../../epi/epi.models';
 import { EpiService } from '../../../services/epi.service';
 
-interface EpiDocument {
-  id: number;
-  name: string;
-  date: string;
-}
+import { FichaEntrega } from '../../../models/epi';
 
 @Component({
   selector: 'app-meus-epis',
@@ -28,9 +24,22 @@ export class MeusEpis {
   reportComment = '';
   reportSent = false;
 
-  readonly documents: EpiDocument[] = [];
+  documents: FichaEntrega[] = [];
+  carregandoFichas = true;
+  erroFichas = '';
+  erroDownload = '';
 
   constructor(private readonly epiService: EpiService) {
+    this.epiService.minhasFichas().subscribe({
+      next: fichas => {
+        this.documents = fichas;
+        this.carregandoFichas = false;
+      },
+      error: () => {
+        this.erroFichas = 'Não foi possível carregar suas fichas.';
+        this.carregandoFichas = false;
+      },
+    });
     this.epiService.meusEpis().subscribe({next:items=>{this.employeeEpis=items.map(e=>{const key=String(e.id);this.ids.set(key,e.id);return {ca:String(e.ca),name:e.nome,deliveredAt:'',status:e.substituido?'Substituído':'Em uso',objectKey:key};});},error:()=>{this.erro='Não foi possível carregar seus EPIs.';}});
   }
 
@@ -77,31 +86,12 @@ export class MeusEpis {
     this.epiService.relatar(this.ids.get(selected.objectKey)!,this.reportState,this.reportComment.trim()).subscribe({next:()=>{this.fecharModal();this.reportSent=true;},error:()=>{this.erro='Não foi possível enviar o relato.';}});
   }
 
-  visualizarFicha(documento: EpiDocument): void {
-    const url = URL.createObjectURL(this.criarFichaBlob(documento));
-    const novaGuia = window.open(url, '_blank', 'noopener,noreferrer');
-
-    if (!novaGuia) {
-      URL.revokeObjectURL(url);
-      return;
-    }
-
-    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  baixarFicha(documento: FichaEntrega): void {
+    this.erroDownload = '';
+    this.epiService.baixarFicha(documento.id, documento.nome).subscribe({
+      error: () => this.erroDownload = 'Não foi possível baixar a ficha.',
+    });
   }
-
-  baixarFicha(documento: EpiDocument): void {
-    const url = URL.createObjectURL(this.criarFichaBlob(documento));
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = `${this.nomeArquivoSeguro(documento.name)}.html`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    URL.revokeObjectURL(url);
-  }
-
   iconeEpi(epi: EmployeeEpi): string {
     const nome = epi.name.toLowerCase();
 
@@ -134,51 +124,6 @@ export class MeusEpis {
     return 'good';
   }
 
-  private criarFichaBlob(documento: EpiDocument): Blob {
-    const epiRows = this.employeeEpis
-      .map(
-        (epi) => `
-          <tr>
-            <td>${this.escapeHtml(epi.name)}</td>
-            <td>${this.escapeHtml(epi.ca)}</td>
-            <td>${this.escapeHtml(epi.deliveredAt)}</td>
-            <td>${this.escapeHtml(epi.status)}</td>
-          </tr>`,
-      )
-      .join('');
-
-    const html = `<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${this.escapeHtml(documento.name)}</title>
-  <style>
-    body { font-family: Arial, sans-serif; color: #243746; margin: 36px; }
-    h1 { color: #003d6c; margin-bottom: 4px; }
-    p { color: #6b7b88; }
-    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
-    th, td { border: 1px solid #dbe3e8; padding: 10px; text-align: left; }
-    th { background: #eef6fa; color: #003d6c; }
-    .meta { margin-top: 8px; font-size: 14px; }
-  </style>
-</head>
-<body>
-  <h1>${this.escapeHtml(documento.name)}</h1>
-  <p class="meta">Emitida em ${this.escapeHtml(documento.date)}</p>
-  <p>Documento demonstrativo do Portal do Funcionário.</p>
-  <table>
-    <thead>
-      <tr><th>EPI</th><th>CA</th><th>Entrega</th><th>Situação</th></tr>
-    </thead>
-    <tbody>${epiRows}</tbody>
-  </table>
-</body>
-</html>`;
-
-    return new Blob([html], { type: 'text/html;charset=utf-8' });
-  }
-
   private readStoredReports(): Array<Record<string, unknown>> {
     try {
       const stored = localStorage.getItem('mar-employee-epi-reports');
@@ -194,21 +139,4 @@ export class MeusEpis {
     this.selectedReportFileNames = [];
   }
 
-  private nomeArquivoSeguro(nome: string): string {
-    return nome
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .toLowerCase();
-  }
-
-  private escapeHtml(valor: string): string {
-    return valor
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
 }
