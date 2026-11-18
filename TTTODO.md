@@ -1,6 +1,6 @@
 # TODO — estado real do frontend (18/11/2026)
 
-Revisado contra o código de `main`. **[x] confirma implementação encontrada; testes e produção são estados separados.** Este arquivo substitui os checklists históricos que estavam contraditórios.
+Revisado contra a branch de remoção de mocks. **[x] confirma implementação encontrada; testes e produção são estados separados.** Este arquivo substitui os checklists históricos que estavam contraditórios.
 
 ## Implementado no código
 
@@ -43,7 +43,7 @@ Revisado contra o código de `main`. **[x] confirma implementação encontrada; 
 - [x] Remover mocks de EPIs de `EpiService`: `getAvailableEpis()`, `getDeliveryDraft()` e `getEmployeeEpis()`.
 - [x] Remover `getPreviousEpis()` e modal antigo de substituição sem operação; o fluxo ativo na Busca EPI usa API.
 - [x] Remover `carregarFallbackLocal()` não utilizado e não mascarar falha da API com dados locais.
-- [ ] Remover a classe duplicada `EpiService` em `epi-status.ts` se não houver consumidores; manter o serviço oficial em `services/epi.service.ts`.
+- [x] Remover a classe duplicada `EpiService` em `epi-status.ts`; manter o serviço oficial em `services/epi.service.ts`.
 - [ ] Revisar a rota antiga `/treinamento/presenca`: decidir se deve redirecionar à página unificada ou continuar suportada; não afirmar que está redirecionada sem alterar a rota.
 - [ ] Corrigir textos com codificação quebrada (mojibake) e revisar acentos/legendas.
 - [ ] Padronizar formulários EPI/funcionário, layout, validações, acessibilidade por teclado e responsividade mobile.
