@@ -7,7 +7,6 @@ export interface Epi {
 	lote: string;
 	vencimento: string;
 	substituido: boolean;
- descartadoEm?:string|null;
  dataDescarte?:string|null;
  motivoDescarte?:string|null;
  responsavelDescarteId?:number|null;
@@ -49,7 +48,6 @@ export interface EpiResponse {
 	lote: string;
 	vencimento: string;
 	substituido: boolean;
- descartadoEm?:string|null;
  dataDescarte?:string|null;
  motivoDescarte?:string|null;
  responsavelDescarteId?:number|null;
