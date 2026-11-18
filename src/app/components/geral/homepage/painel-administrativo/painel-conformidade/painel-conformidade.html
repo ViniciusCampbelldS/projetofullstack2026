@@ -70,7 +70,7 @@
 
         <div class="compliance-percentage training-percentage">
           @if (possuiDadosTreinamento() && !carregandoTreinamentos() && !erroTreinamentos()) {
-            <strong>{{ carregandoTreinamentos() || erroTreinamentos() ? '—' : percentualTreinamentosValidos() + '%' }}</strong>
+            <strong>{{ percentualTreinamentosValidos() }}%</strong>
             <span>válidos</span>
           } @else {
             <strong>-</strong>
@@ -80,7 +80,7 @@
       </div>
 
       @if (possuiDadosTreinamento() && !carregandoTreinamentos() && !erroTreinamentos()) {
-        <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-track" role="progressbar" [attr.aria-valuenow]="percentualTreinamentosValidos()" aria-valuemin="0" aria-valuemax="100">
           <div class="progress-fill training-progress" [style.width.%]="percentualTreinamentosValidos()"></div>
         </div>
       } @else {
