@@ -1,9 +1,3 @@
-export interface EpiOption {
-  name: string;
-  ca: string;
-  validity: string;
-}
-
 export interface DeliveryItem {
   epi: string;
   ca: string;
@@ -26,12 +20,6 @@ export interface EmployeeEpi {
   name: string;
   deliveredAt: string;
   status: string;
-}
-
-export interface PreviousEpi {
-  ca: string;
-  name: string;
-  deliveredAt: string;
 }
 
 export interface HistoryEntry {
