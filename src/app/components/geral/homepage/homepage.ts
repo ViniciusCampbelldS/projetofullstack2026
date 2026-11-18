@@ -68,11 +68,11 @@ export class Homepage implements OnInit {
 		return Math.floor((vencimento.getTime() - hoje.getTime()) / 86400000);
 	}
 
-	get totalTreinamentos(): number { return this.isOperario ? this.treinamentosPortal.length : this.treinamentosMonitorados.length; }
+	get totalTreinamentos(): number { return this.isOperario ? this.treinamentosPortal.filter(t=>t.presente!==false).length : this.treinamentosMonitorados.length; }
 
 	private vencimentoPortal(t: TreinamentoPortal): Date | null { const d=new Date(`${t.vencimento}T12:00:00`);return t.vencimento&&!Number.isNaN(d.getTime())?d:null; }
 	private diasAvisoPortal(t: TreinamentoPortal): number { return Math.max(0,t.diasAviso??30); }
-	private portalPendencia(t: TreinamentoPortal): boolean { const d=this.vencimentoPortal(t);return !!d&&this.diasAte(d)<=this.diasAvisoPortal(t); }
+	private portalPendencia(t: TreinamentoPortal): boolean { if(t.presente===false)return false; const d=this.vencimentoPortal(t);return !!d&&this.diasAte(d)<=this.diasAvisoPortal(t); }
 	get treinamentosPortalPendentes(): TreinamentoPortal[] { return this.treinamentosPortal.filter(t=>this.portalPendencia(t)); }
 	get pendenciasFuncionario(): Array<{titulo:string;detalhe:string;status:string;classe:string;icone:string}> {
 		const epis=this.notificacaoService.episComNotificacao.map(e=>({titulo:e.nome,detalhe:`CA ${e.ca} · ${e.funcionario||'Seu EPI'}`,status:this.notificacaoService.estaVencido(e.vencimento)?'Vencido':this.notificacaoService.textoVencimento(e),classe:this.notificacaoService.estaVencido(e.vencimento)?'status-danger':'status-warning',icone:'bi-shield-exclamation'}));
