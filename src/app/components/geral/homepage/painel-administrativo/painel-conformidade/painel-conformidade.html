@@ -70,7 +70,7 @@
 
         <div class="compliance-percentage training-percentage">
           @if (possuiDadosTreinamento()) {
-            <strong>0%</strong>
+            <strong>{{ percentualTreinamentosValidos() }}%</strong>
             <span>válidos</span>
           } @else {
             <strong>-</strong>
@@ -81,7 +81,7 @@
 
       @if (possuiDadosTreinamento()) {
         <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-          <div class="progress-fill training-progress" style="width: 0%"></div>
+          <div class="progress-fill training-progress" [style.width.%]="percentualTreinamentosValidos()"></div>
         </div>
       } @else {
         <div class="progress-track progress-empty">
@@ -91,7 +91,7 @@
 
       <div class="training-empty-message">
         <i class="bi bi-info-circle"></i>
-        Nenhum treinamento monitorado no momento.
+        @if (carregandoTreinamentos()) { Carregando treinamentos... } @else if (erroTreinamentos()) { {{ erroTreinamentos() }} } @else { {{ treinamentosEmDia() }} válido(s), {{ treinamentosProximos() }} próximo(s) do vencimento e {{ treinamentosVencidos() }} vencido(s). }
       </div>
     </article>
   </div>
