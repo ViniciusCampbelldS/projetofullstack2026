@@ -72,6 +72,12 @@
           @if (possuiDadosTreinamento() && !carregandoTreinamentos() && !erroTreinamentos()) {
             <strong>{{ percentualTreinamentosValidos() }}%</strong>
             <span>válidos</span>
+          } @else if (carregandoTreinamentos()) {
+            <strong>—</strong>
+            <span>carregando</span>
+          } @else if (erroTreinamentos()) {
+            <strong>—</strong>
+            <span>indisponível</span>
           } @else {
             <strong>-</strong>
             <span>sem dados</span>
