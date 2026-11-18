@@ -124,15 +124,6 @@ export class MeusEpis {
     return 'good';
   }
 
-  private readStoredReports(): Array<Record<string, unknown>> {
-    try {
-      const stored = localStorage.getItem('mar-employee-epi-reports');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  }
-
   private limparImagensSelecionadas(): void {
     this.selectedReportImages.forEach((url) => URL.revokeObjectURL(url));
     this.selectedReportImages = [];
