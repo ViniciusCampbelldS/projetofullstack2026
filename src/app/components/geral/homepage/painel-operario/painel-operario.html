@@ -18,9 +18,9 @@
       </p>
 
       <div class="employee-hero-meta">
-        <span><i class="bi bi-shield-check"></i>3 EPIs ativos</span>
-        <span><i class="bi bi-journal-check"></i>3 treinamentos</span>
-        <span><i class="bi bi-exclamation-triangle"></i>1 pendencia</span>
+        <span><i class="bi bi-shield-check"></i>{{ totalEpis() }} EPIs vinculados</span>
+        <span><i class="bi bi-journal-check"></i>{{ totalTreinamentos() }} treinamentos</span>
+        <span><i class="bi bi-exclamation-triangle"></i>{{ totalPendencias() }} pendência(s)</span>
       </div>
     </div>
 
@@ -60,11 +60,14 @@
         <p>Itens que precisam de acompanhamento.</p>
       </div>
 
-      <span class="employee-panel-counter">1</span>
+      <span class="employee-panel-counter">{{ totalPendencias() }}</span>
     </div>
 
     <div class="employee-pending-list">
-      @for (pendencia of pendenciasFuncionario(); track pendencia.titulo) {
+      @if (carregandoTreinamentos()) { <p role="status">Carregando treinamentos...</p> }
+      @else if (erroTreinamentos()) { <p role="alert">{{ erroTreinamentos() }}</p> }
+      @else if (pendenciasFuncionario().length === 0) { <p>Nenhuma pendência encontrada nos seus registros.</p> }
+      @else { @for (pendencia of pendenciasFuncionario(); track pendencia.titulo + pendencia.detalhe) {
         <article class="employee-pending-item">
           <span class="employee-pending-icon">
             <i class="bi" [ngClass]="pendencia.icone"></i>
@@ -77,7 +80,7 @@
 
           <small [class]="pendencia.classe">{{ pendencia.status }}</small>
         </article>
-      }
+      } }
     </div>
   </section>
 </section>
