@@ -1,4 +1,5 @@
-<p role="alert">{{erro}}</p>
+@if (erro) { <p role="alert">{{erro}}</p> }
+@if (carregando) { <p role="status">Carregando treinamentos...</p> }
 <section class="training-dashboard">
   <div class="training-heading">
     <div>
@@ -15,7 +16,7 @@
         <h3>Treinamentos obrigatórios</h3>
         <p class="section-description">Status atualizado de validade por NR.</p>
       </div>
-      <span class="item-count">{{ employeeTrainings.length }} treinamentos</span>
+      <span class="item-count">{{ carregando || erro ? '—' : employeeTrainings.length }} treinamentos</span>
     </div>
 
     <div class="training-table-wrapper">
@@ -29,6 +30,7 @@
           </tr>
         </thead>
         <tbody>
+          @if (!carregando && !erro && employeeTrainings.length === 0) { <tr><td colspan="4">Nenhum treinamento registrado.</td></tr> }
           @for (treinamento of employeeTrainings; track treinamento.id) {
             <tr>
               <td><span class="nr-badge">{{ treinamento.nr }}</span></td>
