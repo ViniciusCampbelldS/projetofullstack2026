@@ -66,7 +66,7 @@
     <div class="employee-pending-list">
       @if (carregandoTreinamentos()) { <p role="status">Carregando treinamentos...</p> }
       @if (erroTreinamentos()) { <p role="alert">{{ erroTreinamentos() }} Os avisos de EPI continuam disponíveis abaixo.</p> }
-      @if (pendenciasFuncionario().length === 0) { <p>Nenhuma pendência encontrada nos seus registros.</p> }
+      @if (pendenciasFuncionario().length === 0 && !erroTreinamentos()) { <p>Nenhuma pendência encontrada nos seus registros.</p> }
       @else { @for (pendencia of pendenciasFuncionario(); track pendencia.titulo + pendencia.detalhe) {
         <article class="employee-pending-item">
           <span class="employee-pending-icon">
