@@ -9,7 +9,6 @@ import {
 	EpiResponse,
 	EpiUpdateRequest, EntregaEpiRequest, EntregaEpiResponse, FichaEntrega
 } from '../models/epi';
-import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, PreviousEpi } from '../components/epi/epi.models';
 
 // ServiÃƒÂ§o responsÃƒÂ¡vel pela comunicaÃƒÂ§ÃƒÂ£o dos EPIs com a API Java.
 @Injectable({
