@@ -13,4 +13,9 @@ export class PainelOperario {
   funcionario = input.required<any>();
   resumoFuncionario = input.required<any[]>();
   pendenciasFuncionario = input.required<any[]>();
+  totalEpis = input.required<number>();
+  totalTreinamentos = input.required<number>();
+  totalPendencias = input.required<number>();
+  carregandoTreinamentos = input.required<boolean>();
+  erroTreinamentos = input.required<string>();
 }
