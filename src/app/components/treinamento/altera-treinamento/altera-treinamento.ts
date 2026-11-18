@@ -104,6 +104,18 @@ export class AlteraTreinamento implements OnInit {
     });
   }
 
+  get totalTurmas(): number { return this.treinamentos.length; }
+
+  get turmasAgendadas(): number { const hoje=this.hojeLocal(); return this.treinamentos.filter(t=>t.aplicacao>hoje).length; }
+
+  get participacoesProximas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&this.diasAteVencimento(p)>=0&&this.diasAteVencimento(p)<=30).length; }
+
+  get participacoesVencidas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&this.diasAteVencimento(p)<0).length; }
+
+  private diasAteVencimento(p: ParticipacaoTreinamento): number { const d=new Date(`${this.somarMeses(p.data,p.validadeMeses)}T12:00:00`);const h=new Date();h.setHours(0,0,0,0);d.setHours(0,0,0,0);return Math.floor((d.getTime()-h.getTime())/86400000); }
+
+  private hojeLocal(): string { const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
   get treinamentosFiltrados(): TreinamentoRegistro[] {
     return this.treinamentos.filter((item) =>
       (!this.filtroId || String(item.id).includes(this.filtroId)) &&
