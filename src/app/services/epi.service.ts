@@ -9,15 +9,15 @@ import {
 	EpiResponse,
 	EpiUpdateRequest, EntregaEpiRequest, EntregaEpiResponse, FichaEntrega
 } from '../models/epi';
-import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, HistoryEntry, PreviousEpi } from '../components/epi/epi.models';
+import { DeliveryItem, EmployeeEpi, EpiOption, EpiRecord, PreviousEpi } from '../components/epi/epi.models';
 
-// Serviço responsável pela comunicação dos EPIs com a API Java.
+// ServiÃƒÂ§o responsÃƒÂ¡vel pela comunicaÃƒÂ§ÃƒÂ£o dos EPIs com a API Java.
 @Injectable({
 	providedIn: 'root'
 })
 export class EpiService {
 
-	//CLiente para fazer as requisições HTTP para a API.
+	//CLiente para fazer as requisiÃƒÂ§ÃƒÂµes HTTP para a API.
 	private readonly http = inject(HttpClient);
 	// Endpoint principal dos EPIs.
 	private readonly apiEpis = `${environment.apiUrl}/epis`;
@@ -70,7 +70,7 @@ export class EpiService {
 
 	// POST /epis
 	//
-	// Cadastra um único EPI.
+	// Cadastra um ÃƒÂºnico EPI.
 	cadastrar(epi: EpiRequest): Observable<EpiResponse> {
 		return this.http.post<EpiResponse>(
 			this.apiEpis,
@@ -80,7 +80,7 @@ export class EpiService {
 
 	// POST /epis
 	//
-	// Cadastra um único EPI.
+	// Cadastra um ÃƒÂºnico EPI.
 	cadastrarEmLote(request: EpiCreateRequest): Observable<EpiBulkCreateResponse> {
 
 		return this.http.post<EpiBulkCreateResponse>(
@@ -108,42 +108,15 @@ export class EpiService {
 			`${this.apiEpis}/${id}`
 		);
 	}
-
-	//#TODO - Não implementado, apenas front-end.
-	getHistory(): HistoryEntry[] {
-		return [
-			{
-				data: '06/08/2026 09:48',
-				usuario: 'Admin SST',
-				registro: 'CPF 16779645, CA 11022 e 34456',
-				alteracao: 'Entrega registrada',
-				detalhe: 'Ficha digital criada para João Pedro com 2 EPIs.',
-			},
-			{
-				data: '05/08/2026 16:20',
-				usuario: 'Admin SST',
-				registro: 'CA 34456',
-				alteracao: 'Manual',
-				detalhe: 'Alterado o número de dias para notificação de próximo do vencimento para CA 34456.',
-			},
-			{
-				data: '02/08/2026 11:05',
-				usuario: 'Admin SST',
-				registro: 'CPF 20724369, CA 40271',
-				alteracao: 'Substituição',
-				detalhe: 'Bota isolante anterior substituída por vencimento.',
-			},
-		];
-	}
-	// Retorna os EPIs disponíveis para a tela de entrega.
+	// Retorna os EPIs disponÃƒÂ­veis para a tela de entrega.
 	//
-	// Estes dados ainda são locais.
-	// Posteriormente deverão vir do endpoint GET /epis.
+	// Estes dados ainda sÃƒÂ£o locais.
+	// Posteriormente deverÃƒÂ£o vir do endpoint GET /epis.
 	getAvailableEpis(): EpiOption[] {
 
 		return [
 			{
-				name: 'Capacete de segurança',
+				name: 'Capacete de seguranÃƒÂ§a',
 				ca: '101022',
 				validity: '2026-09-12',
 			},
@@ -161,7 +134,7 @@ export class EpiService {
 			},
 
 			{
-				name: 'Óculos de segurança incolor',
+				name: 'Ãƒâ€œculos de seguranÃƒÂ§a incolor',
 				ca: '88912',
 				validity: '2027-01-10',
 			},
@@ -176,12 +149,12 @@ export class EpiService {
 
 	// Retorna a lista inicial de entrega.
 	//
-	// Estes dados também são temporários e ainda locais.
+	// Estes dados tambÃƒÂ©m sÃƒÂ£o temporÃƒÂ¡rios e ainda locais.
 	getDeliveryDraft(): DeliveryItem[] {
 
 		return [
 			{
-				epi: 'Capacete de segurança',
+				epi: 'Capacete de seguranÃƒÂ§a',
 				ca: '101022',
 				quantity: 1,
 				validity: '2026-09-12',
@@ -196,9 +169,9 @@ export class EpiService {
 		];
 	}
 
-	// Retorna os EPIs exibidos no portal do funcionário.
+	// Retorna os EPIs exibidos no portal do funcionÃƒÂ¡rio.
 	//
-	// Ainda é um mock até a API de entregas ser implementada.
+	// Ainda ÃƒÂ© um mock atÃƒÂ© a API de entregas ser implementada.
 	getEmployeeEpis(): EmployeeEpi[] {
 
 		return [
@@ -225,16 +198,16 @@ export class EpiService {
 		];
 	}
 
-	// Retorna EPIs anteriores usados no modal de substituição.
+	// Retorna EPIs anteriores usados no modal de substituiÃƒÂ§ÃƒÂ£o.
 	//
-	// Ainda é um mock enquanto o histórico de entrega
-	// não estiver implementado na API Java.
+	// Ainda ÃƒÂ© um mock enquanto o histÃƒÂ³rico de entrega
+	// nÃƒÂ£o estiver implementado na API Java.
 	getPreviousEpis(): PreviousEpi[] {
 
 		return [
 			{
 				ca: '88912',
-				name: 'Óculos de segurança incolor',
+				name: 'Ãƒâ€œculos de seguranÃƒÂ§a incolor',
 				deliveredAt: '10/01/2026',
 			},
 
@@ -246,7 +219,7 @@ export class EpiService {
 
 			{
 				ca: '55301',
-				name: 'Luva nitrílica',
+				name: 'Luva nitrÃƒÂ­lica',
 				deliveredAt: '19/04/2026',
 			},
 		];

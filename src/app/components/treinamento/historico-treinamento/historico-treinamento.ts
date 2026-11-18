@@ -1,11 +1,13 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { HistoricoLista } from '../../historico/historico-lista';
 
 @Component({
   selector: 'app-historico-treinamento',
   standalone: true,
-  imports: [CommonModule],
+  imports: [HistoricoLista],
   templateUrl: './historico-treinamento.html',
   styleUrl: './historico-treinamento.scss',
 })
-export class HistoricoTreinamento {}
+export class HistoricoTreinamento {
+  readonly areas = ['TURMA', 'NR', 'TREINAMENTO', 'NOTIFICACAO_TREINAMENTO'];
+}

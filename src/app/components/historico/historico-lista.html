@@ -1,0 +1,35 @@
+@if (carregando) { <div class="form-message" role="status">Carregando histórico...</div> }
+@if (erro) { <div class="form-message" role="alert">{{ erro }}</div> }
+<div class="table-container">
+  <table>
+    <thead>
+      <tr><th>Data</th><th>Usuário</th><th>Área</th><th>Registro</th><th>Alteração</th><th>Descrição</th><th>Notas</th></tr>
+    </thead>
+    <tbody>
+      @for (l of linhas; track l.evento.id) {
+        <tr>
+          <td>{{ l.evento.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ l.evento.autorNome || '—' }}</td>
+          <td>{{ l.evento.areaDoSite }}</td>
+          <td>{{ l.evento.registroId }}</td>
+          <td><span class="status" [ngClass]="classe(l.evento.acao)">{{ l.evento.acao }}</span></td>
+          <td>{{ l.detalhe }}</td>
+          <td>
+            @for (c of l.evento.comentarios; track $index) {
+              <div>{{ c.texto }} <small>({{ c.criadoEm | date: 'dd/MM/yyyy HH:mm' }})</small></div>
+            }
+            <button class="btn btn-sm btn-soft" type="button" title="Adicionar nota" (click)="abrirNota(l)"><i class="bi bi-journal-text"></i></button>
+            @if (notaAbertaId === l.evento.id) {
+              <div class="mt-1">
+                <input class="form-control form-control-sm" [(ngModel)]="novaNota" maxlength="1000" placeholder="Nota" />
+                <button class="btn btn-sm btn-brand mt-1" type="button" (click)="salvarNota(l)">Salvar nota</button>
+              </div>
+            }
+          </td>
+        </tr>
+      } @empty {
+        @if (!carregando) { <tr><td colspan="7">Nenhum registro no histórico.</td></tr> }
+      }
+    </tbody>
+  </table>
+</div>
