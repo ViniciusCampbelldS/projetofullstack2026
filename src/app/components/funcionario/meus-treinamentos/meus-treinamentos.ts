@@ -23,7 +23,8 @@ interface EmployeeTraining {
 export class MeusTreinamentos {
   employeeTrainings:EmployeeTraining[]=[];
   erro='';
-  constructor(http:HttpClient){http.get<Array<{id:number;nr:string;data:string;vencimento:string;diasAviso:number;presente:boolean}>>(`${environment.apiUrl}/portal/treinamentos`).subscribe({next:items=>{const br=(value:string)=>value?value.split('-').reverse().join('/'):'';this.employeeTrainings=items.map(t=>({id:t.id,nr:t.nr,trainingDate:br(t.data),dueDate:br(t.vencimento),diasAviso:t.diasAviso,presente:t.presente}));},error:()=>{this.erro='Não foi possível carregar seus treinamentos.';}});}
+  carregando=true;
+  constructor(http:HttpClient){http.get<Array<{id:number;nr:string;data:string;vencimento:string;diasAviso:number;presente:boolean}>>(`${environment.apiUrl}/portal/treinamentos`).subscribe({next:items=>{const br=(value:string)=>value?value.split('-').reverse().join('/'):'';this.employeeTrainings=items.map(t=>({id:t.id,nr:t.nr,trainingDate:br(t.data),dueDate:br(t.vencimento),diasAviso:t.diasAviso,presente:t.presente}));this.carregando=false;},error:()=>{this.erro='Não foi possível carregar seus treinamentos.';this.carregando=false;}});}
 
   situacaoTreinamento(treinamento: EmployeeTraining): string {
     if(!treinamento.presente)return 'Não realizado';
@@ -55,7 +56,7 @@ export class MeusTreinamentos {
       return 'warning';
     }
 
-    return 'good';
+    return situacao === 'Não realizado' || situacao === 'Sem vencimento informado' ? 'neutral' : 'good';
   }
 
   private dataBrParaDate(data: string): Date {
