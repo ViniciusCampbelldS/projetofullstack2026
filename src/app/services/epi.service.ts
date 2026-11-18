@@ -107,7 +107,4 @@ export class EpiService {
 			`${this.apiEpis}/${id}`
 		);
 	}
-	// Retorna os EPIs disponÃƒÂ­veis para a tela de entrega.
-	//
-	// Estes dados ainda sÃƒÂ£o locais.
 }
