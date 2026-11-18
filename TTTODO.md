@@ -33,16 +33,16 @@ Revisado contra o código de `main`. **[x] confirma implementação encontrada; 
 - [ ] Tornar os filtros/paginação do histórico configuráveis no frontend; atualmente cada área consulta até 100 eventos.
 - [ ] Implementar exportação PDF/XLSX/ODF reais; hoje esses formatos geram texto simples com a extensão correspondente.
 - [ ] Validar o XML gerado (conteúdo, acentos, filtros e abertura em leitor) e ajustar MIME/encoding de todos os formatos.
-- [ ] Conectar indicadores de treinamento ao banco/API: a homepage usa total de treinamentos = 0 e o painel de gestão exibe números fixos 24, 08, 07 e 01.
+- [x] Conectar indicadores de treinamento à API e substituir números fixos; os status usam validade da NR e prazo de aviso configurado.
 - [ ] Substituir listas fixas de cargos e setores por entrada livre com sugestões dos valores cadastrados; não restringir o usuário a opções hardcoded.
 - [ ] Revisar a busca de NR por número parcial e garantir que descrição/número e seleção estejam corretos.
 - [ ] Revisar CRUD de NR para impedir nomes duplicados; backend ainda não valida duplicidade por nome.
 - [ ] Rever e completar estados de loading, vazio, erro, sucesso e retry em todas as telas.
 
 ### P2 — remover código legado e corrigir UX
-- [ ] Remover mocks não utilizados em `EpiService`: `getAvailableEpis()`, `getDeliveryDraft()`, `getEmployeeEpis()`; garantir que nenhum consumidor restante dependa deles.
-- [ ] Remover `getPreviousEpis()` e modal antigo de substituição com dados fictícios/botões sem operação; o fluxo ativo na Busca EPI usa API.
-- [ ] Remover `carregarFallbackLocal()` não utilizado e não mascarar falha da API com dados locais.
+- [x] Remover mocks de EPIs de `EpiService`: `getAvailableEpis()`, `getDeliveryDraft()` e `getEmployeeEpis()`.
+- [x] Remover `getPreviousEpis()` e modal antigo de substituição sem operação; o fluxo ativo na Busca EPI usa API.
+- [x] Remover `carregarFallbackLocal()` não utilizado e não mascarar falha da API com dados locais.
 - [ ] Remover a classe duplicada `EpiService` em `epi-status.ts` se não houver consumidores; manter o serviço oficial em `services/epi.service.ts`.
 - [ ] Revisar a rota antiga `/treinamento/presenca`: decidir se deve redirecionar à página unificada ou continuar suportada; não afirmar que está redirecionada sem alterar a rota.
 - [ ] Corrigir textos com codificação quebrada (mojibake) e revisar acentos/legendas.
