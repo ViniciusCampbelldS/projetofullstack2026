@@ -39,15 +39,23 @@ export class Homepage implements OnInit {
 
 	ngOnInit(): void {
 		this.carregandoTreinamentos = true;
-		const consulta = this.isOperario ? this.treinamentoService.meusTreinamentos() : this.treinamentoService.turmas();
-		consulta.subscribe({
-			next: itens => {
-				if (this.isOperario) this.treinamentosPortal = itens as TreinamentoPortal[];
-				else this.participacoesTreinamento = itens as ParticipacaoTreinamento[];
-				this.carregandoTreinamentos = false;
-			},
-			error: () => { this.erroTreinamentos = 'Não foi possível carregar os dados de treinamentos.'; this.carregandoTreinamentos = false; }
-		});
+		if (this.isOperario) {
+			this.treinamentoService.meusTreinamentos().subscribe({
+				next: (itens: TreinamentoPortal[]) => {
+					this.treinamentosPortal = itens;
+					this.carregandoTreinamentos = false;
+				},
+				error: () => { this.erroTreinamentos = 'Não foi possível carregar os dados de treinamentos.'; this.carregandoTreinamentos = false; }
+			});
+		} else {
+			this.treinamentoService.turmas().subscribe({
+				next: (itens: ParticipacaoTreinamento[]) => {
+					this.participacoesTreinamento = itens;
+					this.carregandoTreinamentos = false;
+				},
+				error: () => { this.erroTreinamentos = 'Não foi possível carregar os dados de treinamentos.'; this.carregandoTreinamentos = false; }
+			});
+		}
 	}
 
 	private get treinamentosMonitorados(): ParticipacaoTreinamento[] {
