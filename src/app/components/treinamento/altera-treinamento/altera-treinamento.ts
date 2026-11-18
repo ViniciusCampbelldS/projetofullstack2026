@@ -13,6 +13,7 @@ import {
 import { EmployeeSelectorModal, FuncionarioTreinamento } from '../employee-selector-modal/employee-selector-modal';
 import { SelectedEmployeesModal } from '../selected-employees-modal/selected-employees-modal';
 import { NrTreinamento, ParticipacaoTreinamento, TreinamentoService } from '../../../services/treinamento.service';
+import { NotificacaoService } from '../../../services/notificacao';
 
 type SituacaoTreinamento = SituacaoTreinamentoModal;
 
@@ -67,7 +68,8 @@ export class AlteraTreinamento implements OnInit {
   constructor(
     private readonly authService: AuthService,
     private readonly funcionarioService: FuncionarioService,
-    private readonly treinamentoService: TreinamentoService
+    private readonly treinamentoService: TreinamentoService,
+    private readonly notificacaoService: NotificacaoService
   ) {}
 
   ngOnInit(): void {
@@ -108,7 +110,7 @@ export class AlteraTreinamento implements OnInit {
 
   get turmasAgendadas(): number { const hoje=this.hojeLocal(); return this.treinamentos.filter(t=>t.aplicacao>hoje).length; }
 
-  get participacoesProximas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&this.diasAteVencimento(p)>=0&&this.diasAteVencimento(p)<=30).length; }
+  get participacoesProximas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&this.diasAteVencimento(p)>=0&&this.diasAteVencimento(p)<=this.notificacaoService.obterDiasAviso(String(p.nrId),true)).length; }
 
   get participacoesVencidas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&this.diasAteVencimento(p)<0).length; }
 
@@ -283,5 +285,5 @@ export class AlteraTreinamento implements OnInit {
 
   private somarMeses(data: string, meses: number): string { const d=new Date(`${data}T12:00:00`);d.setMonth(d.getMonth()+meses);return d.toISOString().slice(0,10); }
   private mesesEntre(inicio:string,fim:string):number { const a=new Date(`${inicio}T12:00:00`),b=new Date(`${fim}T12:00:00`);return Math.max(1,(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth()); }
-  private situacao(vencimento:string):SituacaoTreinamento { if(!vencimento)return 'Vencido';const dias=(new Date(`${vencimento}T12:00:00`).getTime()-Date.now())/86400000;return dias<0?'Vencido':dias<30?'Proximo do vencimento':'Em dia'; }
+  private situacao(vencimento:string):SituacaoTreinamento { if(!vencimento)return 'Vencido';const dias=(new Date(`${vencimento}T12:00:00`).getTime()-Date.now())/86400000;return dias<0?'Vencido':dias<this.notificacaoService.obterDiasAviso(String(this.treinamentoEditando?.nrId??0),true)?'Proximo do vencimento':'Em dia'; }
 }
