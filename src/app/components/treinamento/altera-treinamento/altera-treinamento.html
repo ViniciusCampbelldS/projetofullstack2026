@@ -143,25 +143,13 @@
 
     <div class="row g-3 mt-1" [hidden]="!podeEditarTreinamento">
       <div class="col-md-4">
-        <label for="curso-turma">Treinamento cadastrado</label>
-        <select id="curso-turma" class="form-select" [(ngModel)]="cursoSelecionadoId">
-          <option [ngValue]="null">Criar novo treinamento</option>
-          @for (curso of cursos; track curso.id) {
-            <option [ngValue]="curso.id">NR {{ curso.nrId }} — {{ curso.nome }}</option>
+        <label for="curso-turma">NR do treinamento</label>
+        <select id="curso-turma" class="form-select" [(ngModel)]="nrSelecionadoId">
+          <option [ngValue]="null">Selecione a NR</option>
+          @for (nr of nrs; track nr.id) {
+            <option [ngValue]="nr.id">{{ nr.nome }}</option>
           }
         </select>
-      </div>
-      <div class="col-md-2">
-        <label for="curso-nr">NR do novo</label>
-        <input id="curso-nr" class="form-control" type="number" min="1" [(ngModel)]="novoNrId" [disabled]="cursoSelecionadoId !== null" />
-      </div>
-      <div class="col-md-3">
-        <label for="curso-nome">Nome do novo</label>
-        <input id="curso-nome" class="form-control" [(ngModel)]="novoNome" [disabled]="cursoSelecionadoId !== null" />
-      </div>
-      <div class="col-md-3">
-        <label for="curso-validade">Validade em meses</label>
-        <input id="curso-validade" class="form-control" type="number" min="1" [(ngModel)]="novaValidadeMeses" [disabled]="cursoSelecionadoId !== null" />
       </div>
       <div class="col-md-3">
         <label for="turma-data">Data da turma</label>

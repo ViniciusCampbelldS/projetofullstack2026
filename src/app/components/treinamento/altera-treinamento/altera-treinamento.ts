@@ -12,13 +12,13 @@ import {
 } from '../editar-treinamento-modal/editar-treinamento-modal';
 import { EmployeeSelectorModal, FuncionarioTreinamento } from '../employee-selector-modal/employee-selector-modal';
 import { SelectedEmployeesModal } from '../selected-employees-modal/selected-employees-modal';
-import { CursoTreinamento, ParticipacaoTreinamento, TreinamentoService } from '../../../services/treinamento.service';
+import { NrTreinamento, ParticipacaoTreinamento, TreinamentoService } from '../../../services/treinamento.service';
 
 type SituacaoTreinamento = SituacaoTreinamentoModal;
 
 interface TreinamentoRegistro {
   id: number;
-  cursoId: number;
+  nrId: number;
   nr: string;
   treinamento: string;
   funcionario: string;
@@ -50,11 +50,8 @@ export class AlteraTreinamento implements OnInit {
   erroFuncionarios = '';
 
   treinamentos: TreinamentoRegistro[] = [];
-  cursos: CursoTreinamento[] = [];
-  cursoSelecionadoId: number | null = null;
-  novoNrId: number | null = null;
-  novoNome = '';
-  novaValidadeMeses = 12;
+  nrs: NrTreinamento[] = [];
+  nrSelecionadoId: number | null = null;
   novaData = new Date().toISOString().slice(0, 10);
   novoHorario = '08:00';
   salvandoTurma = false;
@@ -76,7 +73,7 @@ export class AlteraTreinamento implements OnInit {
 
   ngOnInit(): void {
     this.carregarTreinamentos();
-    this.carregarCursos();
+    this.carregarNrs();
     this.carregandoFuncionarios = true;
     this.erroFuncionarios = '';
 
@@ -101,10 +98,10 @@ export class AlteraTreinamento implements OnInit {
     });
   }
 
-  carregarCursos(): void {
+  carregarNrs(): void {
     this.treinamentoService.listar().subscribe({
-      next: (cursos) => this.cursos = cursos,
-      error: () => this.erroTreinamentos = 'Não foi possível carregar o catálogo de treinamentos.',
+      next: (nrs) => this.nrs = nrs,
+      error: () => this.erroTreinamentos = 'Não foi possível carregar o lista de NRs.',
     });
   }
 
@@ -128,7 +125,7 @@ export class AlteraTreinamento implements OnInit {
         this.treinamentos = [...grupos.entries()].map(([id, itens]) => {
           const primeira = itens[0];
           const vencimento = primeira.presente ? this.somarMeses(primeira.data, primeira.validadeMeses) : '';
-          return { id, cursoId: primeira.treinamentoId, nr: `NR-${String(primeira.nrId).padStart(2, '0')}`, treinamento: primeira.treinamento,
+          return { id, nrId: primeira.nrId, nr: `NR-${String(primeira.nrId).padStart(2, '0')}`, treinamento: primeira.nrNome,
             funcionario: itens.map((item) => item.funcionario).join(', '), aplicacao: primeira.data,
             vencimento, situacao: this.situacao(vencimento), participantes: itens };
         });
@@ -190,10 +187,9 @@ export class AlteraTreinamento implements OnInit {
       return;
     }
 
-    const nrId = Number(this.formTreinamento.nr.replace(/\D/g, ''));
-    this.treinamentoService.atualizar(this.treinamentoEditando.cursoId, {
-      nrId, nome: this.formTreinamento.treinamento, validadeMeses: this.mesesEntre(this.formTreinamento.aplicacao, this.formTreinamento.vencimento),
-    }).subscribe({next:()=>{this.mensagem='Treinamento atualizado.';this.fecharEdicaoTreinamento();this.carregarTreinamentos();},error:()=>this.mensagem='Não foi possível salvar o treinamento.'});
+    const nr = this.nrs.find((item) => item.id === this.treinamentoEditando!.nrId);
+    if (!nr) { this.mensagem = 'NR não encontrada.'; return; }
+    this.treinamentoService.atualizarValidade(nr, this.mesesEntre(this.formTreinamento.aplicacao, this.formTreinamento.vencimento)).subscribe({next:()=>{this.mensagem='Treinamento atualizado.';this.fecharEdicaoTreinamento();this.carregarTreinamentos();},error:()=>this.mensagem='Não foi possível salvar o treinamento.'});
   }
 
   abrirModalFuncionarios(): void {
@@ -225,36 +221,23 @@ export class AlteraTreinamento implements OnInit {
 
   adicionarNovoTreinamento(): void {
     if (!this.podeEditarTreinamento || this.salvandoTurma) return;
-    if (this.selectedFuncionarioIds.size === 0 || !this.novaData || !this.novoHorario) {
-      this.mensagem = 'Selecione funcionários, data e horário para criar a turma.';
+    if (!this.nrSelecionadoId || this.selectedFuncionarioIds.size === 0 || !this.novaData || !this.novoHorario) {
+      this.mensagem = 'Selecione NR, funcionários, data e horário para criar a turma.';
       return;
     }
     this.salvandoTurma = true;
-    const criarTurma = (cursoId: number) => this.treinamentoService.criarTurma({
-      treinamentoId: cursoId, data: this.novaData, horario: this.novoHorario, funcionarioIds: [...this.selectedFuncionarioIds],
+    this.treinamentoService.criarTurma({
+      nrId: this.nrSelecionadoId, data: this.novaData, horario: this.novoHorario, funcionarioIds: [...this.selectedFuncionarioIds],
     }).subscribe({
       next: () => {
         this.mensagem = 'Turma criada e participantes registrados.';
         this.selectedFuncionarioIds = new Set();
-        this.cursoSelecionadoId = cursoId;
-        this.salvandoTurma = false;
-        this.carregarCursos();
+                this.salvandoTurma = false;
         this.carregarTreinamentos();
       },
       error: () => { this.mensagem = 'Não foi possível criar a turma.'; this.salvandoTurma = false; },
     });
 
-    if (this.cursoSelecionadoId) {
-      criarTurma(this.cursoSelecionadoId);
-      return;
-    }
-    if (!this.novoNrId || !this.novoNome.trim() || this.novaValidadeMeses < 1) {
-      this.mensagem = 'Escolha um curso existente ou informe NR, nome e validade para criar um novo.';
-      this.salvandoTurma = false;
-      return;
-    }
-    this.treinamentoService.criar({ nrId: this.novoNrId, nome: this.novoNome.trim(), validadeMeses: this.novaValidadeMeses })
-      .subscribe({ next: (curso) => criarTurma(curso.id), error: () => { this.mensagem = 'Não foi possível criar o treinamento.'; this.salvandoTurma = false; } });
   }
 
   atualizarPresenca(turma: TreinamentoRegistro, participante: ParticipacaoTreinamento, presente: boolean): void {
