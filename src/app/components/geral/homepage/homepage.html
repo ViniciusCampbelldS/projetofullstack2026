@@ -1,7 +1,7 @@
 <section class="homepage">
 	@if (isOperario) {
 	<app-painel-operario [saudacao]="saudacao" [funcionario]="funcionario" [resumoFuncionario]="resumoFuncionario"
-		[pendenciasFuncionario]="pendenciasFuncionario" />
+		[pendenciasFuncionario]="pendenciasFuncionario" [totalEpis]="totalEpis" [totalTreinamentos]="totalTreinamentos" [totalPendencias]="totalPendenciasFuncionario" [carregandoTreinamentos]="carregandoTreinamentos" [erroTreinamentos]="erroTreinamentos" />
 	} @else {
 	<app-painel-administrativo [dataHoje]="dataHoje" [saudacao]="saudacao"
 		[percentualEpisValidos]="percentualEpisValidos" [possuiDadosTreinamento]="possuiDadosTreinamento"
