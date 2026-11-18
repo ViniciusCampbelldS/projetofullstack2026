@@ -110,9 +110,9 @@ export class AlteraTreinamento implements OnInit {
 
   get turmasAgendadas(): number { const hoje=this.hojeLocal(); return this.treinamentos.filter(t=>t.aplicacao>hoje).length; }
 
-  get participacoesProximas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&this.diasAteVencimento(p)>=0&&this.diasAteVencimento(p)<=this.notificacaoService.obterDiasAviso(String(p.nrId),true)).length; }
+  get participacoesProximas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&p.validadeMeses>0&&this.diasAteVencimento(p)>=0&&this.diasAteVencimento(p)<=this.notificacaoService.obterDiasAviso(String(p.nrId),true)).length; }
 
-  get participacoesVencidas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&this.diasAteVencimento(p)<0).length; }
+  get participacoesVencidas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&p.validadeMeses>0&&this.diasAteVencimento(p)<0).length; }
 
   private diasAteVencimento(p: ParticipacaoTreinamento): number { const d=new Date(`${this.somarMeses(p.data,p.validadeMeses)}T12:00:00`);const h=new Date();h.setHours(0,0,0,0);d.setHours(0,0,0,0);return Math.floor((d.getTime()-h.getTime())/86400000); }
 
@@ -138,7 +138,7 @@ export class AlteraTreinamento implements OnInit {
           const vencimento = primeira.presente ? this.somarMeses(primeira.data, primeira.validadeMeses) : '';
           return { id, nrId: primeira.nrId, nr: `NR-${String(primeira.nrId).padStart(2, '0')}`, treinamento: primeira.nrNome,
             funcionario: itens.map((item) => item.funcionario).join(', '), aplicacao: primeira.data,
-            vencimento, situacao: this.situacao(vencimento), participantes: itens };
+            vencimento, situacao: this.situacao(vencimento, primeira.nrId), participantes: itens };
         });
         this.carregandoTreinamentos = false;
       },
@@ -285,5 +285,5 @@ export class AlteraTreinamento implements OnInit {
 
   private somarMeses(data: string, meses: number): string { const d=new Date(`${data}T12:00:00`);d.setMonth(d.getMonth()+meses);return d.toISOString().slice(0,10); }
   private mesesEntre(inicio:string,fim:string):number { const a=new Date(`${inicio}T12:00:00`),b=new Date(`${fim}T12:00:00`);return Math.max(1,(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth()); }
-  private situacao(vencimento:string):SituacaoTreinamento { if(!vencimento)return 'Vencido';const dias=(new Date(`${vencimento}T12:00:00`).getTime()-Date.now())/86400000;return dias<0?'Vencido':dias<this.notificacaoService.obterDiasAviso(String(this.treinamentoEditando?.nrId??0),true)?'Proximo do vencimento':'Em dia'; }
+  private situacao(vencimento:string,nrId:number):SituacaoTreinamento { if(!vencimento)return 'Em dia';const data=new Date(`${vencimento}T12:00:00`);if(Number.isNaN(data.getTime()))return 'Em dia';const hoje=new Date();hoje.setHours(0,0,0,0);data.setHours(0,0,0,0);const dias=Math.floor((data.getTime()-hoje.getTime())/86400000);return dias<0?'Vencido':dias<=this.notificacaoService.obterDiasAviso(String(nrId),true)?'Proximo do vencimento':'Em dia'; }
 }
