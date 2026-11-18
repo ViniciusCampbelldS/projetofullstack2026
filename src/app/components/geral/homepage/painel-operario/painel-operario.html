@@ -19,8 +19,8 @@
 
       <div class="employee-hero-meta">
         <span><i class="bi bi-shield-check"></i>{{ totalEpis() }} EPIs vinculados</span>
-        <span><i class="bi bi-journal-check"></i>{{ totalTreinamentos() }} treinamentos</span>
-        <span><i class="bi bi-exclamation-triangle"></i>{{ totalPendencias() }} pendência(s)</span>
+        <span><i class="bi bi-journal-check"></i>{{ carregandoTreinamentos() || erroTreinamentos() ? '—' : totalTreinamentos() }} treinamentos</span>
+        <span><i class="bi bi-exclamation-triangle"></i>{{ carregandoTreinamentos() || erroTreinamentos() ? '—' : totalPendencias() }} pendência(s)</span>
       </div>
     </div>
 
@@ -65,8 +65,8 @@
 
     <div class="employee-pending-list">
       @if (carregandoTreinamentos()) { <p role="status">Carregando treinamentos...</p> }
-      @else if (erroTreinamentos()) { <p role="alert">{{ erroTreinamentos() }}</p> }
-      @else if (pendenciasFuncionario().length === 0) { <p>Nenhuma pendência encontrada nos seus registros.</p> }
+      @if (erroTreinamentos()) { <p role="alert">{{ erroTreinamentos() }} Os avisos de EPI continuam disponíveis abaixo.</p> }
+      @if (pendenciasFuncionario().length === 0) { <p>Nenhuma pendência encontrada nos seus registros.</p> }
       @else { @for (pendencia of pendenciasFuncionario(); track pendencia.titulo + pendencia.detalhe) {
         <article class="employee-pending-item">
           <span class="employee-pending-icon">
