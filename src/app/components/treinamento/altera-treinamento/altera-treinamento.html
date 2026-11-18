@@ -18,28 +18,28 @@
       <div class="stat-icon">ðŸ“š</div>
       <div>
         <small>Total de treinamentos</small>
-        <strong>{{ totalTurmas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : totalTurmas }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">ðŸ—“ï¸</div>
       <div>
         <small>Agendados</small>
-        <strong>{{ turmasAgendadas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : turmasAgendadas }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">âš ï¸</div>
       <div>
         <small>Proximos do vencimento</small>
-        <strong>{{ participacoesProximas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesProximas }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">â—</div>
       <div>
         <small>Vencidos</small>
-        <strong>{{ participacoesVencidas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesVencidas }}</strong>
       </div>
     </div>
   </div>
