@@ -75,14 +75,14 @@ export class Homepage implements OnInit {
 	private portalPendencia(t: TreinamentoPortal): boolean { const d=this.vencimentoPortal(t);return !!d&&this.diasAte(d)<=this.diasAvisoPortal(t); }
 	get treinamentosPortalPendentes(): TreinamentoPortal[] { return this.treinamentosPortal.filter(t=>this.portalPendencia(t)); }
 	get pendenciasFuncionario(): Array<{titulo:string;detalhe:string;status:string;classe:string;icone:string}> {
-		const epis=this.notificacaoService.episComNotificacao.map(e=>({titulo:e.nome,detalhe:`CA ${e.ca} · ${e.funcionario||'Seu EPI'}`,status:this.notificacaoService.estaVencido(e.vencimento)?'Vencido':this.notificacaoService.textoVencimentoEpi(e),classe:this.notificacaoService.estaVencido(e.vencimento)?'status-danger':'status-warning',icone:'bi-shield-exclamation'}));
-		const treinamentos=this.treinamentosPortalPendentes.map(t=>({titulo:`Treinamento ${t.nr}`,detalhe:`Vencimento ${t.vencimento.split('-').reverse().join('/')}`,status:this.diasAte(this.vencimentoPortal(t)!)<0?'Vencido':'Próximo',classe:'status-warning',icone:'bi-journal-exclamation'}));
+		const epis=this.notificacaoService.episComNotificacao.map(e=>({titulo:e.nome,detalhe:`CA ${e.ca} · ${e.funcionario||'Seu EPI'}`,status:this.notificacaoService.estaVencido(e.vencimento)?'Vencido':this.notificacaoService.textoVencimento(e),classe:this.notificacaoService.estaVencido(e.vencimento)?'status-danger':'status-warning',icone:'bi-shield-exclamation'}));
+		const treinamentos=this.treinamentosPortalPendentes.map(t=>({titulo:`Treinamento ${t.nr}`,detalhe:`Vencimento ${t.vencimento.split('-').reverse().join('/')}`,status:this.diasAte(this.vencimentoPortal(t)!)<0?'Vencido':'Próximo',classe:this.diasAte(this.vencimentoPortal(t)!)<0?'status-danger':'status-warning',icone:'bi-journal-exclamation'}));
 		return [...epis,...treinamentos];
 	}
 	get resumoFuncionario(){return [{rotulo:'EPIs vinculados',valor:String(this.notificacaoService.totalEpis),detalhe:'Dados da API',icone:'bi-shield-check',classe:'good'},{rotulo:'Treinamentos',valor:String(this.treinamentosPortal.length),detalhe:'Registros do banco',icone:'bi-journal-check',classe:'good'},{rotulo:'Pendências',valor:String(this.pendenciasFuncionario.length),detalhe:'Itens que exigem atenção',icone:'bi-exclamation-triangle',classe:this.pendenciasFuncionario.length?'warning':'good'}];}
 	get totalPendenciasFuncionario(): number { return this.pendenciasFuncionario.length; }
 	get treinamentosVencidos(): number { return this.treinamentosMonitorados.filter(p => { const v=this.vencimentoTreinamento(p); return v && this.diasAte(v)<0; }).length; }
-	get treinamentosProximos(): number { return this.treinamentosMonitorados.filter(p => { const v=this.vencimentoTreinamento(p); const d=v?this.diasAte(v):null; return d!==null && d>=0 && d<=30; }).length; }
+	get treinamentosProximos(): number { return this.treinamentosMonitorados.filter(p => { const v=this.vencimentoTreinamento(p); const d=v?this.diasAte(v):null; return d!==null && d>=0 && d<=this.notificacaoService.obterDiasAviso(String(p.nrId),true); }).length; }
 	get treinamentosEmDia(): number { return this.totalTreinamentos-this.treinamentosVencidos-this.treinamentosProximos; }
 	get percentualTreinamentosValidos(): number { return this.totalTreinamentos ? Math.round((this.totalTreinamentos-this.treinamentosVencidos)/this.totalTreinamentos*100) : 0; }
 
