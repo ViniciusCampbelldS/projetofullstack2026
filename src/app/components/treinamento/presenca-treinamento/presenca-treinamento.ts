@@ -1,239 +1,58 @@
-import {AuthService} from '../../../services/auth/auth';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EmployeeSelectorModal, FuncionarioTreinamento } from '../employee-selector-modal/employee-selector-modal';
-import { SelectedEmployeesModal } from '../selected-employees-modal/selected-employees-modal';
-import { FuncionarioStatus } from '../../../models/funcionario';
-import { FuncionarioService } from '../../../services/funcionario.service';
+import { AuthService } from '../../../services/auth/auth';
+import { ParticipacaoTreinamento, TreinamentoService } from '../../../services/treinamento.service';
 
-interface TurmaTreinamento {
+interface Turma {
   id: number;
-  treinamento: string;
+  nrNome: string;
   data: string;
   horario: string;
-  participantes: string[];
-  documento: string;
+  participantes: ParticipacaoTreinamento[];
 }
 
 @Component({
   selector: 'app-abre-treinamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmployeeSelectorModal, SelectedEmployeesModal],
+  imports: [CommonModule, FormsModule],
   templateUrl: './presenca-treinamento.html',
   styleUrl: './presenca-treinamento.scss'
 })
 export class PresencaTreinamento implements OnInit {
-  funcionarios: FuncionarioTreinamento[] = [];
-  carregandoFuncionarios = false;
-
-  treinamento = '';
-  data = '';
-  horario = '';
-  filtroTurmaData = '';
-  filtroTurmaHorario = '';
-  participantes: string[] = [];
-  documento = '';
-  documentoPreviewUrl = '';
+  turmas: Turma[] = [];
+  turmaSelecionadaId: number | null = null;
+  carregando = false;
   mensagem = '';
-  turmaSelecionadaId: number | null = 1;
-  isEmployeeModalOpen = false;
-  isSelectedEmployeesModalOpen = false;
-  selectedFuncionarioIds = new Set<number>();
 
-  turmas: TurmaTreinamento[] = [
-    {
-      id: 1,
-      treinamento: 'NR-35 - Trabalho em Altura',
-      data: '2026-08-20',
-      horario: '08:00',
-      participantes: ['Pedro Henrique', 'Carlos Oliveira'],
-      documento: 'lista-presenca-nr35.pdf',
-    },
-    {
-      id: 2,
-      treinamento: 'NR-10 - Seguranca em Eletricidade',
-      data: '2026-08-12',
-      horario: '14:00',
-      participantes: ['Joao da Silva', 'Ana Costa'],
-      documento: 'lista-presenca-nr10.pdf',
-    },
-    {
-      id: 3,
-      treinamento: 'NR-12 - Seguranca em Maquinas',
-      data: '2026-08-22',
-      horario: '09:30',
-      participantes: ['Fernanda Lima', 'Marcos Pereira'],
-      documento: 'lista-presenca-nr12.pdf',
-    },
-  ];
-
-  constructor(private readonly funcionarioService: FuncionarioService,private readonly auth:AuthService) {
-    const turmaInicial = this.turmaSelecionada;
-
-    if (turmaInicial) {
-      this.selecionarTurma(turmaInicial);
-    }
-  }
+  constructor(private readonly service: TreinamentoService, private readonly auth: AuthService) {}
 
   ngOnInit(): void {
-    this.carregandoFuncionarios = true;
-
-    this.funcionarioService.listar().subscribe({
-      next: (funcionarios) => {
-        this.funcionarios = funcionarios.map((funcionario) => ({
-          id: funcionario.id,
-          nome: funcionario.nome,
-          cpf: funcionario.cpf,
-          cargo: funcionario.cargo,
-          area: funcionario.setor,
-          status: this.statusParaTela(funcionario.status),
-        }));
-
-        const turma = this.turmaSelecionada;
-        if (turma) {
-          this.selecionarTurma(turma);
+    this.carregando = true;
+    this.service.turmas().subscribe({
+      next: (linhas) => {
+        const mapa = new Map<number, Turma>();
+        for (const l of linhas) {
+          const turma = mapa.get(l.id) ?? { id: l.id, nrNome: l.nrNome, data: l.data, horario: l.horario, participantes: [] };
+          if (l.funcionarioId) turma.participantes.push(l);
+          mapa.set(l.id, turma);
         }
-
-        this.carregandoFuncionarios = false;
+        this.turmas = [...mapa.values()].sort((a, b) => b.data.localeCompare(a.data));
+        this.turmaSelecionadaId = this.turmas[0]?.id ?? null;
+        this.carregando = false;
       },
-      error: (erro) => {
-        console.error('Erro ao carregar funcionários para presença:', erro);
-        this.funcionarios = [];
-        this.selectedFuncionarioIds = new Set<number>();
-        this.participantes = [];
-        this.mensagem = 'Não foi possível carregar os funcionários.';
-        this.carregandoFuncionarios = false;
-      },
+      error: () => { this.mensagem = 'Não foi possível carregar as turmas.'; this.carregando = false; },
     });
   }
 
-  private statusParaTela(status: string): FuncionarioStatus {
-    switch (status) {
-      case 'Af':
-        return 'Afastado';
-      case 'In':
-        return 'Inativo';
-      default:
-        return 'Ativo';
-    }
-  }
+  get podeEditar(): boolean { return this.auth.podeEditarTreinamento(); }
 
-  get podeCriar(): boolean {
-    return this.auth.podeEditarTreinamento() && Boolean(this.treinamento && this.data && this.horario && this.participantes.length > 0);
-  }
+  get turma(): Turma | null { return this.turmas.find((t) => t.id === this.turmaSelecionadaId) ?? null; }
 
-  get filteredTurmas(): TurmaTreinamento[] {
-    return this.turmas.filter((turma) => {
-      const matchData = !this.filtroTurmaData || turma.data === this.filtroTurmaData;
-      const matchHorario = !this.filtroTurmaHorario || turma.horario === this.filtroTurmaHorario;
-
-      return matchData && matchHorario;
+  marcar(p: ParticipacaoTreinamento, presente: boolean): void {
+    this.service.atualizarPresenca(p.id, p.funcionarioId, presente).subscribe({
+      next: () => { p.presente = presente; this.mensagem = ''; },
+      error: () => { this.mensagem = 'Não foi possível salvar a presença.'; },
     });
-  }
-
-  get turmaSelecionada(): TurmaTreinamento | null {
-    return this.turmas.find((turma) => turma.id === this.turmaSelecionadaId) ?? null;
-  }
-
-  get funcionariosSelecionados(): FuncionarioTreinamento[] {
-    return this.funcionarios.filter((funcionario) => this.selectedFuncionarioIds.has(funcionario.id));
-  }
-
-  obterStatusTurma(turma: TurmaTreinamento): 'Planejada' | 'Realizada' {
-    const dataHoraTurma = new Date(`${turma.data}T${turma.horario}:00`);
-    const agora = new Date();
-
-    return dataHoraTurma < agora ? 'Realizada' : 'Planejada';
-  }
-
-  selecionarTurma(turma: TurmaTreinamento): void {
-    this.turmaSelecionadaId = turma.id;
-    this.treinamento = turma.treinamento;
-    this.data = turma.data;
-    this.horario = turma.horario;
-    this.participantes = [...turma.participantes];
-    this.selectedFuncionarioIds = new Set(
-      this.funcionarios
-        .filter((funcionario) => turma.participantes.includes(funcionario.nome))
-        .map((funcionario) => funcionario.id)
-    );
-  }
-
-  abrirModalFuncionarios(): void {
-    this.isEmployeeModalOpen = true;
-  }
-
-  fecharModalFuncionarios(): void {
-    this.isEmployeeModalOpen = false;
-  }
-
-  abrirModalFuncionariosSelecionados(): void {
-    this.isSelectedEmployeesModalOpen = true;
-  }
-
-  fecharModalFuncionariosSelecionados(): void {
-    this.isSelectedEmployeesModalOpen = false;
-  }
-
-  salvarFuncionariosSelecionados(funcionarioIds: number[]): void {
-    this.selectedFuncionarioIds = new Set(funcionarioIds);
-    this.sincronizarParticipantes();
-    this.fecharModalFuncionarios();
-  }
-
-  removerParticipante(funcionarioId: number): void {
-    this.selectedFuncionarioIds = new Set(
-      [...this.selectedFuncionarioIds].filter((id) => id !== funcionarioId)
-    );
-    this.sincronizarParticipantes();
-  }
-
-  onDocumentoSelecionado(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    if (this.documentoPreviewUrl) {
-      URL.revokeObjectURL(this.documentoPreviewUrl);
-    }
-
-    this.documento = file.name;
-    this.documentoPreviewUrl = URL.createObjectURL(file);
-  }
-
-  criarTurma(): void {
-    if (!this.podeCriar) {
-      const camposFaltantes = [
-        !this.treinamento ? 'treinamento' : '',
-        !this.data ? 'data' : '',
-        !this.horario ? 'horario' : '',
-        this.participantes.length === 0 ? 'ao menos um funcionario' : '',
-      ].filter(Boolean);
-
-      this.mensagem = 'Preencha: ' + camposFaltantes.join(', ') + '.';
-      return;
-    }
-
-    this.turmas = [
-      {
-        id: Math.max(...this.turmas.map((turma) => turma.id), 0) + 1,
-        treinamento: this.treinamento,
-        data: this.data,
-        horario: this.horario,
-        participantes: [...this.participantes],
-        documento: this.documento || 'Documento pendente',
-      },
-      ...this.turmas,
-    ];
-
-    this.mensagem = 'Presenca registrada localmente no frontend.';
-  }
-
-  private sincronizarParticipantes(): void {
-    this.participantes = this.funcionariosSelecionados.map((funcionario) => funcionario.nome);
   }
 }

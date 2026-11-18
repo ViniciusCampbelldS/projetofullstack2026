@@ -95,10 +95,10 @@
 
           <ul class="dropdown-menu">
             <li>
-              <a class="dropdown-item" [routerLink]="['/treinamento/editar']">Nova Turma/Treinamentos</a>
+              <a class="dropdown-item" [routerLink]="['/treinamento']">Nova Turma/Treinamentos</a>
             </li>
             <li>
-              <a class="dropdown-item" [routerLink]="['/treinamento/presenca']">Presença</a>
+              <a class="dropdown-item" [routerLink]="['/treinamento/presenca']">PresenÃ§a</a>
             </li>
             <li>
               <a class="dropdown-item" [routerLink]="['/treinamento/historico']">Historico de Alteracoes</a>
@@ -163,10 +163,10 @@
               <input id="regraCaOuNr" type="text" maxlength="15" [(ngModel)]="regraCaOuNr" />
             </div>
 
-            <label for="isNorma">Tipo do código</label>
+            <label for="isNorma">Tipo do cÃ³digo</label>
             <select id="isNorma" class="form-select" [(ngModel)]="isNorma">
               <option [ngValue]="false">CA de EPI</option>
-              <option [ngValue]="true">Número de NR</option>
+              <option [ngValue]="true">NÃºmero de NR</option>
             </select>
 
             <label for="diasAviso">Avisar com antecedencia</label>
@@ -188,7 +188,7 @@
             <div class="notification-rules">
               @for (regra of regrasAviso; track (regra.isNorma ? "nr-" : "ca-") + regra.id) {
                 <div class="notification-rule">
-                  <span><strong>{{ regra.isNorma ? 'NR' : 'CA' }} {{ regra.caOuNr }}</strong> · {{ regra.diasAviso }} dias</span>
+                  <span><strong>{{ regra.isNorma ? 'NR' : 'CA' }} {{ regra.caOuNr }}</strong> Â· {{ regra.diasAviso }} dias</span>
                   <button type="button" (click)="editarRegraAviso(regra)">Editar</button>
                   <button type="button" (click)="excluirRegraAviso(regra, $event)">Excluir</button>
                 </div>
