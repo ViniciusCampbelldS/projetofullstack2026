@@ -16,6 +16,12 @@ export class PainelAdministrativo {
   saudacao = input.required<string>();
   percentualEpisValidos = input.required<number>();
   possuiDadosTreinamento = input.required<boolean>();
+  percentualTreinamentosValidos = input.required<number>();
+  treinamentosEmDia = input.required<number>();
+  treinamentosProximos = input.required<number>();
+  treinamentosVencidos = input.required<number>();
+  carregandoTreinamentos = input.required<boolean>();
+  erroTreinamentos = input.required<string>();
   totalEpis = input.required<number>();
   episEmDia = input.required<any[]>();
   episProximos = input.required<any[]>();
