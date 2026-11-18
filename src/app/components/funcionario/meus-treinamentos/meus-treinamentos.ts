@@ -9,6 +9,8 @@ interface EmployeeTraining {
   nr: string;
   trainingDate: string;
   dueDate: string;
+  diasAviso:number;
+  presente:boolean;
 }
 
 @Component({
@@ -21,9 +23,10 @@ interface EmployeeTraining {
 export class MeusTreinamentos {
   employeeTrainings:EmployeeTraining[]=[];
   erro='';
-  constructor(http:HttpClient){http.get<Array<{id:number;nr:string;data:string;vencimento:string;diasAviso:number}>>(`${environment.apiUrl}/portal/treinamentos`).subscribe({next:items=>{const br=(value:string)=>value?value.split('-').reverse().join('/'):'';this.employeeTrainings=items.map(t=>({id:t.id,nr:t.nr,trainingDate:br(t.data),dueDate:br(t.vencimento),diasAviso:t.diasAviso}));},error:()=>{this.erro='Não foi possível carregar seus treinamentos.';}});}
+  constructor(http:HttpClient){http.get<Array<{id:number;nr:string;data:string;vencimento:string;diasAviso:number;presente:boolean}>>(`${environment.apiUrl}/portal/treinamentos`).subscribe({next:items=>{const br=(value:string)=>value?value.split('-').reverse().join('/'):'';this.employeeTrainings=items.map(t=>({id:t.id,nr:t.nr,trainingDate:br(t.data),dueDate:br(t.vencimento),diasAviso:t.diasAviso,presente:t.presente}));},error:()=>{this.erro='Não foi possível carregar seus treinamentos.';}});}
 
   situacaoTreinamento(treinamento: EmployeeTraining): string {
+    if(!treinamento.presente)return 'Não realizado';
     const vencimento = this.dataBrParaDate(treinamento.dueDate);
     if(Number.isNaN(vencimento.getTime()))return "Sem vencimento informado";
     const hoje = this.inicioDoDia(new Date());
