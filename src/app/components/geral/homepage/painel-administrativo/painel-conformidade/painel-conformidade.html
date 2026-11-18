@@ -69,8 +69,8 @@
         </div>
 
         <div class="compliance-percentage training-percentage">
-          @if (possuiDadosTreinamento()) {
-            <strong>{{ percentualTreinamentosValidos() }}%</strong>
+          @if (possuiDadosTreinamento() && !carregandoTreinamentos() && !erroTreinamentos()) {
+            <strong>{{ carregandoTreinamentos() || erroTreinamentos() ? '—' : percentualTreinamentosValidos() + '%' }}</strong>
             <span>válidos</span>
           } @else {
             <strong>-</strong>
@@ -91,7 +91,7 @@
 
       <div class="training-empty-message">
         <i class="bi bi-info-circle"></i>
-        @if (carregandoTreinamentos()) { Carregando treinamentos... } @else if (erroTreinamentos()) { {{ erroTreinamentos() }} } @else { {{ treinamentosEmDia() }} válido(s), {{ treinamentosProximos() }} próximo(s) do vencimento e {{ treinamentosVencidos() }} vencido(s). }
+        @if (carregandoTreinamentos()) { Carregando treinamentos... } @else if (erroTreinamentos()) { {{ erroTreinamentos() }} } @else if (!carregandoTreinamentos() && !erroTreinamentos()) { {{ treinamentosEmDia() }} válido(s), {{ treinamentosProximos() }} próximo(s) do vencimento e {{ treinamentosVencidos() }} vencido(s). }
       </div>
     </article>
   </div>
