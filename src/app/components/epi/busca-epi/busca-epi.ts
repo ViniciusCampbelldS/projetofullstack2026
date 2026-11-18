@@ -42,7 +42,7 @@ interface BuscaEpiRow {
   vencimento: string;
   lote?: string;
   substituido?: boolean;
-  descartadoEm?:string|null;
+  
   dataDescarte?:string|null;
   motivoDescarte?:string|null;
   responsavelDescarteId?:number|null;
@@ -322,7 +322,7 @@ export class BuscaEpi implements OnInit {
         (!validadeFiltro || vencimento.includes(validadeFiltro)) &&
         (!funcionarioFiltro || funcionario.includes(funcionarioFiltro)) &&
         (!situacaoFiltro || situacao.includes(situacaoFiltro)) &&
-        (this.incluirSubstituidos || item.substituido === false) && (this.incluirDescartados || !item.descartadoEm)
+        (this.incluirSubstituidos || item.substituido === false) && (this.incluirDescartados || !item.dataDescarte)
       );
     });
   }
@@ -397,12 +397,12 @@ export class BuscaEpi implements OnInit {
     }
 
     this.itemSelecionado = item;
-    if(item.descartadoEm)return;
+    if(item.dataDescarte)return;
     this.motivoDescarte = '';this.dataDescarte=this.hoje();this.erroAcao='';
     this.modalDescarteAberto = true;
   }
 
-  get podeDescartar(){return this.podeEditar&&!this.enviandoAcao&&!!this.itemSelecionado&&!this.itemSelecionado.descartadoEm&&this.motivoDescarte.trim().length>0&&this.dataValida(this.dataDescarte);}
+  get podeDescartar(){return this.podeEditar&&!this.enviandoAcao&&!!this.itemSelecionado&&!this.itemSelecionado.dataDescarte&&this.motivoDescarte.trim().length>0&&this.dataValida(this.dataDescarte);}
   confirmarDescarte():void{
     if(!this.podeDescartar)return;const item=this.itemSelecionado!;this.enviandoAcao=true;this.erroAcao='';
     this.epiService.descartar(item.id,this.motivoDescarte.trim(),this.dataDescarte).pipe(finalize(()=>this.enviandoAcao=false),takeUntilDestroyed(this.destroyRef)).subscribe({next:()=>{
@@ -410,9 +410,9 @@ export class BuscaEpi implements OnInit {
     },error:e=>this.erroAcao=e?.error?.detail??e?.error?.message??'Não foi possível registrar o descarte.'});
   }
   abrirSubstituicao(item:BuscaEpiRow){
-    if(!this.podeEditar||item.substituido||item.descartadoEm||!item.funcionarioIds?.length)return;
+    if(!this.podeEditar||item.substituido||item.dataDescarte||!item.funcionarioIds?.length)return;
     this.itemSubstituindo=item;this.novoEpiId=null;this.motivoSubstituicao='';this.dataSubstituicao=this.hoje();this.erroAcao='';this.alternativas=[];this.modalSubstituicaoAberto=true;this.carregandoAlternativas=true;
-    this.epiService.listarDisponiveis().pipe(finalize(()=>this.carregandoAlternativas=false),takeUntilDestroyed(this.destroyRef)).subscribe({next:items=>this.alternativas=items.filter(e=>e.id!==item.id&&!e.substituido&&!e.descartadoEm),error:()=>this.erroAcao='Não foi possível carregar os objetos disponíveis.'});
+    this.epiService.listarDisponiveis().pipe(finalize(()=>this.carregandoAlternativas=false),takeUntilDestroyed(this.destroyRef)).subscribe({next:items=>this.alternativas=items.filter(e=>e.id!==item.id&&!e.substituido&&!e.dataDescarte),error:()=>this.erroAcao='Não foi possível carregar os objetos disponíveis.'});
   }
   get podeSubstituir(){return this.podeEditar&&!this.enviandoAcao&&!this.carregandoAlternativas&&!!this.itemSubstituindo&&this.alternativas.some(e=>e.id===this.novoEpiId)&&this.motivoSubstituicao.trim().length>0&&this.dataValida(this.dataSubstituicao);}
   confirmarSubstituicao(){
@@ -439,7 +439,7 @@ export class BuscaEpi implements OnInit {
   }
 
   private atualizarStatusDoItem(item: BuscaEpiRow): BuscaEpiRow {
-    if(item.descartadoEm)return {...item,status:'Descartado',statusClass:'status-expired'};
+    if(item.dataDescarte)return {...item,status:'Descartado',statusClass:'status-expired'};
     if(item.substituido)return {...item,status:'Substituído',statusClass:'status-warning'};
     const statusInfo = this.calcularStatus(
       this.toDate(item.vencimento),
@@ -552,7 +552,7 @@ export class BuscaEpi implements OnInit {
       // A API devolve vencimento no formato ISO.
       // A tabela transforma a data para exibição pt-BR.
       substituido: epi.substituido ?? false,
-      descartadoEm:epi.descartadoEm,dataDescarte:epi.dataDescarte,motivoDescarte:epi.motivoDescarte,responsavelDescarteId:epi.responsavelDescarteId,
+      dataDescarte:epi.dataDescarte,motivoDescarte:epi.motivoDescarte,responsavelDescarteId:epi.responsavelDescarteId,
       // Valor inicial; será recalculado logo abaixo.
       status: 'Próximo do vencimento',
       statusClass: 'status-warning',

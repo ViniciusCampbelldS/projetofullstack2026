@@ -41,7 +41,7 @@ describe('Cadastro e autocomplete EPI',()=>{
   const old={id:11,nome:'Capacete',ca:'12345',funcionario:'Funcionário',funcionarioIds:[7],vencimento:'01/01/2030',status:'Em uso',statusClass:'status-good' as const,substituido:false};
   component.abrirDescarte(old);component.confirmarDescarte();http.expectNone(base+'/epis/11/descarte');
   component.motivoDescarte='Danificado';component.confirmarDescarte();const req=http.expectOne(base+'/epis/11/descarte');expect(req.request.method).toBe('POST');expect(req.request.body.motivo).toBe('Danificado');expect(req.request.body.data).toMatch(/^\d{4}-\d{2}-\d{2}$/);req.flush(null);
-  http.expectOne(base+'/epis').flush([{id:11,nome:'Capacete',ca:12345,lote:'L1',vencimento:'2030-01-01',substituido:false,funcionarios:[],descartadoEm:'2026-11-17T00:00:00Z',dataDescarte:'2026-11-16',motivoDescarte:'Danificado',responsavelDescarteId:7}]);
+  http.expectOne(base+'/epis').flush([{id:11,nome:'Capacete',ca:12345,lote:'L1',vencimento:'2030-01-01',substituido:false,funcionarios:[],dataDescarte:'2026-11-16',motivoDescarte:'Danificado',responsavelDescarteId:7}]);
   expect(component.epis[0].status).toBe('Descartado');expect(component.epis[0].id).toBe(11);expect(component.modalDescarteAberto).toBe(false);
  });
 });
