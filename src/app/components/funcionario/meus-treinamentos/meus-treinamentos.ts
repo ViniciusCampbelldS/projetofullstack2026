@@ -5,7 +5,6 @@ import { Component } from '@angular/core';
 
 interface EmployeeTraining {
   id: number;
- diasAviso?:number;
   nr: string;
   trainingDate: string;
   dueDate: string;
