@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 
 export interface NrTreinamento { id:number; nome:string; validadeMeses:number|null; }
 export interface TurmaTreinamento { id:number; nrId:number; data:string; horario:string; }
-export interface ParticipacaoTreinamento extends TurmaTreinamento { nrNome:string; validadeMeses:number; funcionarioId:number; funcionario:string; presente:boolean; }
+export interface ParticipacaoTreinamento extends TurmaTreinamento { nrNome:string; validadeMeses:number; funcionarioId:number; funcionario:string; presente:boolean; documentoNome?:string|null; }
 export interface TreinamentoPortal { id:number; nr:string; nome?:string; data:string; vencimento:string; diasAviso:number; presente:boolean; }
 
 @Injectable({providedIn:'root'})

@@ -10,6 +10,7 @@ interface Turma {
   data: string;
   horario: string;
   participantes: ParticipacaoTreinamento[];
+  documentoNome?: string | null;
 }
 
 @Component({
@@ -38,7 +39,7 @@ export class PresencaTreinamento implements OnInit {
       next: (linhas) => {
         const mapa = new Map<number, Turma>();
         for (const l of linhas) {
-          const turma = mapa.get(l.id) ?? { id: l.id, nrNome: l.nrNome, data: l.data, horario: l.horario, participantes: [] };
+          const turma = mapa.get(l.id) ?? { id: l.id, nrNome: l.nrNome, data: l.data, horario: l.horario, documentoNome: l.documentoNome, participantes: [] };
           if (l.funcionarioId) turma.participantes.push(l);
           mapa.set(l.id, turma);
         }
@@ -75,7 +76,10 @@ export class PresencaTreinamento implements OnInit {
     }
     this.documentoOcupado = true;
     this.service.enviarDocumento(turmaId, arquivo).subscribe({
-      next: (documento) => this.concluirDocumento('Documento salvo: ' + documento.documentoNome),
+      next: (documento) => {
+        this.atualizarNomeDocumento(turmaId, documento.documentoNome);
+        this.concluirDocumento('Documento salvo.');
+      },
       error: (erro) => this.falhaDocumento(erro.status, 'enviar'),
     });
   }
@@ -90,7 +94,7 @@ export class PresencaTreinamento implements OnInit {
         const url = URL.createObjectURL(arquivo);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'documento-turma-' + turmaId + '.' + extensao;
+        link.download = this.turma?.documentoNome || 'documento-turma-' + turmaId + '.' + extensao;
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         this.concluirDocumento('Download iniciado.');
@@ -104,9 +108,17 @@ export class PresencaTreinamento implements OnInit {
     this.limparEstadoDocumento();
     this.documentoOcupado = true;
     this.service.excluirDocumento(turmaId).subscribe({
-      next: () => this.concluirDocumento('Documento excluído.'),
+      next: () => {
+        this.atualizarNomeDocumento(turmaId, null);
+        this.concluirDocumento('Documento excluído.');
+      },
       error: (erro) => this.falhaDocumento(erro.status, 'excluir'),
     });
+  }
+
+  private atualizarNomeDocumento(turmaId: number, nome: string | null): void {
+    const turma = this.turmas.find((item) => item.id === turmaId);
+    if (turma) turma.documentoNome = nome;
   }
 
   private concluirDocumento(mensagem: string): void {

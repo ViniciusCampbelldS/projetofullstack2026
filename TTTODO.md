@@ -29,7 +29,8 @@ Revisado contra a branch de remoção de mocks. **[x] confirma implementação e
 ### P1 — dados reais e funcionalidades incompletas
 - [ ] Upload e armazenamento de imagens nos relatos de estado do EPI: seleção/preview local existe, mas envio de anexos não está disponível; a tela informa isso.
 - [x] Conectar envio/substituição, download e exclusão de documento à API na tela de presença da turma. Build e suíte Angular passaram localmente.
-- [ ] Mostrar metadados do documento já salvo ao selecionar uma turma e validar o fluxo e as permissões com a API publicada.
+- [x] Mostrar o nome do documento salvo ao selecionar a turma e atualizar a tela após envio ou exclusão.
+- [ ] Validar o fluxo autenticado e as permissões com a API publicada.
 - [ ] Completar histórico de funcionário (criação e alterações de campos) quando o backend passar a registrar esses eventos.
 - [ ] Permitir que o funcionário consulte seu próprio histórico, se esse requisito for mantido; atualmente a página administrativa de histórico é restrita.
 - [x] Filtrar o histórico por área e navegar por páginas de 20, 50 ou 100 eventos via API. O agrupamento de criações de EPI é feito dentro de cada página. Build e suíte Angular passaram; validação com API publicada pendente.
