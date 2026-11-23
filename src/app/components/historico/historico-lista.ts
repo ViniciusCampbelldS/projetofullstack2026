@@ -14,6 +14,10 @@ interface Linha { eventos: HistoricoEvento[]; evento: HistoricoEvento; detalhe: 
 export class HistoricoLista implements OnInit {
   @Input() areas: string[] = [];
   linhas: Linha[] = [];
+  area = '';
+  pagina = 0;
+  tamanho = 20;
+  total = 0;
   carregando = false;
   erro = '';
   notaAbertaId: number | null = null;
@@ -21,14 +25,45 @@ export class HistoricoLista implements OnInit {
 
   constructor(private readonly service: HistoricoService) {}
 
-  ngOnInit(): void { this.carregar(); }
+  ngOnInit(): void {
+    this.area = this.areas[0] ?? '';
+    this.carregar();
+  }
+
+  filtrar(): void {
+    this.pagina = 0;
+    this.total = 0;
+    this.carregar();
+  }
+
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.total / this.tamanho));
+  }
+
+  mudarPagina(delta: number): void {
+    const destino = this.pagina + delta;
+    if (this.carregando || destino < 0 || destino >= this.totalPaginas) return;
+    this.pagina = destino;
+    this.carregar();
+  }
 
   carregar(): void {
+    if (this.carregando || !this.area) return;
     this.carregando = true;
     this.erro = '';
-    this.service.listar(this.areas).subscribe({
-      next: (eventos) => { this.linhas = this.agrupar(eventos); this.carregando = false; },
-      error: () => { this.erro = 'Não foi possível carregar o histórico.'; this.carregando = false; },
+    this.linhas = [];
+    this.notaAbertaId = null;
+    this.novaNota = '';
+    this.service.listar(this.area, this.pagina, this.tamanho).subscribe({
+      next: ({ itens, total }) => {
+        this.linhas = this.agrupar(itens);
+        this.total = total;
+        this.carregando = false;
+      },
+      error: () => {
+        this.erro = 'Não foi possível carregar o histórico.';
+        this.carregando = false;
+      },
     });
   }
 

@@ -21,7 +21,8 @@ Revisado contra a branch de remoção de mocks. **[x] confirma implementação e
 ## Pendências confirmadas
 
 ### P0 — validar a integração
-- [ ] Rodar build/testes Angular e smoke tests com backend real; não há execuções de GitHub Actions encontradas nesta revisão.
+- [x] Rodar build e testes Angular: build local passou (dois avisos de tamanho) e 16 testes passaram. Workflow de CI adicionado, primeira execução remota pendente.
+- [ ] Rodar smoke tests com backend real.
 - [ ] Validar em produção cadastro/edição/filtros, entrega/substituição/descarte, fichas, turma/presença, notificações, histórico, login e permissões.
 - [ ] Confirmar se deploy Vercel corresponde ao `main` atual.
 
@@ -30,7 +31,7 @@ Revisado contra a branch de remoção de mocks. **[x] confirma implementação e
 - [ ] Interface de documentos de treinamento: backend tem PUT/GET/DELETE, mas ligar upload, exibição, download e exclusão na tela e validar permissões.
 - [ ] Completar histórico de funcionário (criação e alterações de campos) quando o backend passar a registrar esses eventos.
 - [ ] Permitir que o funcionário consulte seu próprio histórico, se esse requisito for mantido; atualmente a página administrativa de histórico é restrita.
-- [ ] Tornar os filtros/paginação do histórico configuráveis no frontend; atualmente cada área consulta até 100 eventos.
+- [x] Filtrar o histórico por área e navegar por páginas de 20, 50 ou 100 eventos via API. O agrupamento de criações de EPI é feito dentro de cada página. Build e suíte Angular passaram; validação com API publicada pendente.
 - [ ] Implementar exportação PDF/XLSX/ODF reais; hoje esses formatos geram texto simples com a extensão correspondente.
 - [ ] Validar o XML gerado (conteúdo, acentos, filtros e abertura em leitor) e ajustar MIME/encoding de todos os formatos.
 - [x] Conectar indicadores de treinamento à API e substituir números fixos; os status usam validade da NR e prazo de aviso configurado.
