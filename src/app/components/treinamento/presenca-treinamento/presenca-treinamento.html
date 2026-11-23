@@ -12,7 +12,7 @@
 
     <div class="field mb-3">
       <label for="turma-presenca">Turma</label>
-      <select id="turma-presenca" class="form-select" [(ngModel)]="turmaSelecionadaId">
+      <select id="turma-presenca" class="form-select" [ngModel]="turmaSelecionadaId" (ngModelChange)="turmaSelecionadaId = $event; limparEstadoDocumento()" [disabled]="documentoOcupado">
         @for (t of turmas; track t.id) {
           <option [ngValue]="t.id">#{{ t.id }} - {{ t.nrNome }} - {{ t.data | date: 'dd/MM/yyyy' }} {{ t.horario }}</option>
         }
@@ -21,6 +21,31 @@
 
     @if (turma; as t) {
       <h2>{{ t.nrNome }}</h2>
+      <section class="mb-3" aria-labelledby="documento-turma">
+        <h3 id="documento-turma" class="h5">Documento da turma</h3>
+        @if (podeEditar) {
+          <label for="arquivo-turma" class="form-label">Enviar ou substituir (PDF, PNG ou JPEG, até 5 MB)</label>
+          <input #arquivo id="arquivo-turma" class="form-control mb-2" type="file"
+            accept=".pdf,.png,.jpg,.jpeg" [disabled]="documentoOcupado" (change)="enviarDocumento(t.id, arquivo)" />
+        }
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-soft" [disabled]="documentoOcupado" (click)="baixarDocumento(t.id)">
+            Baixar documento
+          </button>
+          @if (podeEditar && !confirmarExclusaoDocumento) {
+            <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="documentoOcupado" (click)="limparEstadoDocumento(); confirmarExclusaoDocumento = true">
+              Excluir documento
+            </button>
+          }
+          @if (confirmarExclusaoDocumento) {
+            <button type="button" class="btn btn-sm btn-danger" (click)="excluirDocumento(t.id)">Confirmar exclusão</button>
+            <button type="button" class="btn btn-sm btn-soft" (click)="limparEstadoDocumento()">Cancelar</button>
+          }
+        </div>
+        @if (documentoOcupado) { <p role="status">Processando documento...</p> }
+        @if (documentoMensagem) { <p role="status">{{ documentoMensagem }}</p> }
+        @if (documentoErro) { <p role="alert">{{ documentoErro }}</p> }
+      </section>
       @for (p of t.participantes; track p.funcionarioId) {
         <label class="d-block">
           <input type="checkbox" [checked]="p.presente" [disabled]="!podeEditar"

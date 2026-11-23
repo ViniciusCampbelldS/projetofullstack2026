@@ -16,5 +16,23 @@ export class TreinamentoService {
   turmas(){return this.http.get<ParticipacaoTreinamento[]>(`${this.api}/turmas`);}
   meusTreinamentos(){return this.http.get<TreinamentoPortal[]>(`${environment.apiUrl}/portal/treinamentos`);}
   criarTurma(turma:{nrId:number;data:string;horario:string;funcionarioIds:number[]}){return this.http.post<TurmaTreinamento>(`${this.api}/turmas`,turma);}
+  enviarDocumento(turmaId: number, arquivo: File) {
+    const dados = new FormData();
+    dados.append('arquivo', arquivo);
+    return this.http.put<{ documentoNome: string }>(this.urlDocumento(turmaId), dados);
+  }
+
+  baixarDocumento(turmaId: number) {
+    return this.http.get(this.urlDocumento(turmaId), { responseType: 'blob' });
+  }
+
+  excluirDocumento(turmaId: number) {
+    return this.http.delete<void>(this.urlDocumento(turmaId));
+  }
+
+  private urlDocumento(turmaId: number): string {
+    return `${this.api}/turmas/${turmaId}/documento`;
+  }
+
   atualizarPresenca(turmaId:number,funcionarioId:number,presente:boolean){return this.http.patch<void>(`${this.api}/turmas/${turmaId}/participantes/${funcionarioId}`,{presente});}
 }
