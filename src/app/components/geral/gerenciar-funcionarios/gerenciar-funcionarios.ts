@@ -56,30 +56,18 @@ export class GerenciarFuncionarios implements OnInit {
    */
   private readonly authService = inject(AuthService);
 
-  /*
-   * Opções de setores disponíveis no formulário.
-   */
-  readonly setores = [
-    'Operações',
-    'Manutenção',
-    'Produção',
-    'Qualidade',
-    'Logística',
-    'Administrativo',
-  ];
+  get setores(): string[] {
+    return this.valoresCadastrados('setor');
+  }
 
-  /*
-   * Opções de cargos disponíveis.
-   */
-  readonly cargos = [
-    'Operador',
-    'Soldador',
-    'Eletricista',
-    'Supervisor',
-    'Auxiliar',
-    'Técnico de Segurança',
-  ];
+  get cargos(): string[] {
+    return this.valoresCadastrados('cargo');
+  }
 
+  private valoresCadastrados(campo: 'setor' | 'cargo'): string[] {
+    return [...new Set(this.funcionarios.map((funcionario) => funcionario[campo]?.trim()).filter((valor): valor is string => !!valor))]
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }
   /*
    * Perfis apresentados para o usuário.
    */
@@ -828,9 +816,9 @@ export class GerenciarFuncionarios implements OnInit {
 
       cpf: this.form.cpf.replace(/\D/g, ''),
 
-      setor: this.form.setor,
+      setor: this.form.setor.trim(),
 
-      cargo: this.form.cargo,
+      cargo: this.form.cargo.trim(),
 
       permissoes: this.perfilParaPermissao(this.form.perfil),
 
@@ -876,9 +864,9 @@ export class GerenciarFuncionarios implements OnInit {
 
       cpf: '',
 
-      setor: 'Ex.: Compras',
+      setor: '',
 
-      cargo: 'Ex.: Metalúrgico I',
+      cargo: '',
 
       perfil: 'Funcionário',
 

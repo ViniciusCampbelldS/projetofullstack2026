@@ -268,20 +268,14 @@
 
 			<div class="col-md-4">
 				<label class="form-label" for="setor">Setor</label>
-				<select id="setor" class="form-select" [(ngModel)]="form.setor">
-					@for (setor of setores; track setor) {
-					<option [value]="setor">{{ setor }}</option>
-					}
-				</select>
+				<input id="setor" class="form-control" type="text" list="sugestoes-setores" placeholder="Ex.: Compras" [(ngModel)]="form.setor" />
+                <datalist id="sugestoes-setores">@for (setor of setores; track setor) { <option [value]="setor"></option> }</datalist>
 			</div>
 
 			<div class="col-md-4">
 				<label class="form-label" for="cargo">Cargo</label>
-				<select id="cargo" class="form-select" [(ngModel)]="form.cargo">
-					@for (cargo of cargos; track cargo) {
-					<option [value]="cargo">{{ cargo }}</option>
-					}
-				</select>
+				<input id="cargo" class="form-control" type="text" list="sugestoes-cargos" placeholder="Ex.: Metalúrgico I" [(ngModel)]="form.cargo" />
+                <datalist id="sugestoes-cargos">@for (cargo of cargos; track cargo) { <option [value]="cargo"></option> }</datalist>
 			</div>
 
 			<div class="col-md-4">

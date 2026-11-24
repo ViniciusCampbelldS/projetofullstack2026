@@ -37,7 +37,7 @@ Revisado contra a branch de remoção de mocks. **[x] confirma implementação e
 - [ ] Implementar exportação PDF/XLSX/ODF reais; hoje esses formatos geram texto simples com a extensão correspondente.
 - [ ] Validar o XML gerado (conteúdo, acentos, filtros e abertura em leitor) e ajustar MIME/encoding de todos os formatos.
 - [x] Conectar indicadores de treinamento à API e substituir números fixos; os status usam validade da NR e prazo de aviso configurado.
-- [ ] Substituir listas fixas de cargos e setores por entrada livre com sugestões dos valores cadastrados; não restringir o usuário a opções hardcoded.
+- [x] Permitir entrada livre de cargos e setores com sugestões e filtros derivados dos funcionários carregados. Build e testes Angular passaram localmente; validação com a API publicada pendente.
 - [ ] Revisar a busca de NR por número parcial e garantir que descrição/número e seleção estejam corretos.
 - [ ] Revisar CRUD de NR para impedir nomes duplicados; backend ainda não valida duplicidade por nome.
 - [ ] Rever e completar estados de loading, vazio, erro, sucesso e retry em todas as telas.
