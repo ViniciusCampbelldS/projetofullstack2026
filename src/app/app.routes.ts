@@ -76,6 +76,12 @@ export const routes: Routes = [
     canActivate: [tstGuard]
   },
 
+  {
+    path: 'meu-historico',
+    loadComponent: () => import('./components/funcionario/meu-historico/meu-historico').then(m => m.MeuHistorico),
+    canActivate: [authGuard]
+  },
+
   // funcionario
   {
     path: 'funcionario',

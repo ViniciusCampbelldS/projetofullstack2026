@@ -1,0 +1,24 @@
+<section class="historico-pessoal">
+  <header><h1>Meu histórico</h1><p>Alterações registradas nos seus dados cadastrais.</p></header>
+  <div class="panel">
+    @if (carregando) { <p role="status">Carregando histórico...</p> }
+    @if (erro) { <p role="alert">{{ erro }}</p><button class="btn btn-soft" type="button" (click)="carregar()">Tentar novamente</button> }
+    @if (!carregando && !erro) {
+      @for (evento of eventos; track $index) {
+        <article>
+          <h2>{{ evento.acao }} <small>{{ evento.criadoEm | date:'dd/MM/yyyy HH:mm' }}</small></h2>
+          <ul>
+            @for (campo of campos(evento); track campo) {
+              <li>{{ campo }}: @if (evento.antes) { {{ texto(evento.antes[campo]) }} → } {{ texto(evento.depois?.[campo]) }}</li>
+            }
+          </ul>
+        </article>
+      } @empty { <p>Nenhuma alteração registrada.</p> }
+      <nav aria-label="Paginação do histórico">
+        <button class="btn btn-soft" type="button" (click)="mudarPagina(-1)" [disabled]="pagina === 0">Anterior</button>
+        <span>Página {{ pagina + 1 }} · {{ total }} registros</span>
+        <button class="btn btn-soft" type="button" (click)="mudarPagina(1)" [disabled]="(pagina + 1) * tamanho >= total">Próxima</button>
+      </nav>
+    }
+  </div>
+</section>

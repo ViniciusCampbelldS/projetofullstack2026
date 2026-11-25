@@ -10,6 +10,8 @@ export interface HistoricoEvento {
   antes: Record<string, unknown> | null; depois: Record<string, unknown> | null;
   comentarios: HistoricoComentario[];
 }
+export interface EventoPessoal { criadoEm: string; acao: string; antes: Record<string, unknown> | null; depois: Record<string, unknown> | null; }
+export interface PaginaPessoal { itens: EventoPessoal[]; total: number; pagina: number; tamanho: number; }
 interface Pagina { itens: HistoricoEvento[]; total: number; }
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +25,11 @@ export class HistoricoService {
       .set('pagina', pagina)
       .set('tamanho', tamanho);
     return this.http.get<Pagina>(this.api, { params });
+  }
+
+  listarPessoal(pagina: number, tamanho: number): Observable<PaginaPessoal> {
+    const params = new HttpParams().set('pagina', pagina).set('tamanho', tamanho);
+    return this.http.get<PaginaPessoal>(`${environment.apiUrl}/portal/historico`, { params });
   }
 
   comentar(id: number, texto: string) {
