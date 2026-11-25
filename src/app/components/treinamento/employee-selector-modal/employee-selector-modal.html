@@ -31,39 +31,39 @@
 				</div>
 
 				<div class="field">
-					<label for="modal-funcionario-area">Ãrea</label>
+					<label for="modal-funcionario-area">Área</label>
 					<input id="modal-funcionario-area" type="text" class="form-control" [value]="filtroArea"
-						(input)="filtroArea = $any($event.target).value" placeholder="Pesquisar por Ã¡rea" />
+						(input)="filtroArea = $any($event.target).value" placeholder="Pesquisar por área" />
 				</div>
 
-				<!-- Permite filtrar os funcionÃ¡rios pela situaÃ§Ã£o. -->
+				<!-- Permite filtrar os funcionários pela situação. -->
 				<div class="field">
 					<label for="modal-funcionario-status">
 						Status
 					</label>
 
 					<select id="modal-funcionario-status" class="form-control" [(ngModel)]="filtroStatus">
-						<!-- Somente funcionÃ¡rios ativos. -->
+						<!-- Somente funcionários ativos. -->
 						<option value="Ativo">
 							Ativo
 						</option>
 
-						<!-- Somente funcionÃ¡rios inativos. -->
+						<!-- Somente funcionários inativos. -->
 						<option value="Inativo">
 							Inativo
 						</option>
 
-						<!-- Somente funcionÃ¡rios afastados. -->
+						<!-- Somente funcionários afastados. -->
 						<option value="Afastado">
 							Afastado
 						</option>
 
-						<!-- FuncionÃ¡rios ativos ou afastados. -->
+						<!-- Funcionários ativos ou afastados. -->
 						<option value="Ativos e Afastados">
 							Ativos e Afastados
 						</option>
 
-						<!-- Todos os funcionÃ¡rios. -->
+						<!-- Todos os funcionários. -->
 						<option value="Todos">
 							Todos
 						</option>
@@ -84,8 +84,8 @@
 							<th>Nome</th>
 							<th>CPF</th>
 							<th>Cargo</th>
-							<th>Ãrea</th>
-							<!-- Mostra o status que tambÃ©m pode ser usado pelo filtro. -->
+							<th>Área</th>
+							<!-- Mostra o status que também pode ser usado pelo filtro. -->
 							<th>Status</th>
 						</tr>
 					</thead>
@@ -101,7 +101,7 @@
 							<td>{{ funcionario.cpf }}</td>
 							<td>{{ funcionario.cargo }}</td>
 							<td>{{ funcionario.area }}</td>
-							<!-- Exibe a situaÃ§Ã£o atual do funcionÃ¡rio. -->
+							<!-- Exibe a situação atual do funcionário. -->
 							<td>
 								{{ funcionario.status }}
 							</td>
@@ -110,7 +110,7 @@
 						<tr>
 							<!-- A tabela agora possui uma coluna extra de status. -->
 							<td colspan="6" class="empty-row">
-								Nenhum funcionÃ¡rio encontrado com os filtros informados.
+								Nenhum funcionário encontrado com os filtros informados.
 							</td>
 						</tr>
 						}

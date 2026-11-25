@@ -385,3 +385,11 @@ textarea:focus-visible {
 	outline: 2px solid var(--mar-azul-claro);
 	outline-offset: 2px;
 }
+
+/* Espaçamento comum para telas pequenas. */
+@media (max-width: 768px) {
+  :root { --mar-page-padding-x: 16px; --mar-page-padding-top: 24px; --mar-page-padding-bottom: 40px; }
+  .panel { min-width: 0; }
+  .modal-overlay { padding: 12px; }
+  .modal-actions { flex-wrap: wrap; }
+}

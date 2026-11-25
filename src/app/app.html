@@ -98,7 +98,7 @@
               <a class="dropdown-item" [routerLink]="['/treinamento']">Nova Turma/Treinamentos</a>
             </li>
             <li>
-              <a class="dropdown-item" [routerLink]="['/treinamento/presenca']">PresenÃ§a</a>
+              <a class="dropdown-item" [routerLink]="['/treinamento/presenca']">Presença</a>
             </li>
             <li>
               <a class="dropdown-item" [routerLink]="['/treinamento/historico']">Historico de Alteracoes</a>
@@ -163,10 +163,10 @@
               <input id="regraCaOuNr" type="text" maxlength="15" [(ngModel)]="regraCaOuNr" />
             </div>
 
-            <label for="isNorma">Tipo do cÃ³digo</label>
+            <label for="isNorma">Tipo do código</label>
             <select id="isNorma" class="form-select" [(ngModel)]="isNorma">
               <option [ngValue]="false">CA de EPI</option>
-              <option [ngValue]="true">NÃºmero de NR</option>
+              <option [ngValue]="true">Número de NR</option>
             </select>
 
             <label for="diasAviso">Avisar com antecedencia</label>

@@ -91,9 +91,9 @@ export class AlteraTreinamento implements OnInit {
         this.carregandoFuncionarios = false;
       },
       error: (erro) => {
-        console.error('Erro ao carregar funcionÃ¡rios para treinamentos:', erro);
+        console.error('Erro ao carregar funcionários para treinamentos:', erro);
         this.funcionarios = [];
-        this.erroFuncionarios = 'NÃ£o foi possÃ­vel carregar os funcionÃ¡rios.';
+        this.erroFuncionarios = 'Não foi possível carregar os funcionários.';
         this.carregandoFuncionarios = false;
       },
     });
@@ -102,7 +102,7 @@ export class AlteraTreinamento implements OnInit {
   carregarNrs(): void {
     this.treinamentoService.listar().subscribe({
       next: (nrs) => this.nrs = nrs,
-      error: () => this.erroTreinamentos = 'NÃ£o foi possÃ­vel carregar o lista de NRs.',
+      error: () => this.erroTreinamentos = 'Não foi possível carregar o lista de NRs.',
     });
   }
 
@@ -142,7 +142,7 @@ export class AlteraTreinamento implements OnInit {
         });
         this.carregandoTreinamentos = false;
       },
-      error: () => { this.erroTreinamentos = 'NÃ£o foi possÃ­vel carregar os treinamentos.'; this.carregandoTreinamentos = false; },
+      error: () => { this.erroTreinamentos = 'Não foi possível carregar os treinamentos.'; this.carregandoTreinamentos = false; },
     });
   }
 
@@ -199,8 +199,8 @@ export class AlteraTreinamento implements OnInit {
     }
 
     const nr = this.nrs.find((item) => item.id === this.treinamentoEditando!.nrId);
-    if (!nr) { this.mensagem = 'NR nÃ£o encontrada.'; return; }
-    this.treinamentoService.atualizarValidade(nr, this.mesesEntre(this.formTreinamento.aplicacao, this.formTreinamento.vencimento)).subscribe({next:()=>{this.mensagem='Treinamento atualizado.';this.fecharEdicaoTreinamento();this.carregarTreinamentos();},error:()=>this.mensagem='NÃ£o foi possÃ­vel salvar o treinamento.'});
+    if (!nr) { this.mensagem = 'NR não encontrada.'; return; }
+    this.treinamentoService.atualizarValidade(nr, this.mesesEntre(this.formTreinamento.aplicacao, this.formTreinamento.vencimento)).subscribe({next:()=>{this.mensagem='Treinamento atualizado.';this.fecharEdicaoTreinamento();this.carregarTreinamentos();},error:()=>this.mensagem='Não foi possível salvar o treinamento.'});
   }
 
   abrirModalFuncionarios(): void {
@@ -233,7 +233,7 @@ export class AlteraTreinamento implements OnInit {
   adicionarNovoTreinamento(): void {
     if (!this.podeEditarTreinamento || this.salvandoTurma) return;
     if (!this.nrSelecionadoId || this.selectedFuncionarioIds.size === 0 || !this.novaData || !this.novoHorario) {
-      this.mensagem = 'Selecione NR, funcionÃ¡rios, data e horÃ¡rio para criar a turma.';
+      this.mensagem = 'Selecione NR, funcionários, data e horário para criar a turma.';
       return;
     }
     this.salvandoTurma = true;
@@ -246,7 +246,7 @@ export class AlteraTreinamento implements OnInit {
                 this.salvandoTurma = false;
         this.carregarTreinamentos();
       },
-      error: () => { this.mensagem = 'NÃ£o foi possÃ­vel criar a turma.'; this.salvandoTurma = false; },
+      error: () => { this.mensagem = 'Não foi possível criar a turma.'; this.salvandoTurma = false; },
     });
 
   }
@@ -255,7 +255,7 @@ export class AlteraTreinamento implements OnInit {
     if (!this.podeEditarTreinamento) return;
     this.treinamentoService.atualizarPresenca(turma.id, participante.funcionarioId, presente).subscribe({
       next: () => this.carregarTreinamentos(),
-      error: () => this.mensagem = 'NÃ£o foi possÃ­vel atualizar a presenÃ§a.',
+      error: () => this.mensagem = 'Não foi possível atualizar a presença.',
     });
   }
 

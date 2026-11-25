@@ -49,7 +49,7 @@ Revisado contra a branch de remoção de mocks. **[x] confirma implementação e
 - [x] Remover a classe duplicada `EpiService` em `epi-status.ts`; manter o serviço oficial em `services/epi.service.ts`.
 - [ ] Revisar a rota antiga `/treinamento/presenca`: decidir se deve redirecionar à página unificada ou continuar suportada; não afirmar que está redirecionada sem alterar a rota.
 - [ ] Corrigir textos com codificação quebrada (mojibake) e revisar acentos/legendas.
-- [ ] Padronizar formulários EPI/funcionário, layout, validações, acessibilidade por teclado e responsividade mobile.
+- [ ] Padronizar formulários EPI/funcionário, layout, validações, acessibilidade por teclado e responsividade mobile. Avanço: histórico centralizado, seletor de EPI em modal e ajustes gerais de espaçamento móvel; revisão visual das demais telas ainda pendente.
 - [ ] Conferir filtros/status/datas em casos limite e ausência de dados.
 
 ## Dependências de backend/produção

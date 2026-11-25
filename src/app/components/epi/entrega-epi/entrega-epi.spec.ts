@@ -24,6 +24,18 @@ describe('Entrega real de objetos EPI',()=>{
   component.marcar(11,true);expect(component.podeSalvar).toBe(false);component.funcionarioId=7;expect(component.podeSalvar).toBe(true);
   component.marcar(999,true);expect(component.podeSalvar).toBe(false);component.marcar(999,false);component.dataEntrega='2999-01-01';expect(component.podeSalvar).toBe(false);component.confirmar();component.salvar(document.createElement('input'));http.expectNone(base+'/entregas-epis');
  });
+ it('preserva os IDs escolhidos apenas ao confirmar o modal', () => {
+  component.marcar(11, true);
+  component.abrirModalEpis();
+  component.marcarTemporario(11, false);
+  component.marcarTemporario(12, true);
+  component.fecharModalEpis();
+  expect([...component.selecionados]).toEqual([11]);
+  component.abrirModalEpis();
+  component.marcarTemporario(12, true);
+  component.aplicarSelecaoEpis();
+  expect([...component.selecionados]).toEqual([11, 12]);
+ });
  it('envia a ficha e a entrega no mesmo POST multipart', () => {
   component.funcionarioId = 7;
   component.marcar(11, true);

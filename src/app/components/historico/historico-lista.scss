@@ -1,0 +1,12 @@
+:host { display: block; min-width: 0; }
+.table-container { width: 100%; overflow-x: auto; border: 1px solid var(--mar-line); border-radius: 10px; -webkit-overflow-scrolling: touch; }
+table { width: 100%; min-width: 760px; border-collapse: collapse; }
+th, td { padding: 11px 12px; border-bottom: 1px solid var(--mar-line); text-align: center; vertical-align: middle; font-size: .88rem; }
+th { background: var(--mar-azul-escuro); color: white; font-size: .76rem; font-weight: 800; text-transform: uppercase; }
+tbody tr:nth-child(even) { background: #f7fbfd; }
+tbody tr:hover { background: #edf7fb; box-shadow: inset 4px 0 var(--mar-laranja-claro); }
+.status { display: inline-flex; padding: 6px 10px; border-radius: 999px; font-size: .74rem; font-weight: 700; }
+.status.success { background: #dceee8; color: #087c56; }
+.status.warning { background: #fff0dc; color: #a9500c; }
+.status.danger { background: #ffe3e9; color: #ad1a37; }
+@media (max-width: 620px) { th, td { padding: 9px; font-size: .82rem; } nav button { flex: 1; } }

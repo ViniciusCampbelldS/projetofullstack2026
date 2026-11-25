@@ -10,6 +10,7 @@ interface Linha { eventos: HistoricoEvento[]; evento: HistoricoEvento; detalhe: 
   standalone: true,
   imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './historico-lista.html',
+  styleUrl: './historico-lista.scss',
 })
 export class HistoricoLista implements OnInit {
   @Input() areas: string[] = [];

@@ -2,12 +2,12 @@
   <div class="hero">
     <div>
       <h1>Gerenciar Treinamentos</h1>
-      <p>Area para cadastrar, agendar e acompanhar os treinamentos de seguranca dos funcionarios.</p>
+      <p>Área para cadastrar, agendar e acompanhar os treinamentos de segurança dos funcionários.</p>
     </div>
   </div>
 
   @if (carregandoFuncionarios) {
-    <div class="form-message" role="status">Carregando funcionÃ¡rios...</div>
+    <div class="form-message" role="status">Carregando funcionários...</div>
   }
   @if (erroFuncionarios) {
     <div class="form-message" role="alert">{{ erroFuncionarios }}</div>
@@ -15,28 +15,28 @@
 
   <div class="cards">
     <div class="stat-card">
-      <div class="stat-icon">ðŸ“š</div>
+      <div class="stat-icon" aria-hidden="true"><i class="bi bi-journal-bookmark"></i></div>
       <div>
         <small>Total de treinamentos</small>
         <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : totalTurmas }}</strong>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">ðŸ—“ï¸</div>
+      <div class="stat-icon" aria-hidden="true"><i class="bi bi-calendar-event"></i></div>
       <div>
         <small>Agendados</small>
         <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : turmasAgendadas }}</strong>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">âš ï¸</div>
+      <div class="stat-icon" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></div>
       <div>
-        <small>Proximos do vencimento</small>
+        <small>Próximos do vencimento</small>
         <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesProximas }}</strong>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">â—</div>
+      <div class="stat-icon" aria-hidden="true"><i class="bi bi-exclamation-circle"></i></div>
       <div>
         <small>Vencidos</small>
         <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesVencidas }}</strong>

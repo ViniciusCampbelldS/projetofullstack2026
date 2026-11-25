@@ -14,6 +14,7 @@ export class EntregaEpi implements OnInit {
  private readonly funcionarioMudou=new Subject<number|null>();
  funcionarios:FuncionarioResponse[]=[];disponiveis:EpiResponse[]=[];entregas:EntregaEpiResponse[]=[];
  funcionarioId:number|null=null;selecionados=new Set<number>();buscaFuncionario='';buscaEpi='';
+ modalEpisAberto=false; selecaoTemporaria=new Set<number>();
  ficha: File | null = null;
  erroFicha = '';
  erroDownload = '';
@@ -33,6 +34,19 @@ export class EntregaEpi implements OnInit {
  carregar(){this.carregando=true;this.erro='';forkJoin([this.funcionariosApi.listar(),this.api.listarDisponiveis()]).pipe(finalize(()=>this.carregando=false),takeUntilDestroyed(this.destroyRef)).subscribe({next:([funcionarios,epis])=>{this.funcionarios=funcionarios;this.disponiveis=epis;this.selecionados=new Set([...this.selecionados].filter(id=>epis.some(e=>e.id===id)));},error:()=>{this.erro='Não foi possível carregar funcionários e EPIs disponíveis. Tente novamente.';}});}
  selecionarFuncionario(){this.confirmacao=false;this.funcionarioMudou.next(this.funcionarioId);}
  marcar(id:number,checked:boolean){this.confirmacao=false;const next=new Set(this.selecionados);checked?next.add(id):next.delete(id);this.selecionados=next;}
+ abrirModalEpis(){if(!this.podeGerenciar||this.carregando||this.salvando)return;this.selecaoTemporaria=new Set(this.selecionados);this.buscaEpi='';this.modalEpisAberto=true;setTimeout(()=>document.getElementById('delivery-epi-search')?.focus());}
+ marcarTemporario(id:number,checked:boolean){const next=new Set(this.selecaoTemporaria);checked?next.add(id):next.delete(id);this.selecaoTemporaria=next;}
+ fecharModalEpis(){this.modalEpisAberto=false;this.buscaEpi='';setTimeout(()=>document.getElementById('abrir-seletor-epis')?.focus());}
+ aplicarSelecaoEpis(){this.selecionados=new Set(this.selecaoTemporaria);this.confirmacao=false;this.fecharModalEpis();}
+ manterFocoNoModal(event: KeyboardEvent) {
+   const modal = event.currentTarget as HTMLElement;
+   const elementos = Array.from(modal.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled])'));
+   const primeiro = elementos[0];
+   const ultimo = elementos[elementos.length - 1];
+   if (event.shiftKey && document.activeElement === primeiro) { event.preventDefault(); ultimo?.focus(); }
+   else if (!event.shiftKey && document.activeElement === ultimo) { event.preventDefault(); primeiro?.focus(); }
+ }
+
  confirmar(){if(this.podeSalvar){this.confirmacao=true;this.erro='';}}
  selecionarFicha(campo: HTMLInputElement) {
    this.confirmacao = false;
