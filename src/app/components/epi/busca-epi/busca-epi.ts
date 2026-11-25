@@ -158,31 +158,26 @@ export class BuscaEpi implements OnInit {
     this.carregarEpis();
   }
 
-  exportarRelatorio(formato: 'pdf' | 'odf' | 'xlsx' | 'xml'): void {
-    const linhas = this.resultados.map((item) => ({
-      funcionario: item.funcionario,
-      epi: item.nome,
-      ca: item.ca,
-      vencimento: item.vencimento,
-      status: item.status,
+  async exportarRelatorio(formato: 'pdf' | 'odf' | 'xlsx' | 'xml'): Promise<void> {
+    const linhas = this.resultados.map(item => ({
+      funcionario: item.funcionario, epi: item.nome, ca: item.ca,
+      vencimento: item.vencimento, status: item.status,
     }));
-
-		const conteudo = formato === 'xml'
-			? this.gerarXml(linhas)
-			: this.gerarTextoRelatorio(linhas, formato);
-
-    const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = `relatorio-epis.${formato}`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-
-    this.exportMessage = `Relatório .${formato} gerado localmente.`;
+    try {
+      const { gerarRelatorio } = await import('../../../services/exportar-relatorio');
+      const arquivo = await gerarRelatorio(linhas, formato);
+      const url = URL.createObjectURL(arquivo.blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `relatorio-epis.${arquivo.extensao}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      this.exportMessage = `Relatório .${arquivo.extensao} gerado localmente.`;
+    } catch {
+      this.exportMessage = 'Não foi possível gerar o relatório. Tente novamente.';
+    }
   }
 
   /*
@@ -463,40 +458,6 @@ export class BuscaEpi implements OnInit {
     }
 
     return 'status-good';
-  }
-
-  private gerarTextoRelatorio(linhas: Array<Record<string, string>>, formato: string): string {
-    return [
-      `Relatório de EPIs (${formato.toUpperCase()})`,
-      `Gerado em ${new Intl.DateTimeFormat('pt-BR').format(new Date())}`,
-      '',
-      ...linhas.map(
-        (linha, index) =>
-          `${index + 1}. ${linha['funcionario']} | ${linha['epi']} | ${linha['ca']} | ${linha['vencimento']} | ${linha['status']}`,
-      ),
-    ].join('\n');
-  }
-
-	private gerarXml(linhas: Array<Record<string, string>>): string {
-		const itens = linhas.map((linha) => `
-  <epi>
-    <funcionario>${this.escapeXml(linha['funcionario'])}</funcionario>
-    <nome>${this.escapeXml(linha['epi'])}</nome>
-    <ca>${this.escapeXml(linha['ca'])}</ca>
-    <vencimento>${this.escapeXml(linha['vencimento'])}</vencimento>
-    <status>${this.escapeXml(linha['status'])}</status>
-  </epi>`).join('');
-
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<relatorio>${itens}\n</relatorio>`;
-  }
-
-  private escapeXml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
   }
 
   private extrairListaEpis(epis: unknown): EpiResponse[] {
