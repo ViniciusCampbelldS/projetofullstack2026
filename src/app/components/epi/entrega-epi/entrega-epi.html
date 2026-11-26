@@ -5,8 +5,7 @@
 @if(carregando){<p role="status">Carregando funcionários e unidades disponíveis...</p>}
 @if(!podeGerenciar){<p>Seu perfil permite consultar as entregas. O registro exige TST, ADMIN ou Gerência.</p>}
 <section class="panel delivery-panel"><div class="row g-3">
-<div class="col-md-6"><label for="delivery-employee-search">Buscar funcionário por nome ou CPF</label><input id="delivery-employee-search" class="form-control" [(ngModel)]="buscaFuncionario" [disabled]="salvando"/></div>
-<div class="col-md-6"><label for="delivery-employee">Funcionário</label><select id="delivery-employee" class="form-select" [(ngModel)]="funcionarioId" (ngModelChange)="selecionarFuncionario()" [disabled]="carregando||salvando"><option [ngValue]="null">Selecione um funcionário</option>@for(f of funcionariosFiltrados;track f.id){<option [ngValue]="f.id">#{{f.id}} — {{f.nome}} — {{f.cpf}}</option>}</select></div>
+<div class="col-md-6 employee-field"><label>Funcionário</label><div class="employee-choice"><button type="button" class="btn btn-outline-brand" (click)="abrirModalFuncionario()" [disabled]="carregando||salvando">Selecionar funcionário</button><span>{{ funcionarioSelecionado ? funcionarioSelecionado.nome + ' — ' + funcionarioSelecionado.cpf : 'Nenhum funcionário selecionado' }}</span></div></div>
 <div class="col-md-6"><label for="delivery-date">Data da entrega</label><input id="delivery-date" class="form-control" type="date" [(ngModel)]="dataEntrega" [disabled]="salvando" (ngModelChange)="confirmacao=false"/></div>
 </div>
 <div class="epi-selection">
@@ -45,3 +44,5 @@
   </section>
 </div>
 }
+
+<app-employee-selector-modal [isOpen]="modalFuncionarioAberto" [selecaoUnica]="true" [funcionarios]="funcionariosParaSelecao" [selectedFuncionarioIds]="funcionarioIdsSelecionados" titulo="Selecionar funcionário" (close)="modalFuncionarioAberto=false" (save)="selecionarNoModal($event)" />

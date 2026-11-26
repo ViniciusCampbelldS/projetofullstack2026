@@ -77,9 +77,9 @@
 					<thead>
 						<tr>
 							<th>
-								<input type="checkbox" [checked]="allFilteredChecked"
+								@if (!selecaoUnica) { <input type="checkbox" [checked]="allFilteredChecked"
 									(change)="toggleAllFiltered($any($event.target).checked)"
-									aria-label="Selecionar todos os resultados filtrados" />
+									aria-label="Selecionar todos os resultados filtrados" /> }
 							</th>
 							<th>Nome</th>
 							<th>CPF</th>
@@ -93,7 +93,7 @@
 						@for (funcionario of filteredFuncionarios; track funcionario.id) {
 						<tr>
 							<td>
-								<input type="checkbox" [checked]="checkedFuncionarioIds.has(funcionario.id)"
+								<input [type]="selecaoUnica ? 'radio' : 'checkbox'" name="funcionario-selecao" [checked]="checkedFuncionarioIds.has(funcionario.id)"
 									(change)="toggleFuncionarioChecked(funcionario.id, $any($event.target).checked)"
 									[attr.aria-label]="'Selecionar ' + funcionario.nome" />
 							</td>
@@ -121,7 +121,7 @@
 			<footer class="modal-actions">
 				<button class="btn btn-outline-brand" type="button" (click)="fechar()">Cancelar</button>
 				<button class="btn btn-brand" type="button" [disabled]="!hasCheckedFuncionarios"
-					(click)="confirmarSelecao()">Adicionar selecionados</button>
+					(click)="confirmarSelecao()">{{ selecaoUnica ? 'Selecionar funcionário' : 'Adicionar selecionados' }}</button>
 			</footer>
 		</div>
 	</section>

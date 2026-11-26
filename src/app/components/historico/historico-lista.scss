@@ -1,3 +1,4 @@
+@use "../../../styles/shared" as shared;
 :host { display: block; min-width: 0; }
 .table-container { width: 100%; overflow-x: auto; border: 1px solid var(--mar-line); border-radius: 10px; -webkit-overflow-scrolling: touch; }
 table { width: 100%; min-width: 760px; border-collapse: collapse; }
@@ -10,3 +11,5 @@ tbody tr:hover { background: #edf7fb; box-shadow: inset 4px 0 var(--mar-laranja-
 .status.warning { background: #fff0dc; color: #a9500c; }
 .status.danger { background: #ffe3e9; color: #ad1a37; }
 @media (max-width: 620px) { th, td { padding: 9px; font-size: .82rem; } nav button { flex: 1; } }
+
+@include shared.tabela-lateral(".table-container > table", 7);

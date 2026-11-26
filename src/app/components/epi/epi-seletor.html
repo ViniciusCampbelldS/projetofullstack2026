@@ -1,7 +1,7 @@
 <section class="content-area">
   <section class="epi-panel">
-	<app-epi-status></app-epi-status>
     @if (activeSstView === 'cadastro') {
+      <app-epi-status></app-epi-status>
       <app-busca-epi [modoCadastro]="true"></app-busca-epi>
     }
     @if (activeSstView === 'busca') {

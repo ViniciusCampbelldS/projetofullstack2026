@@ -51,8 +51,9 @@
         @if (documentoMensagem) { <p role="status">{{ documentoMensagem }}</p> }
         @if (documentoErro) { <p role="alert">{{ documentoErro }}</p> }
       </section>
+      <h3 class="presence-title">Participantes</h3>
       @for (p of t.participantes; track p.funcionarioId) {
-        <label class="d-block">
+        <label class="presence-person">
           <input type="checkbox" [checked]="p.presente" [disabled]="!podeEditar"
             (change)="marcar(p, $any($event.target).checked)" />
           {{ p.funcionario }}

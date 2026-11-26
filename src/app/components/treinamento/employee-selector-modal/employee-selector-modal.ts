@@ -21,6 +21,7 @@ export interface FuncionarioTreinamento {
 })
 export class EmployeeSelectorModal {
 	@Input() isOpen = false;
+	@Input() selecaoUnica = false;
 	@Input() titulo = 'Adicionar funcionários';
 	@Input() funcionarios: FuncionarioTreinamento[] = [];
 	@Input() selectedFuncionarioIds = new Set<number>();
@@ -83,7 +84,7 @@ export class EmployeeSelectorModal {
 	}
 
 	toggleFuncionarioChecked(funcionarioId: number, checked: boolean): void {
-		const nextChecked = new Set(this.checkedFuncionarioIds);
+		const nextChecked = this.selecaoUnica && checked ? new Set<number>() : new Set(this.checkedFuncionarioIds);
 
 		if (checked) {
 			nextChecked.add(funcionarioId);

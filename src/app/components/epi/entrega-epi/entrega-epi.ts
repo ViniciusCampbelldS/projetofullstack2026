@@ -8,12 +8,14 @@ import {FuncionarioService} from '../../../services/funcionario.service';
 import {AuthService} from '../../../services/auth/auth';
 import {FuncionarioResponse} from '../../../models/funcionario';
 import {EpiResponse,EntregaEpiResponse} from '../../../models/epi';
-@Component({selector:'app-entrega-epi',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./entrega-epi.html',styleUrls:['./entrega-epi.scss']})
+import {EmployeeSelectorModal, FuncionarioTreinamento} from '../../treinamento/employee-selector-modal/employee-selector-modal';
+@Component({selector:'app-entrega-epi',standalone:true,imports:[CommonModule,FormsModule,EmployeeSelectorModal],templateUrl:'./entrega-epi.html',styleUrls:['./entrega-epi.scss']})
 export class EntregaEpi implements OnInit {
  private readonly api=inject(EpiService);private readonly funcionariosApi=inject(FuncionarioService);private readonly auth=inject(AuthService);private readonly destroyRef=inject(DestroyRef);
  private readonly funcionarioMudou=new Subject<number|null>();
  funcionarios:FuncionarioResponse[]=[];disponiveis:EpiResponse[]=[];entregas:EntregaEpiResponse[]=[];
  funcionarioId:number|null=null;selecionados=new Set<number>();buscaFuncionario='';buscaEpi='';
+ modalFuncionarioAberto=false;
  modalEpisAberto=false; selecaoTemporaria=new Set<number>();
  ficha: File | null = null;
  erroFicha = '';
@@ -26,7 +28,11 @@ export class EntregaEpi implements OnInit {
  })),takeUntilDestroyed(this.destroyRef)).subscribe(items=>this.entregas=items);}
  ngOnInit(){this.carregar();}
  get podeGerenciar(){return this.auth.podeEditarEpi();}
- get funcionariosFiltrados(){const q=this.normalizar(this.buscaFuncionario);return this.funcionarios.filter(f=>f.status!=='In'&&(f.id===this.funcionarioId||!q||this.normalizar(f.nome+' '+f.cpf).includes(q)));}
+ get funcionariosParaSelecao(): FuncionarioTreinamento[] { return this.funcionarios.filter(f => f.status === 'At' || f.status === 'Af').map(f => ({id:f.id,nome:f.nome,cpf:f.cpf,cargo:f.cargo,area:f.setor,status:f.status === 'Af' ? 'Afastado' : 'Ativo'})); }
+ funcionarioIdsSelecionados = new Set<number>();
+ abrirModalFuncionario() { this.funcionarioIdsSelecionados = this.funcionarioId === null ? new Set() : new Set([this.funcionarioId]); this.modalFuncionarioAberto = true; }
+ selecionarNoModal(ids:number[]) { const id=ids[0]; if (!this.funcionariosParaSelecao.some(f => f.id === id)) return; this.funcionarioId=id; this.selecionarFuncionario(); this.modalFuncionarioAberto=false; }
+
  get episFiltrados(){const q=this.normalizar(this.buscaEpi);return this.disponiveis.filter(e=>!q||this.normalizar(`${e.id} ${e.ca} ${e.nome} ${e.lote}`).includes(q));}
  get itensSelecionados(){return this.disponiveis.filter(e=>this.selecionados.has(e.id));}
  get funcionarioSelecionado(){return this.funcionarios.find(f=>f.id===this.funcionarioId);}

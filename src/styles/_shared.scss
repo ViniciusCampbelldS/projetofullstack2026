@@ -292,3 +292,27 @@
 		}
 	}
 }
+
+// Em telas pequenas, cada registro passa a ser uma coluna rolavel.
+@mixin tabela-lateral($selector, $linhas) {
+  @media (max-width: 620px) {
+    #{$selector} {
+      display: grid;
+      width: max-content;
+      min-width: 100%;
+      grid-template-rows: repeat($linhas, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(180px, 220px);
+      overflow: visible;
+    }
+    #{$selector} thead, #{$selector} tbody { display: contents; }
+    #{$selector} tr {
+      display: grid;
+      grid-template-rows: subgrid;
+      grid-row: 1 / span #{$linhas};
+      min-width: 0;
+    }
+    #{$selector} thead tr { position: sticky; left: 0; z-index: 2; }
+    #{$selector} th, #{$selector} td { min-width: 0; overflow-wrap: anywhere; }
+  }
+}

@@ -3,7 +3,7 @@
     Área
     <select class="form-select" [ngModel]="area" (ngModelChange)="area = $event; filtrar()" [disabled]="carregando">
       @for (opcao of areas; track opcao) {
-        <option [value]="opcao">{{ opcao }}</option>
+        <option [value]="opcao">{{ nomeArea(opcao) }}</option>
       }
     </select>
   </label>
@@ -22,7 +22,7 @@
 
 @if (carregando) { <div class="form-message" role="status">Carregando histórico...</div> }
 @if (erro) { <div class="form-message" role="alert">{{ erro }}</div> }
-<div class="table-container">
+<div class="table-container" tabindex="0" role="region" aria-label="Tabela de histórico; role para ver outras colunas">
   <table>
     <thead>
       <tr><th>Data</th><th>Usuário</th><th>Área</th><th>Registro</th><th>Alteração</th><th>Descrição</th><th>Notas</th></tr>
@@ -32,7 +32,7 @@
         <tr>
           <td>{{ l.evento.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</td>
           <td>{{ l.evento.autorNome || '—' }}</td>
-          <td>{{ l.evento.areaDoSite }}</td>
+          <td>{{ nomeArea(l.evento.areaDoSite) }}</td>
           <td>{{ l.evento.registroId }}</td>
           <td><span class="status" [ngClass]="classe(l.evento.acao)">{{ l.evento.acao }}</span></td>
           <td>{{ l.detalhe }}</td>

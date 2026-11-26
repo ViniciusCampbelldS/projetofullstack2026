@@ -1,0 +1,11 @@
+<section class="nr-page"><div class="page-shell">
+<header class="header-area"><h1>Editar NRs</h1><p>Cadastre e atualize o catálogo de normas e suas validades.</p></header>
+@if (erro) { <p class="alert alert-danger" role="alert">{{erro}}</p> } @if (mensagem) { <p class="alert alert-success" role="status">{{mensagem}}</p> }
+<section class="panel"><h2>{{editando ? 'Editar NR' : 'Nova NR'}}</h2><div class="nr-form">
+<label>Número<input type="number" class="form-control" min="0" step="1" [(ngModel)]="id" [disabled]="editando || !podeEditar" /></label>
+<label>Nome<input class="form-control" maxlength="250" [(ngModel)]="nome" [disabled]="!podeEditar" /></label>
+<label>Validade em meses<input type="number" class="form-control" min="0.01" step="any" [(ngModel)]="validade" [disabled]="!podeEditar" /></label></div>
+<div class="actions"><button class="btn btn-brand" type="button" (click)="salvar()" [disabled]="!podeEditar || salvando">Salvar</button>@if(editando){<button class="btn btn-soft" type="button" (click)="cancelar()">Cancelar</button>}</div></section>
+<section class="panel"><h2>NRs cadastradas</h2><label for="pesquisar-nrs">Pesquisar por número ou nome</label><input id="pesquisar-nrs" class="form-control" type="search" [(ngModel)]="busca" />
+@if(carregando){<p role="status">Carregando NRs...</p>} @for(n of filtradas;track n.id){<article class="nr-row"><div><strong>NR {{n.id}} — {{n.nome}}</strong><small>Validade: {{n.validadeMeses ?? '—'}} meses</small></div><div class="actions"><button class="btn btn-sm btn-soft" type="button" [disabled]="!podeEditar || salvando" (click)="editar(n)">Editar</button><button class="btn btn-sm btn-outline-danger" type="button" [disabled]="!podeEditar || salvando" (click)="excluir(n)">Excluir</button></div></article>} @empty { @if(!carregando){<p>Nenhuma NR encontrada.</p>} }</section>
+</div></section>

@@ -15,7 +15,7 @@
 
   <div class="cards">
     <div class="stat-card">
-      <div class="stat-icon" aria-hidden="true"><i class="bi bi-journal-bookmark"></i></div>
+      <div class="stat-icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></div>
       <div>
         <small>Total de treinamentos</small>
         <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : totalTurmas }}</strong>
@@ -29,14 +29,14 @@
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></div>
+      <div class="stat-icon" aria-hidden="true"><i class="bi bi-clock-history"></i></div>
       <div>
         <small>Próximos do vencimento</small>
         <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesProximas }}</strong>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon" aria-hidden="true"><i class="bi bi-exclamation-circle"></i></div>
+      <div class="stat-icon" aria-hidden="true"><i class="bi bi-exclamation-octagon-fill"></i></div>
       <div>
         <small>Vencidos</small>
         <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesVencidas }}</strong>
@@ -59,13 +59,18 @@
       </div>
 
       <div class="field">
-        <label>NR</label>
-        <select class="form-select" [(ngModel)]="filtroNrId">
-          <option [ngValue]="null">Todas</option>
-          @for (nr of nrs; track nr.id) {
-            <option [ngValue]="nr.id">{{ nr.nome }}</option>
-          }
-        </select>
+        <label for="buscar-nr-filtro">NR</label>
+        <details class="nr-filter">
+          <summary>{{ filtroNrIds.size ? filtroNrIds.size + ' NR(s) selecionada(s)' : 'Todas as NRs' }}</summary>
+          <div class="nr-options">
+            <label for="buscar-nr-filtro">Pesquisar NR</label>
+            <input id="buscar-nr-filtro" class="form-control" type="search" placeholder="Digite o número ou nome" [(ngModel)]="buscaNrFiltro" />
+            @for (nr of nrsFiltradas; track nr.id) {
+              <label class="nr-option"><input type="checkbox" [checked]="filtroNrIds.has(nr.id)" (change)="alterarFiltroNr(nr.id, $any($event.target).checked)" /> {{ nr.nome }}</label>
+            } @empty { <span>Nenhuma NR encontrada.</span> }
+            @if (filtroNrIds.size) { <button type="button" class="btn btn-sm btn-soft" (click)="filtroNrIds.clear()">Limpar seleção</button> }
+          </div>
+        </details>
       </div>
 
       <div class="field">
@@ -102,13 +107,12 @@
 
     <div class="filters">
       <div class="field">
-        <label for="curso-turma">NR do treinamento</label>
-        <select id="curso-turma" class="form-select" [(ngModel)]="nrSelecionadoId">
-          <option [ngValue]="null">Selecione a NR</option>
-          @for (nr of nrs; track nr.id) {
-            <option [ngValue]="nr.id">{{ nr.nome }}</option>
-          }
-        </select>
+        <label for="buscar-nr-turma">NR do treinamento</label>
+        <details class="nr-filter"><summary>{{ nrsNovaTurma.size ? nrsNovaTurma.size + ' NR(s) selecionada(s)' : 'Selecione as NRs' }}</summary>
+          <div class="nr-options"><label for="buscar-nr-turma">Pesquisar NR</label><input id="buscar-nr-turma" class="form-control" type="search" placeholder="Digite o número ou nome" [(ngModel)]="buscaNrTurma" />
+          @for(nr of nrsFiltradasTurma;track nr.id){<label class="nr-option"><input type="checkbox" [disabled]="salvandoTurma" [checked]="nrsNovaTurma.has(nr.id)" (change)="alterarNrTurma(nr.id,$any($event.target).checked)" /> {{nr.nome}}</label>} @empty {<span>Nenhuma NR encontrada.</span>}
+          @if(nrsNovaTurma.size){<button type="button" class="btn btn-sm btn-soft" [disabled]="salvandoTurma" (click)="nrsNovaTurma.clear()">Limpar seleção</button>}</div>
+        </details><small>Uma turma será criada para cada NR selecionada.</small>
       </div>
       <div class="field">
         <label for="turma-data">Data da turma</label>
@@ -174,7 +178,7 @@
       <div class="form-message" role="alert">{{ erroTreinamentos }}</div>
     }
 
-    <div class="table-container">
+    <div class="table-container" tabindex="0" role="region" aria-label="Tabela de treinamentos; role para ver outras colunas">
       <table>
         <thead>
           <tr>

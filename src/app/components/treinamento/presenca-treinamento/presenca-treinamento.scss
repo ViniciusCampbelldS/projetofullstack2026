@@ -399,3 +399,7 @@ tbody tr:nth-child(even) {
     min-width: 620px;
   }
 }
+
+.presence-title { margin: 24px 0 12px; color: var(--mar-azul-escuro); font-size: 1.1rem; font-weight: 800; }
+.presence-person { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--mar-line-soft); border-radius: 10px; background: var(--mar-bg); overflow-wrap: anywhere; cursor: pointer; }
+.presence-person input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--mar-azul-escuro); }

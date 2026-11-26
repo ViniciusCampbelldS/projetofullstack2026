@@ -57,6 +57,8 @@ export const routes: Routes = [
     canActivate: [tstGuard]
   },
 
+  { path: 'treinamento/nrs', loadComponent: () => import('./components/treinamento/editar-nrs/editar-nrs').then(m => m.EditarNrs), canActivate: [tstGuard] },
+
   // EndereÃ§os antigos permanecem apenas para nÃ£o quebrar favoritos.
   { path: 'treinamento/editar', pathMatch: 'full', redirectTo: 'treinamento' },
   {

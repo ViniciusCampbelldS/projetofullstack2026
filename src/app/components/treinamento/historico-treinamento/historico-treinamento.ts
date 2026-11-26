@@ -9,5 +9,5 @@ import { HistoricoLista } from '../../historico/historico-lista';
   styleUrl: './historico-treinamento.scss',
 })
 export class HistoricoTreinamento {
-  readonly areas = ['TURMA', 'NR', 'TREINAMENTO', 'NOTIFICACAO_TREINAMENTO'];
+  readonly areas = ['TURMA', 'NR', 'NOTIFICACAO_TREINAMENTO'];
 }

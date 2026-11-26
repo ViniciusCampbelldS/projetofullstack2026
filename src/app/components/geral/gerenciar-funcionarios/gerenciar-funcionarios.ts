@@ -9,6 +9,9 @@ import { FuncionarioStatus, FuncionarioStatusFiltro } from '../../../models/func
 import { Funcionario, FuncionarioRequest } from '../../../models/funcionario';
 import { Nr, NrRequest } from '../../../models/nr';
 import { NrService } from '../../../services/nr.service';
+import { EpiService } from '../../../services/epi.service';
+import { TreinamentoService } from '../../../services/treinamento.service';
+import { forkJoin } from 'rxjs';
 
 /*
  * Estrutura utilizada pelo formulário.
@@ -49,6 +52,38 @@ export class GerenciarFuncionarios implements OnInit {
   private readonly funcionarioService = inject(FuncionarioService);
 
   private readonly nrService = inject(NrService);
+  private readonly epiService = inject(EpiService);
+  private readonly treinamentoService = inject(TreinamentoService);
+  indicadoresCarregando = true;
+  indicadoresErro = '';
+  private funcionariosEpiVencido = new Set<number>();
+  private funcionariosTreinamentoVencido = new Set<number>();
+
+  carregarIndicadores(): void {
+    this.indicadoresCarregando = true;
+    this.indicadoresErro = '';
+    forkJoin({epis: this.epiService.listar(), treinamentos: this.treinamentoService.turmas()}).subscribe({
+      next: ({epis, treinamentos}) => {
+        if (treinamentos.some(t => !Object.prototype.hasOwnProperty.call(t, 'vencimento'))) {
+          this.indicadoresErro = 'Atualize o backend para consultar a validade dos treinamentos.';
+          this.indicadoresCarregando = false;
+          return;
+        }
+        const hoje = new Date();
+        const dataHoje = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
+        this.funcionariosEpiVencido = new Set(epis.filter(e => !e.dataDescarte && !e.substituido && !!e.vencimento && e.vencimento.slice(0,10) < dataHoje).flatMap(e => (e.funcionarios ?? []).map(f => f.id)));
+        this.funcionariosTreinamentoVencido = new Set(treinamentos.filter(t => t.presente && !!t.vencimento && t.vencimento.slice(0,10) < dataHoje).map(t => t.funcionarioId));
+        this.indicadoresCarregando = false;
+      },
+      error: () => { this.indicadoresErro = 'Não foi possível carregar os indicadores de vencimento.'; this.indicadoresCarregando = false; },
+    });
+  }
+
+  private contarElegiveis(ids: Set<number>): number {
+    return this.funcionarios.filter(f => (f.status === 'At' || f.status === 'Af') && ids.has(f.id)).length;
+  }
+  get totalComEpiVencido(): number { return this.contarElegiveis(this.funcionariosEpiVencido); }
+  get totalComTreinamentoVencido(): number { return this.contarElegiveis(this.funcionariosTreinamentoVencido); }
 
   /*
    * Injeta o serviço de autenticação para verificar
@@ -183,6 +218,7 @@ export class GerenciarFuncionarios implements OnInit {
   ngOnInit(): void {
     this.carregarFuncionarios();
     this.carregarNrs();
+    this.carregarIndicadores();
   }
 
   /*

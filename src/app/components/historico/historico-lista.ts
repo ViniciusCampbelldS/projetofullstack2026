@@ -26,6 +26,12 @@ export class HistoricoLista implements OnInit {
 
   constructor(private readonly service: HistoricoService) {}
 
+  nomeArea(area: string): string {
+    if (area === 'EPI' || area === 'NR') return area;
+    if (area === 'NOTIFICACAO_EPI' || area === 'NOTIFICACAO_TREINAMENTO') return 'Dias de aviso do vencimento';
+    return area.charAt(0).toLocaleUpperCase('pt-BR') + area.slice(1).toLocaleLowerCase('pt-BR').replaceAll('_', ' ');
+  }
+
   ngOnInit(): void {
     this.area = this.areas[0] ?? '';
     this.carregar();

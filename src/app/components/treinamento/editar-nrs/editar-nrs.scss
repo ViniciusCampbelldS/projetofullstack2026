@@ -1,0 +1,10 @@
+@use "../../../../styles/shared" as shared;
+@include shared.page-shell(".nr-page");
+:host,.page-shell,.panel { min-width:0; }
+.panel { margin-bottom: 18px; padding: var(--mar-panel-padding); border:1px solid var(--mar-line-soft); border-radius:var(--mar-radius-md); background:var(--mar-surface); }
+h1,h2 { color:var(--mar-azul-escuro); font-weight:800; } h2 { font-size:1.2rem; }
+.nr-form { display:grid; grid-template-columns: 1fr 3fr 1fr; gap:14px; } label { display:block; font-weight:700; color:var(--mar-azul-escuro); }
+.actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.nr-row { display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid var(--mar-line); padding:12px 0; }
+.nr-row small { display:block; color:var(--mar-text-secondary); }
+@media(max-width:650px){ .nr-form{grid-template-columns:1fr;} .nr-row{align-items:flex-start;flex-direction:column;} }

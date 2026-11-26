@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { from, concatMap, catchError, of } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -52,14 +53,28 @@ export class AlteraTreinamento implements OnInit {
 
   treinamentos: TreinamentoRegistro[] = [];
   nrs: NrTreinamento[] = [];
-  nrSelecionadoId: number | null = null;
+  nrsNovaTurma = new Set<number>();
+  buscaNrTurma = '';
+  get nrsFiltradasTurma(): NrTreinamento[] { const q=this.buscaNrTurma.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR'); return this.nrs.filter(n => `${n.id} NR-${n.id} ${n.nome}`.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').includes(q)); }
+  alterarNrTurma(id: number, marcado: boolean): void { const ids=new Set(this.nrsNovaTurma); marcado ? ids.add(id) : ids.delete(id); this.nrsNovaTurma=ids; }
   novaData = new Date().toISOString().slice(0, 10);
   novoHorario = '08:00';
   salvandoTurma = false;
   carregandoTreinamentos = false;
   erroTreinamentos = '';
   filtroId = '';
-  filtroNrId: number | null = null;
+  filtroNrIds = new Set<number>();
+  buscaNrFiltro = '';
+  get nrsFiltradas(): NrTreinamento[] {
+    const normalizar = (valor: string) => valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+    const busca = normalizar(this.buscaNrFiltro.trim());
+    return this.nrs.filter(nr => normalizar(`${nr.id} NR-${nr.id} ${nr.nome}`).includes(busca));
+  }
+  alterarFiltroNr(id: number, marcado: boolean): void {
+    const ids = new Set(this.filtroNrIds);
+    marcado ? ids.add(id) : ids.delete(id);
+    this.filtroNrIds = ids;
+  }
   filtroData = '';
   filtroSituacao = '';
 
@@ -122,7 +137,7 @@ export class AlteraTreinamento implements OnInit {
     return this.treinamentos.filter((item) =>
       (!this.filtroId || String(item.id).includes(this.filtroId)) &&
       (!this.filtroData || item.aplicacao === this.filtroData) &&
-      (this.filtroNrId === null || item.nrId === this.filtroNrId) &&
+      (this.filtroNrIds.size === 0 || this.filtroNrIds.has(item.nrId)) &&
       (!this.filtroSituacao || item.situacao === this.filtroSituacao));
   }
 
@@ -232,23 +247,13 @@ export class AlteraTreinamento implements OnInit {
 
   adicionarNovoTreinamento(): void {
     if (!this.podeEditarTreinamento || this.salvandoTurma) return;
-    if (!this.nrSelecionadoId || this.selectedFuncionarioIds.size === 0 || !this.novaData || !this.novoHorario) {
-      this.mensagem = 'Selecione NR, funcionários, data e horário para criar a turma.';
-      return;
-    }
-    this.salvandoTurma = true;
-    this.treinamentoService.criarTurma({
-      nrId: this.nrSelecionadoId, data: this.novaData, horario: this.novoHorario, funcionarioIds: [...this.selectedFuncionarioIds],
-    }).subscribe({
-      next: () => {
-        this.mensagem = 'Turma criada e participantes registrados.';
-        this.selectedFuncionarioIds = new Set();
-                this.salvandoTurma = false;
-        this.carregarTreinamentos();
-      },
-      error: () => { this.mensagem = 'Não foi possível criar a turma.'; this.salvandoTurma = false; },
+    if (!this.nrsNovaTurma.size || !this.selectedFuncionarioIds.size || !this.novaData || !this.novoHorario) { this.mensagem = 'Selecione NRs, funcionários, data e horário para criar as turmas.'; return; }
+    const ids=[...this.nrsNovaTurma]; const funcionarios=[...this.selectedFuncionarioIds]; const data=this.novaData; const horario=this.novoHorario;
+    const criadas:number[]=[]; const falhas:number[]=[]; this.salvandoTurma=true;
+    from(ids).pipe(concatMap(nrId => this.treinamentoService.criarTurma({nrId,data,horario,funcionarioIds:funcionarios}).pipe(catchError(() => { falhas.push(nrId); return of(null); })))).subscribe({
+      next: turma => { if (turma) criadas.push(turma.nrId); },
+      complete: () => { this.salvandoTurma=false; this.nrsNovaTurma=new Set(falhas); this.mensagem=falhas.length ? `${criadas.length} turma(s) criada(s). Não foi possível criar as NRs: ${falhas.join(', ')}. Apenas elas permanecem selecionadas para tentar novamente.` : `${criadas.length} turma(s) criada(s) e participantes registrados.`; if (!falhas.length) this.selectedFuncionarioIds=new Set(); this.carregarTreinamentos(); }
     });
-
   }
 
   atualizarPresenca(turma: TreinamentoRegistro, participante: ParticipacaoTreinamento, presente: boolean): void {

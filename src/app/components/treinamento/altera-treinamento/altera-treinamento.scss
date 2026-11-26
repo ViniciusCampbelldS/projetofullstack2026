@@ -329,3 +329,16 @@ tbody tr:nth-child(even) {
     min-width: 720px;
   }
 }
+
+.stat-card:nth-child(1) .stat-icon { color: #006aa7; background: #e4f1f8; }
+.stat-card:nth-child(2) .stat-icon { color: #168553; background: #e5f3eb; }
+.stat-card:nth-child(3) .stat-icon { color: #d46b08; background: #fff0df; }
+.stat-card:nth-child(4) .stat-icon { color: #d83048; background: #fce9ed; }
+
+@include shared.tabela-lateral(".table-container > table", 9);
+
+.nr-filter { position: relative; min-width: 0; }
+.nr-filter summary { cursor: pointer; border: 1px solid #ced4da; border-radius: 6px; background: white; padding: 8px 12px; min-height: 38px; }
+.nr-options { position: absolute; z-index: 10; top: 100%; left: 0; width: max(100%, 260px); max-width: min(400px, 85vw); max-height: 280px; overflow: auto; padding: 12px; display: grid; gap: 8px; border: 1px solid var(--mar-line); border-radius: 8px; background: white; box-shadow: var(--mar-shadow-soft); }
+.nr-options .nr-option { display: flex; align-items: start; gap: 8px; font-weight: 400; }
+.nr-option input { margin-top: 4px; }

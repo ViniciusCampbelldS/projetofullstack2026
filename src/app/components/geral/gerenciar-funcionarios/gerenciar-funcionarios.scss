@@ -440,3 +440,14 @@
 		flex-direction: column-reverse;
 	}
 }
+.funcionarios-table { width: max-content; min-width: 100%; }
+.funcionarios-table th { position: sticky; left: 0; z-index: 1; min-width: 100px; background: var(--mar-azul-escuro); color: white; }
+.funcionarios-table td { min-width: 190px; max-width: 260px; overflow-wrap: anywhere; }
+.table-responsive { max-width: 100%; -webkit-overflow-scrolling: touch; }
+
+:host, .funcionarios-page, .page-shell, .list-card { min-width: 0; }
+.list-card { max-width: 100%; }
+.table-responsive { width: 100%; overflow-x: auto; }
+.funcionarios-table { overflow: visible; }
+
+.stat-icon.red { background: #fce9ed; color: #c62743; }
