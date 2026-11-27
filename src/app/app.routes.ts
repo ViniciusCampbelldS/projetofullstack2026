@@ -8,7 +8,7 @@ import { authGuard, tstGuard } from './auth/auth.guard';
 export const routes: Routes = [
  {path:'redefinir-senha',loadComponent:()=>import('./components/geral/login/redefinir-senha').then(m=>m.RedefinirSenha)},
 
-  // login que e a unica pagina liberada sem autenticaÃ§Ã£o
+  // login que e a unica pagina liberada sem autenticação
   {
     path: 'login',
     component: Login
@@ -59,7 +59,7 @@ export const routes: Routes = [
 
   { path: 'treinamento/nrs', loadComponent: () => import('./components/treinamento/editar-nrs/editar-nrs').then(m => m.EditarNrs), canActivate: [tstGuard] },
 
-  // EndereÃ§os antigos permanecem apenas para nÃ£o quebrar favoritos.
+  // Endereços antigos permanecem apenas para não quebrar favoritos.
   { path: 'treinamento/editar', pathMatch: 'full', redirectTo: 'treinamento' },
   {
     path: 'treinamento/presenca',

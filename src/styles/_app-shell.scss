@@ -301,6 +301,9 @@ nav {
 }
 
 .logout-link {
+	border: 0;
+	background: transparent;
+	box-shadow: none;
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -828,8 +831,10 @@ nav {
 	}
 }
 
-/* Mant?m todo o painel acess?vel em telas baixas e estreitas. */
+/* Mantém todo o painel acessível em telas baixas e estreitas. */
 .notification-panel { max-height: min(80vh, 720px); overflow-y: auto; overscroll-behavior: contain; }
 .notification-config, .notification-rule { min-width: 0; }
 .notification-rule span { overflow-wrap: anywhere; }
 @media (max-width: 620px) { .notification-panel { max-height: calc(100dvh - 96px); } }
+
+.logout-link:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }

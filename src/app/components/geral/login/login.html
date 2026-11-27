@@ -1,3 +1,13 @@
+@if (entrando) {
+  <section class="login-loading" role="status" aria-live="polite" aria-label="Entrando no sistema">
+    @if (videoCarregamento) {
+      <video class="login-loading-video" [src]="videoCarregamento" autoplay muted loop playsinline aria-hidden="true"></video>
+    } @else {
+      <span class="login-loading-spinner" aria-hidden="true"></span>
+    }
+    <span class="visually-hidden">Entrando no sistema...</span>
+  </section>
+} @else {
 <section class="login-page"><div class="login-panel">
 <img src="/logo-mar.svg" alt="MAR Metalúrgica"/><h1>Acessar o sistema</h1>
 <form class="login-form" (ngSubmit)="entrar()">
@@ -8,3 +18,5 @@
 <button type="button" (click)="recuperacao=!recuperacao">Esqueci minha senha</button></form>
 @if(recuperacao){<form class="login-form" (ngSubmit)="recuperar()"><p>Recuperação demonstrativa: os endereços são fictícios e nenhum e-mail será enviado.</p><label for="email">E-mail cadastrado</label><input id="email" name="email" type="email" [(ngModel)]="emailRecuperacao" required/><button type="submit" [disabled]="carregando">Solicitar recuperação</button><p role="status">{{mensagem}}</p></form>}
 </div></section>
+
+}

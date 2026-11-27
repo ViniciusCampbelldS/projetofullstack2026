@@ -10,6 +10,7 @@ export interface EpiMonitorado {
   nome: string;
   funcionario: string;
   vencimento: string;
+  contaIndicador?: boolean;
 }
 
 export interface RegraAviso {
@@ -40,7 +41,19 @@ export class NotificacaoService {
   episMonitorados:EpiMonitorado[]=[];
   private avisosProprios=new Map<string,number>();
   private readonly auth=inject(AuthService);
-  carregarEpis(){const url=this.auth.podeVerAdministracao()?`${environment.apiUrl}/epis`:`${environment.apiUrl}/portal/epis`;return this.http.get<any[]>(url).pipe(tap(items=>{this.avisosProprios=new Map(items.map(e=>[String(e.ca),e.diasAviso??30]));this.episMonitorados=items.map(e=>({id:e.id,ca:String(e.ca),nome:e.nome,funcionario:e.funcionarios?.map((f:any)=>f.nome).join(', ')??'',vencimento:e.vencimento}));}));}
+  carregarEpis() {
+    const administrativo = this.auth.podeVerAdministracao();
+    const url = administrativo ? `${environment.apiUrl}/epis` : `${environment.apiUrl}/portal/epis`;
+    return this.http.get<any[]>(url).pipe(tap(items => {
+      this.avisosProprios = new Map(items.map(e => [String(e.ca), e.diasAviso ?? 30]));
+      this.episMonitorados = items.map(e => {
+        const responsaveis = e.funcionarios ?? [];
+        const elegiveis = responsaveis.filter((f: any) => f.status !== 'In');
+        return { id: e.id, ca: String(e.ca), nome: e.nome, funcionario: elegiveis.map((f: any) => f.nome).join(', '), vencimento: e.vencimento,
+          contaIndicador: !e.substituido && !e.dataDescarte && (!administrativo || responsaveis.length === 0 || elegiveis.length > 0) };
+      });
+    }));
+  }
 
 
   carregarRegrasAviso(): Observable<RegraAviso[]> {
@@ -240,8 +253,12 @@ export class NotificacaoService {
     return this.episMonitorados;
   }
 
+  get episParaIndicadores(): EpiMonitorado[] {
+    return this.todosEpis.filter(epi => epi.contaIndicador !== false);
+  }
+
   get totalEpis(): number {
-    return this.todosEpis.length;
+    return this.episParaIndicadores.length;
   }
 
   get episComNotificacao(): EpiMonitorado[] {
@@ -249,18 +266,18 @@ export class NotificacaoService {
   }
 
   get episVencidos(): EpiMonitorado[] {
-    return this.todosEpis.filter((epi) => this.estaVencido(epi.vencimento));
+    return this.episParaIndicadores.filter((epi) => this.estaVencido(epi.vencimento));
   }
 
   get episProximos(): EpiMonitorado[] {
-    return this.todosEpis.filter(
+    return this.episParaIndicadores.filter(
       (epi) =>
         !this.estaVencido(epi.vencimento) && this.deveAvisarEpi(epi.vencimento, epi.ca)
     );
   }
 
   get episEmDia(): EpiMonitorado[] {
-    return this.todosEpis.filter(
+    return this.episParaIndicadores.filter(
       (epi) =>
         !this.estaVencido(epi.vencimento) && !this.deveAvisarEpi(epi.vencimento, epi.ca)
     );

@@ -17,6 +17,7 @@ export class PainelAdministrativo {
   percentualEpisValidos = input.required<number>();
   possuiDadosTreinamento = input.required<boolean>();
   percentualTreinamentosValidos = input.required<number>();
+  totalTreinamentos = input.required<number>();
   treinamentosEmDia = input.required<number>();
   treinamentosProximos = input.required<number>();
   treinamentosVencidos = input.required<number>();

@@ -121,13 +121,16 @@ export class AlteraTreinamento implements OnInit {
     });
   }
 
-  get totalTurmas(): number { return this.treinamentos.length; }
+  private get idsFuncionariosElegiveis(): Set<number> { return new Set(this.funcionarios.filter(f => f.status !== 'Inativo').map(f => f.id)); }
+  private get turmasMonitoradas(): TreinamentoRegistro[] { const ids=this.idsFuncionariosElegiveis; return this.treinamentos.filter(t => t.participantes.some(p => ids.has(p.funcionarioId))); }
+  private get participacoesMonitoradas(): ParticipacaoTreinamento[] { const ids=this.idsFuncionariosElegiveis; return this.treinamentos.flatMap(t => t.participantes).filter(p => ids.has(p.funcionarioId)); }
+  get totalTurmas(): number { return this.turmasMonitoradas.length; }
 
-  get turmasAgendadas(): number { const hoje=this.hojeLocal(); return this.treinamentos.filter(t=>t.aplicacao>hoje).length; }
+  get turmasAgendadas(): number { const hoje=this.hojeLocal(); return this.turmasMonitoradas.filter(t=>t.aplicacao>hoje).length; }
 
-  get participacoesProximas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&p.validadeMeses>0&&this.diasAteVencimento(p)>=0&&this.diasAteVencimento(p)<=this.notificacaoService.obterDiasAviso(String(p.nrId),true)).length; }
+  get participacoesProximas(): number { return this.participacoesMonitoradas.filter(p=>p.presente&&p.validadeMeses>0&&this.diasAteVencimento(p)>=0&&this.diasAteVencimento(p)<=this.notificacaoService.obterDiasAviso(String(p.nrId),true)).length; }
 
-  get participacoesVencidas(): number { return this.treinamentos.flatMap(t=>t.participantes).filter(p=>p.presente&&p.validadeMeses>0&&this.diasAteVencimento(p)<0).length; }
+  get participacoesVencidas(): number { return this.participacoesMonitoradas.filter(p=>p.presente&&p.validadeMeses>0&&this.diasAteVencimento(p)<0).length; }
 
   private diasAteVencimento(p: ParticipacaoTreinamento): number { const d=new Date(`${this.somarMeses(p.data,p.validadeMeses)}T12:00:00`);const h=new Date();h.setHours(0,0,0,0);d.setHours(0,0,0,0);return Math.floor((d.getTime()-h.getTime())/86400000); }
 

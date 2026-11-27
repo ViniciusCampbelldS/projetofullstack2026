@@ -15,6 +15,10 @@
     <div class="stat-icon stat-red"><i class="bi bi-exclamation-octagon"></i></div>
     <div class="stat-content"><span>EPIs vencidos</span><strong>{{ episVencidos().length }}</strong><small>Requerem atenção</small></div>
   </article>
+  <article class="stat-card">
+    <div class="stat-icon stat-training"><i class="bi bi-mortarboard-fill" aria-hidden="true"></i></div>
+    <div class="stat-content"><span>Treinamentos monitorados</span><strong>{{ carregandoTreinamentos() || erroTreinamentos() ? '—' : totalTreinamentos() }}</strong><small>@if (carregandoTreinamentos()) { Carregando... } @else if (erroTreinamentos()) { Dados indisponíveis } @else { Concluídos com validade }</small></div>
+  </article>
 </section>
 
 <section class="overview-panel mt-4">

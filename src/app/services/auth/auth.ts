@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, finalize, of, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
+export const TEMPO_ESPERA_LOGIN_MS = 120_000;
 export type UserRole = 'Técnico de Segurança do Trabalho' | 'Funcionário' | 'RH' | 'Gerência' | 'Administrador';
 export interface Usuario { id:number; nome:string; email:string; permissoes:string; cargo?:string;setor?:string; }
 @Injectable({providedIn:'root'})
@@ -9,8 +10,8 @@ export class AuthService {
  private apiUrl = `${environment.apiUrl}/auth`;
  private user: Usuario | null = null;
  constructor(private http:HttpClient){}
- login(dados:{email:string;senha:string}) { return this.http.post<{access_token:string}>(`${this.apiUrl}/login`,dados).pipe(timeout(10000),tap(r=>this.salvarToken(r.access_token))); }
- carregarUsuario():Observable<Usuario>{return this.http.get<Usuario>(`${this.apiUrl}/me`).pipe(timeout(10000),tap(u=>this.user=u));}
+ login(dados:{email:string;senha:string}) { return this.http.post<{access_token:string}>(`${this.apiUrl}/login`,dados).pipe(timeout(TEMPO_ESPERA_LOGIN_MS),tap(r=>this.salvarToken(r.access_token))); }
+ carregarUsuario(tempoEsperaMs = 10_000):Observable<Usuario>{return this.http.get<Usuario>(`${this.apiUrl}/me`).pipe(timeout(tempoEsperaMs),tap(u=>this.user=u));}
  inicializar():Observable<Usuario|null>{return this.obterToken()?this.carregarUsuario():of(null);}
  recuperar(email:string){return this.http.post<{mensagem:string}>(`${this.apiUrl}/recuperar-senha`,{email});}
  redefinir(token:string,senha:string){return this.http.post<void>(`${this.apiUrl}/redefinir-senha`,{token,senha});}

@@ -181,3 +181,28 @@
   color: var(--laranja-claro);
   text-decoration: underline;
 }
+.login-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: var(--mar-azul-escuro);
+}
+
+.login-loading-video {
+  display: block;
+  width: min(70vw, 480px);
+  max-height: 70dvh;
+  object-fit: contain;
+}
+
+.login-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, .3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: login-spin .9s linear infinite;
+}
+
+@keyframes login-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .login-loading-spinner { animation: none; } }

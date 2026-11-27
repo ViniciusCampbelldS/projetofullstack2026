@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { TreinamentoService, ParticipacaoTreinamento, TreinamentoPortal } from '../../../services/treinamento.service';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import { FuncionarioService } from '../../../services/funcionario.service';
 import { PainelAdministrativo } from './painel-administrativo/painel-administrativo';
 import { PainelOperario } from './painel-operario/painel-operario';
 
@@ -22,6 +24,7 @@ export class Homepage implements OnInit {
 
 	dataHoje: string;
 	private participacoesTreinamento: ParticipacaoTreinamento[] = [];
+	private funcionariosElegiveis = new Set<number>();
 	private treinamentosPortal: TreinamentoPortal[] = [];
 	carregandoTreinamentos = false;	erroTreinamentos = '';
 
@@ -33,6 +36,7 @@ export class Homepage implements OnInit {
 		private readonly notificacaoService: NotificacaoService,
 		private readonly authService: AuthService,
 		private readonly treinamentoService: TreinamentoService,
+		private readonly funcionarioService: FuncionarioService,
 	) {
 		this.dataHoje = this.formatarDataAtual();
 	}
@@ -48,8 +52,9 @@ export class Homepage implements OnInit {
 				error: () => { this.erroTreinamentos = 'Não foi possível carregar os dados de treinamentos.'; this.carregandoTreinamentos = false; }
 			});
 		} else {
-			this.treinamentoService.turmas().subscribe({
-				next: (itens: ParticipacaoTreinamento[]) => {
+			forkJoin({ itens: this.treinamentoService.turmas(), funcionarios: this.funcionarioService.listar() }).subscribe({
+				next: ({ itens, funcionarios }) => {
+					this.funcionariosElegiveis = new Set(funcionarios.filter(f => f.status === 'At' || f.status === 'Af').map(f => f.id));
 					this.participacoesTreinamento = itens;
 					this.carregandoTreinamentos = false;
 				},
@@ -59,7 +64,7 @@ export class Homepage implements OnInit {
 	}
 
 	private get treinamentosMonitorados(): ParticipacaoTreinamento[] {
-		return this.participacoesTreinamento.filter(p => p.presente && p.validadeMeses > 0);
+		return this.participacoesTreinamento.filter(p => this.funcionariosElegiveis.has(p.funcionarioId) && p.presente && p.validadeMeses > 0);
 	}
 
 	private vencimentoTreinamento(p: ParticipacaoTreinamento): Date | null {

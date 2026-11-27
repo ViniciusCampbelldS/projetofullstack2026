@@ -18,28 +18,28 @@
       <div class="stat-icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></div>
       <div>
         <small>Total de treinamentos</small>
-        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : totalTurmas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos || carregandoFuncionarios || erroFuncionarios ? '—' : totalTurmas }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon" aria-hidden="true"><i class="bi bi-calendar-event"></i></div>
       <div>
         <small>Agendados</small>
-        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : turmasAgendadas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos || carregandoFuncionarios || erroFuncionarios ? '—' : turmasAgendadas }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon" aria-hidden="true"><i class="bi bi-clock-history"></i></div>
       <div>
         <small>Próximos do vencimento</small>
-        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesProximas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos || carregandoFuncionarios || erroFuncionarios ? '—' : participacoesProximas }}</strong>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-icon" aria-hidden="true"><i class="bi bi-exclamation-octagon-fill"></i></div>
       <div>
         <small>Vencidos</small>
-        <strong>{{ carregandoTreinamentos || erroTreinamentos ? '—' : participacoesVencidas }}</strong>
+        <strong>{{ carregandoTreinamentos || erroTreinamentos || carregandoFuncionarios || erroFuncionarios ? '—' : participacoesVencidas }}</strong>
       </div>
     </div>
   </div>

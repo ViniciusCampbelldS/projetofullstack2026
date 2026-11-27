@@ -10,13 +10,13 @@ import {
 	EpiUpdateRequest, EntregaEpiRequest, EntregaEpiResponse, FichaEntrega
 } from '../models/epi';
 
-// ServiÃƒÂ§o responsÃƒÂ¡vel pela comunicaÃƒÂ§ÃƒÂ£o dos EPIs com a API Java.
+// Serviço responsável pela comunicação dos EPIs com a API Java.
 @Injectable({
 	providedIn: 'root'
 })
 export class EpiService {
 
-	//CLiente para fazer as requisiÃƒÂ§ÃƒÂµes HTTP para a API.
+	//CLiente para fazer as requisições HTTP para a API.
 	private readonly http = inject(HttpClient);
 	// Endpoint principal dos EPIs.
 	private readonly apiEpis = `${environment.apiUrl}/epis`;
@@ -69,7 +69,7 @@ export class EpiService {
 
 	// POST /epis
 	//
-	// Cadastra um ÃƒÂºnico EPI.
+	// Cadastra um único EPI.
 	cadastrar(epi: EpiRequest): Observable<EpiResponse> {
 		return this.http.post<EpiResponse>(
 			this.apiEpis,
@@ -79,7 +79,7 @@ export class EpiService {
 
 	// POST /epis
 	//
-	// Cadastra um ÃƒÂºnico EPI.
+	// Cadastra um único EPI.
 	cadastrarEmLote(request: EpiCreateRequest): Observable<EpiBulkCreateResponse> {
 
 		return this.http.post<EpiBulkCreateResponse>(

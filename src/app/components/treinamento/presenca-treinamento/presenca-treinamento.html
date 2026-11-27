@@ -1,4 +1,5 @@
 <section class="treinamento-view">
+  <div class="page-shell">
   <div class="header-area">
     <div>
       <h1>Presença em Treinamentos</h1>
@@ -6,11 +7,12 @@
     </div>
   </div>
 
-  <article class="panel">
+  <article class="panel selection-panel">
     @if (carregando) { <div class="form-message" role="status">Carregando turmas...</div> }
     @if (mensagem) { <div class="form-message" role="alert">{{ mensagem }}</div> }
 
-    <div class="field mb-3">
+    <div class="panel-heading"><h2>Selecionar turma</h2><p>Escolha a turma para consultar e registrar a presença.</p></div>
+    <div class="field">
       <label for="turma-presenca">Turma</label>
       <select id="turma-presenca" class="form-select" [ngModel]="turmaSelecionadaId" (ngModelChange)="turmaSelecionadaId = $event; limparEstadoDocumento()" [disabled]="documentoOcupado">
         @for (t of turmas; track t.id) {
@@ -19,12 +21,15 @@
       </select>
     </div>
 
-    @if (turma; as t) {
-      <h2>{{ t.nrNome }}</h2>
-      <section class="mb-3" aria-labelledby="documento-turma">
-        <h3 id="documento-turma" class="h5">Documento da turma</h3>
+  </article>
+
+  @if (turma; as t) {
+    <article class="panel turma-panel">
+      <div class="turma-heading"><div><span class="eyebrow">Turma #{{ t.id }}</span><h2>{{ t.nrNome }}</h2><p><i class="bi bi-calendar-event" aria-hidden="true"></i> {{ t.data | date: 'dd/MM/yyyy' }} · {{ t.horario }}</p></div><span class="participant-count">{{ t.participantes.length }} participante(s)</span></div>
+      <section class="document-section" aria-labelledby="documento-turma">
+        <h3 id="documento-turma">Documento da turma</h3>
         @if (t.documentoNome) {
-          <p>Arquivo salvo: {{ t.documentoNome }}</p>
+          <p class="document-name"><i class="bi bi-file-earmark-check" aria-hidden="true"></i> {{ t.documentoNome }}</p>
         } @else if (t.documentoNome === null) {
           <p>Nenhum documento salvo.</p>
         }
@@ -33,7 +38,7 @@
           <input #arquivo id="arquivo-turma" class="form-control mb-2" type="file"
             accept=".pdf,.png,.jpg,.jpeg" [disabled]="documentoOcupado" (change)="enviarDocumento(t.id, arquivo)" />
         }
-        <div class="d-flex flex-wrap gap-2">
+        <div class="document-actions">
           <button type="button" class="btn btn-sm btn-soft" [disabled]="documentoOcupado || t.documentoNome === null" (click)="baixarDocumento(t.id)">
             Baixar documento
           </button>
@@ -51,18 +56,22 @@
         @if (documentoMensagem) { <p role="status">{{ documentoMensagem }}</p> }
         @if (documentoErro) { <p role="alert">{{ documentoErro }}</p> }
       </section>
-      <h3 class="presence-title">Participantes</h3>
+      <div class="participants-heading"><div><h3 class="presence-title">Participantes</h3><p>Marque os participantes presentes. As alterações são salvas automaticamente.</p></div></div>
+      <div class="presence-list">
       @for (p of t.participantes; track p.funcionarioId) {
         <label class="presence-person">
           <input type="checkbox" [checked]="p.presente" [disabled]="!podeEditar"
             (change)="marcar(p, $any($event.target).checked)" />
-          {{ p.funcionario }}
+          <span class="person-name">{{ p.funcionario }}</span>
+          <span class="presence-status" [class.present]="p.presente">{{ p.presente ? 'Presente' : 'Não marcado' }}</span>
         </label>
       } @empty {
-        <p>Turma sem participantes.</p>
+        <p class="empty-state">Turma sem participantes.</p>
       }
-    } @else if (!carregando) {
-      <p>Nenhuma turma cadastrada.</p>
-    }
-  </article>
+      </div>
+    </article>
+  } @else if (!carregando && !mensagem) {
+    <article class="panel empty-state">Nenhuma turma cadastrada.</article>
+  }
+  </div>
 </section>
