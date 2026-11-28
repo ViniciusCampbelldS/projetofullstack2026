@@ -3,7 +3,7 @@
   <div class="header-area">
     <div>
       <h1>Presença em Treinamentos</h1>
-      <p>Selecione a turma e marque os participantes presentes. Cada marcação é salva na hora.</p>
+      <p>Selecione a turma, marque os participantes presentes e salve as alterações quando terminar.</p>
     </div>
   </div>
 
@@ -14,7 +14,7 @@
     <div class="panel-heading"><h2>Selecionar turma</h2><p>Escolha a turma para consultar e registrar a presença.</p></div>
     <div class="field">
       <label for="turma-presenca">Turma</label>
-      <select id="turma-presenca" class="form-select" [ngModel]="turmaSelecionadaId" (ngModelChange)="turmaSelecionadaId = $event; limparEstadoDocumento()" [disabled]="documentoOcupado">
+      <select id="turma-presenca" class="form-select" [ngModel]="turmaSelecionadaId" (ngModelChange)="selecionarTurma($event)" [disabled]="documentoOcupado || salvandoPresencas">
         @for (t of turmas; track t.id) {
           <option [ngValue]="t.id">#{{ t.id }} - {{ t.nrNome }} - {{ t.data | date: 'dd/MM/yyyy' }} {{ t.horario }}</option>
         }
@@ -56,14 +56,26 @@
         @if (documentoMensagem) { <p role="status">{{ documentoMensagem }}</p> }
         @if (documentoErro) { <p role="alert">{{ documentoErro }}</p> }
       </section>
-      <div class="participants-heading"><div><h3 class="presence-title">Participantes</h3><p>Marque os participantes presentes. As alterações são salvas automaticamente.</p></div></div>
+      <div class="participants-heading"><div><h3 class="presence-title">Participantes</h3><p>Marque os participantes presentes e salve quando concluir.</p></div>
+        @if (podeEditar) {
+          <div class="presence-actions">
+            @if (confirmandoPresencas) {
+              <span>Confirmar o envio das presenças?</span>
+              <button type="button" class="btn btn-sm btn-primary" [disabled]="salvandoPresencas" (click)="salvarPresencas()">{{ salvandoPresencas ? 'Salvando...' : 'Confirmar' }}</button>
+              <button type="button" class="btn btn-sm btn-soft" [disabled]="salvandoPresencas" (click)="cancelarSalvarPresencas()">Cancelar</button>
+            } @else {
+              <button type="button" class="btn btn-sm btn-primary" [disabled]="!temAlteracoesPresenca || salvandoPresencas" (click)="pedirConfirmacaoPresencas()">Salvar presenças</button>
+            }
+          </div>
+        }
+      </div>
       <div class="presence-list">
       @for (p of t.participantes; track p.funcionarioId) {
         <label class="presence-person">
-          <input type="checkbox" [checked]="p.presente" [disabled]="!podeEditar"
+          <input type="checkbox" [checked]="presencaExibida(p)" [disabled]="!podeEditar || salvandoPresencas"
             (change)="marcar(p, $any($event.target).checked)" />
           <span class="person-name">{{ p.funcionario }}</span>
-          <span class="presence-status" [class.present]="p.presente">{{ p.presente ? 'Presente' : 'Não marcado' }}</span>
+          <span class="presence-status" [class.present]="presencaExibida(p)">{{ presencaExibida(p) ? 'Presente' : 'Não marcado' }}</span>
         </label>
       } @empty {
         <p class="empty-state">Turma sem participantes.</p>

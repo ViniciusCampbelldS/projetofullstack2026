@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../services/auth/auth';
 import { ParticipacaoTreinamento, TreinamentoService } from '../../../services/treinamento.service';
 
@@ -30,6 +31,9 @@ export class PresencaTreinamento implements OnInit {
   documentoMensagem = '';
   documentoErro = '';
   confirmarExclusaoDocumento = false;
+  presencasPendentes = new Map<string, boolean>();
+  confirmandoPresencas = false;
+  salvandoPresencas = false;
 
   constructor(private readonly service: TreinamentoService, private readonly auth: AuthService) {}
 
@@ -54,6 +58,23 @@ export class PresencaTreinamento implements OnInit {
   get podeEditar(): boolean { return this.auth.podeEditarTreinamento(); }
 
   get turma(): Turma | null { return this.turmas.find((t) => t.id === this.turmaSelecionadaId) ?? null; }
+
+  selecionarTurma(id: number | null): void {
+    this.turmaSelecionadaId = id;
+    this.presencasPendentes.clear();
+    this.confirmandoPresencas = false;
+    this.limparEstadoDocumento();
+  }
+
+  private chavePresenca(participante: ParticipacaoTreinamento): string {
+    return `${participante.id}:${participante.funcionarioId}`;
+  }
+
+  presencaExibida(participante: ParticipacaoTreinamento): boolean {
+    return this.presencasPendentes.get(this.chavePresenca(participante)) ?? participante.presente;
+  }
+
+  get temAlteracoesPresenca(): boolean { return this.presencasPendentes.size > 0; }
 
   limparEstadoDocumento(): void {
     this.documentoMensagem = '';
@@ -135,9 +156,40 @@ export class PresencaTreinamento implements OnInit {
   }
 
   marcar(p: ParticipacaoTreinamento, presente: boolean): void {
-    this.service.atualizarPresenca(p.id, p.funcionarioId, presente).subscribe({
-      next: () => { p.presente = presente; this.mensagem = ''; },
-      error: () => { this.mensagem = 'Não foi possível salvar a presença.'; },
+    if (!this.podeEditar || this.salvandoPresencas) return;
+    const chave = this.chavePresenca(p);
+    if (presente === p.presente) this.presencasPendentes.delete(chave);
+    else this.presencasPendentes.set(chave, presente);
+    this.confirmandoPresencas = false;
+  }
+
+  pedirConfirmacaoPresencas(): void {
+    if (this.temAlteracoesPresenca && !this.salvandoPresencas) this.confirmandoPresencas = true;
+  }
+
+  cancelarSalvarPresencas(): void { this.confirmandoPresencas = false; }
+
+  salvarPresencas(): void {
+    const turma = this.turma;
+    if (!turma || !this.temAlteracoesPresenca || this.salvandoPresencas) return;
+    const alteracoes = turma.participantes.flatMap((p) => {
+      const presente = this.presencasPendentes.get(this.chavePresenca(p));
+      return presente === undefined ? [] : [{ participante: p, presente }];
+    });
+    this.salvandoPresencas = true;
+    forkJoin(alteracoes.map(({ participante, presente }) => this.service.atualizarPresenca(turma.id, participante.funcionarioId, presente))).subscribe({
+      next: () => {
+        for (const { participante, presente } of alteracoes) participante.presente = presente;
+        this.presencasPendentes.clear();
+        this.confirmandoPresencas = false;
+        this.salvandoPresencas = false;
+        this.mensagem = 'Presenças atualizadas.';
+      },
+      error: () => {
+        this.salvandoPresencas = false;
+        this.confirmandoPresencas = false;
+        this.mensagem = 'Não foi possível salvar as presenças. Revise e tente novamente.';
+      },
     });
   }
 }

@@ -141,6 +141,7 @@
 .selected-panel {
   display: grid;
   gap: 12px;
+  margin-top: 12px;
   margin-bottom: var(--mar-panel-padding);
   padding: 14px;
   border: 1px solid var(--mar-line-soft);
@@ -335,10 +336,22 @@ tbody tr:nth-child(even) {
 .stat-card:nth-child(3) .stat-icon { color: #d46b08; background: #fff0df; }
 .stat-card:nth-child(4) .stat-icon { color: #d83048; background: #fce9ed; }
 
-@include shared.tabela-lateral(".table-container > table", 9);
+@include shared.tabela-lateral(".table-container > table", 10);
 
-.nr-filter { position: relative; min-width: 0; }
-.nr-filter summary { cursor: pointer; border: 1px solid #ced4da; border-radius: 6px; background: white; padding: 8px 12px; min-height: 38px; }
+.participant-name,
+.presence-indicator {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.presence-readonly { min-width: 110px; }
+.presence-indicator { justify-content: center; border-radius: 6px; background: #fce9ed; color: #8e1b2d; font-weight: 800; }
+.presence-indicator.present { background: #e2f2e9; color: #087a4a; }
+
+.nr-selector { position: relative; min-width: 0; width: 100%; }
+.nr-selector .form-control { width: 100%; }
 .nr-options { position: absolute; z-index: 10; top: 100%; left: 0; width: max(100%, 260px); max-width: min(400px, 85vw); max-height: 280px; overflow: auto; padding: 12px; display: grid; gap: 8px; border: 1px solid var(--mar-line); border-radius: 8px; background: white; box-shadow: var(--mar-shadow-soft); }
 .nr-options .nr-option { display: flex; align-items: start; gap: 8px; font-weight: 400; }
 .nr-option input { margin-top: 4px; }

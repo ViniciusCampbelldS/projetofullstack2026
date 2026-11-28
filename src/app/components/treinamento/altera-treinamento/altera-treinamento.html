@@ -60,17 +60,17 @@
 
       <div class="field">
         <label for="buscar-nr-filtro">NR</label>
-        <details class="nr-filter">
-          <summary>{{ filtroNrIds.size ? filtroNrIds.size + ' NR(s) selecionada(s)' : 'Todas as NRs' }}</summary>
-          <div class="nr-options">
-            <label for="buscar-nr-filtro">Pesquisar NR</label>
-            <input id="buscar-nr-filtro" class="form-control" type="search" placeholder="Digite o número ou nome" [(ngModel)]="buscaNrFiltro" />
-            @for (nr of nrsFiltradas; track nr.id) {
-              <label class="nr-option"><input type="checkbox" [checked]="filtroNrIds.has(nr.id)" (change)="alterarFiltroNr(nr.id, $any($event.target).checked)" /> {{ nr.nome }}</label>
-            } @empty { <span>Nenhuma NR encontrada.</span> }
-            @if (filtroNrIds.size) { <button type="button" class="btn btn-sm btn-soft" (click)="filtroNrIds.clear()">Limpar seleção</button> }
-          </div>
-        </details>
+        <div class="nr-selector" (focusout)="fecharOpcoesNrFiltro($event)">
+          <input id="buscar-nr-filtro" class="form-control" type="search" placeholder="Digite o número ou nome" [(ngModel)]="buscaNrFiltro" (focus)="opcoesNrFiltroVisiveis = true" />
+          @if (opcoesNrFiltroVisiveis) {
+            <div class="nr-options">
+              @for (nr of nrsFiltradas; track nr.id) {
+                <label class="nr-option"><input type="checkbox" [checked]="filtroNrIds.has(nr.id)" (change)="alterarFiltroNr(nr.id, $any($event.target).checked)" /> {{ nr.nome }}</label>
+              } @empty { <span>Nenhuma NR encontrada.</span> }
+              @if (filtroNrIds.size) { <button type="button" class="btn btn-sm btn-soft" (click)="filtroNrIds.clear()">Limpar seleção</button> }
+            </div>
+          }
+        </div>
       </div>
 
       <div class="field">
@@ -107,12 +107,15 @@
 
     <div class="filters">
       <div class="field">
-        <label for="buscar-nr-turma">NR do treinamento</label>
-        <details class="nr-filter"><summary>{{ nrsNovaTurma.size ? nrsNovaTurma.size + ' NR(s) selecionada(s)' : 'Selecione as NRs' }}</summary>
-          <div class="nr-options"><label for="buscar-nr-turma">Pesquisar NR</label><input id="buscar-nr-turma" class="form-control" type="search" placeholder="Digite o número ou nome" [(ngModel)]="buscaNrTurma" />
-          @for(nr of nrsFiltradasTurma;track nr.id){<label class="nr-option"><input type="checkbox" [disabled]="salvandoTurma" [checked]="nrsNovaTurma.has(nr.id)" (change)="alterarNrTurma(nr.id,$any($event.target).checked)" /> {{nr.nome}}</label>} @empty {<span>Nenhuma NR encontrada.</span>}
-          @if(nrsNovaTurma.size){<button type="button" class="btn btn-sm btn-soft" [disabled]="salvandoTurma" (click)="nrsNovaTurma.clear()">Limpar seleção</button>}</div>
-        </details><small>Uma turma será criada para cada NR selecionada.</small>
+        <label for="buscar-nr-turma">{{ buscaNrTurma ? 'Uma turma será criada para cada NR selecionada.' : 'NR do treinamento' }}</label>
+        <div class="nr-selector" (focusout)="fecharOpcoesNrTurma($event)">
+          <input id="buscar-nr-turma" class="form-control" type="search" placeholder="Digite o número ou nome" [(ngModel)]="buscaNrTurma" (focus)="opcoesNrTurmaVisiveis = true" [disabled]="salvandoTurma" />
+          @if (opcoesNrTurmaVisiveis) {
+            <div class="nr-options">
+            @for(nr of nrsFiltradasTurma;track nr.id){<label class="nr-option"><input type="checkbox" [disabled]="salvandoTurma" [checked]="nrsNovaTurma.has(nr.id)" (change)="alterarNrTurma(nr.id,$any($event.target).checked)" /> {{nr.nome}}</label>} @empty {<span>Nenhuma NR encontrada.</span>}
+            @if(nrsNovaTurma.size){<button type="button" class="btn btn-sm btn-soft" [disabled]="salvandoTurma" (click)="nrsNovaTurma.clear()">Limpar seleção</button>}</div>
+          }
+        </div>
       </div>
       <div class="field">
         <label for="turma-data">Data da turma</label>
@@ -186,6 +189,7 @@
             <th>NR</th>
             <th>Treinamento</th>
             <th>Funcionario</th>
+            <th>Presença</th>
             <th>Aplicacao</th>
             <th>Vencimento</th>
             <th>Situacao</th>
@@ -201,11 +205,12 @@
               <td>{{ treinamento.treinamento }}</td>
               <td>
                 @for (participante of treinamento.participantes; track participante.funcionarioId) {
-                  <label class="d-block">
-                    <input type="checkbox" [checked]="participante.presente" [disabled]="!podeEditarTreinamento"
-                      (change)="atualizarPresenca(treinamento, participante, $any($event.target).checked)" />
-                    {{ participante.funcionario }}
-                  </label>
+                  <div class="participant-name">{{ participante.funcionario }}</div>
+                }
+              </td>
+              <td class="presence-readonly">
+                @for (participante of treinamento.participantes; track participante.funcionarioId) {
+                  <span class="presence-indicator" [class.present]="participante.presente">{{ participante.presente ? '✓' : '✗' }}</span>
                 }
               </td>
               <td>{{ treinamento.aplicacao | date: 'dd/MM/yyyy' }}</td>

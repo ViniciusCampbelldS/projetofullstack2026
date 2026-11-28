@@ -55,7 +55,12 @@ export class AlteraTreinamento implements OnInit {
   nrs: NrTreinamento[] = [];
   nrsNovaTurma = new Set<number>();
   buscaNrTurma = '';
-  get nrsFiltradasTurma(): NrTreinamento[] { const q=this.buscaNrTurma.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR'); return this.nrs.filter(n => `${n.id} NR-${n.id} ${n.nome}`.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').includes(q)); }
+  opcoesNrTurmaVisiveis = false;
+  fecharOpcoesNrTurma(evento: FocusEvent): void {
+    const proximo = evento.relatedTarget as Node | null;
+    if (!proximo || !(evento.currentTarget as HTMLElement).contains(proximo)) this.opcoesNrTurmaVisiveis = false;
+  }
+  get nrsFiltradasTurma(): NrTreinamento[] { const q=this.buscaNrTurma.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR'); return this.nrs.filter(n => `${n.id} NR-${n.id} ${n.nome}`.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').includes(q)).sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })); }
   alterarNrTurma(id: number, marcado: boolean): void { const ids=new Set(this.nrsNovaTurma); marcado ? ids.add(id) : ids.delete(id); this.nrsNovaTurma=ids; }
   novaData = new Date().toISOString().slice(0, 10);
   novoHorario = '08:00';
@@ -65,10 +70,15 @@ export class AlteraTreinamento implements OnInit {
   filtroId = '';
   filtroNrIds = new Set<number>();
   buscaNrFiltro = '';
+  opcoesNrFiltroVisiveis = false;
+  fecharOpcoesNrFiltro(evento: FocusEvent): void {
+    const proximo = evento.relatedTarget as Node | null;
+    if (!proximo || !(evento.currentTarget as HTMLElement).contains(proximo)) this.opcoesNrFiltroVisiveis = false;
+  }
   get nrsFiltradas(): NrTreinamento[] {
     const normalizar = (valor: string) => valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
     const busca = normalizar(this.buscaNrFiltro.trim());
-    return this.nrs.filter(nr => normalizar(`${nr.id} NR-${nr.id} ${nr.nome}`).includes(busca));
+    return this.nrs.filter(nr => normalizar(`${nr.id} NR-${nr.id} ${nr.nome}`).includes(busca)).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
   }
   alterarFiltroNr(id: number, marcado: boolean): void {
     const ids = new Set(this.filtroNrIds);
